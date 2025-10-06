@@ -3,6 +3,7 @@ import AnimationContainer from './components/AnimationContainer'
 import ScenePanel from './components/ScenePanel'
 import KonvaSceneEditor from './components/KonvaSceneEditor'
 import Toolbar from './components/Toolbar'
+import HandWritingTest from './pages/HandWritingTest'
 import sampleStory from './data/scenes'
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
   })
   const [selectedSceneIndex, setSelectedSceneIndex] = useState(0)
   const [isEditorOpen, setIsEditorOpen] = useState(false)
+  const [showHandWritingTest, setShowHandWritingTest] = useState(false)
 
   // Save scenes to localStorage whenever they change
   useEffect(() => {
@@ -76,6 +78,11 @@ function App() {
     setSelectedSceneIndex(targetIndex)
   }
 
+  // Show hand writing test if toggled
+  if (showHandWritingTest) {
+    return <HandWritingTest onBack={() => setShowHandWritingTest(false)} />
+  }
+
   return (
     <div className="app flex h-screen overflow-hidden dark">
       {/* Left Panel - Scenes List */}
@@ -92,7 +99,10 @@ function App() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
         {/* Toolbar */}
-        <Toolbar onOpenEditor={() => setIsEditorOpen(true)} />
+        <Toolbar 
+          onOpenEditor={() => setIsEditorOpen(true)}
+          onShowHandWritingTest={() => setShowHandWritingTest(true)}
+        />
 
         {/* Animation Container */}
         <AnimationContainer 
