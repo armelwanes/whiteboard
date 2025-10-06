@@ -1,10 +1,17 @@
 import React from 'react';
+import SceneObject from './SceneObject';
 
 const Scene = ({ 
   title, 
   content, 
   isActive, 
   backgroundImage,
+  objects = [],
+  selectedObjectId,
+  onSelectObject,
+  onUpdateObject,
+  onDeleteObject,
+  isEditing = false,
 }) => {
   return (
     <div
@@ -16,6 +23,7 @@ const Scene = ({
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
+      onClick={() => isEditing && onSelectObject && onSelectObject(null)}
     >
       <div className="relative h-full flex flex-col items-center justify-center p-8 bg-black bg-opacity-40">
         <div 
@@ -31,6 +39,19 @@ const Scene = ({
           </div>
         </div>
       </div>
+
+      {/* Render scene objects */}
+      {objects && objects.map((obj) => (
+        <SceneObject
+          key={obj.id}
+          object={obj}
+          isSelected={selectedObjectId === obj.id}
+          onSelect={onSelectObject}
+          onUpdate={onUpdateObject}
+          onDelete={onDeleteObject}
+          isEditing={isEditing}
+        />
+      ))}
     </div>
   );
 };
