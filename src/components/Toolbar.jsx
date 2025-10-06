@@ -1,53 +1,63 @@
 import React from 'react';
+import { Button } from './ui/button';
+import { Edit, Type, Square, Image, Camera, Circle } from 'lucide-react';
 
 const Toolbar = ({ onOpenEditor }) => {
   return (
     <div className="toolbar bg-gradient-to-r from-gray-900 via-gray-900 to-gray-800 border-b border-gray-700 px-6 py-3 flex items-center gap-3 shadow-lg">
       {/* Main Actions */}
-      <button
+      <Button
         onClick={onOpenEditor}
-        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-2.5 px-6 rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
-        title="Éditer la scène"
+        className="gap-2 shadow-lg"
+        size="lg"
       >
-        <span className="text-lg">✏️</span>
+        <Edit className="w-4 h-4" />
         <span>Éditer</span>
-      </button>
+      </Button>
 
-      <div className="h-8 w-px bg-gray-700 mx-1"></div>
+      <div className="h-8 w-px bg-border mx-1"></div>
 
       {/* Tools */}
-      <button
-        className="toolbar-btn bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2 font-medium"
+      <Button
+        variant="secondary"
+        size="default"
+        className="gap-2"
         title="Ajouter du texte"
       >
-        <span className="text-base">🔤</span>
+        <Type className="w-4 h-4" />
         <span className="text-sm">Texte</span>
-      </button>
+      </Button>
       
-      <button
-        className="toolbar-btn bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2 font-medium"
+      <Button
+        variant="secondary"
+        size="default"
+        className="gap-2"
         title="Ajouter une forme"
       >
-        <span className="text-base">⬜</span>
+        <Square className="w-4 h-4" />
         <span className="text-sm">Formes</span>
-      </button>
+      </Button>
       
-      <button
+      <Button
         onClick={onOpenEditor}
-        className="toolbar-btn bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2 font-medium"
+        variant="secondary"
+        size="default"
+        className="gap-2"
         title="Ajouter une image"
       >
-        <span className="text-base">🖼️</span>
+        <Image className="w-4 h-4" />
         <span className="text-sm">Image</span>
-      </button>
+      </Button>
 
-      <button
-        className="toolbar-btn bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2 font-medium"
+      <Button
+        variant="secondary"
+        size="default"
+        className="gap-2"
         title="Caméra"
       >
-        <span className="text-base">📹</span>
+        <Camera className="w-4 h-4" />
         <span className="text-sm">Caméra</span>
-      </button>
+      </Button>
 
       <div className="flex-1"></div>
 
