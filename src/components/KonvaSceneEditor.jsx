@@ -43,7 +43,7 @@ const SceneImage = ({ image, isSelected, onSelect, onChange }) => {
             y: e.target.y(),
           });
         }}
-        onTransformEnd={(e) => {
+        onTransformEnd={() => {
           const node = imageRef.current;
           const scaleX = node.scaleX();
           const scaleY = node.scaleY();
