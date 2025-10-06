@@ -234,7 +234,7 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
                     />
                   ))}
                   
-                  {/* Text overlay for title and content */}
+                  {/* Text overlay for title */}
                   <Rect
                     x={0}
                     y={0}
@@ -248,7 +248,7 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
                   {editedScene.title && (
                     <Text
                       x={0}
-                      y={180}
+                      y={220}
                       width={960}
                       text={editedScene.title}
                       fontSize={48}
@@ -259,24 +259,6 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
                       shadowBlur={10}
                       shadowOffset={{ x: 2, y: 2 }}
                       shadowOpacity={0.8}
-                      listening={false}
-                    />
-                  )}
-                  
-                  {/* Content Text */}
-                  {editedScene.content && (
-                    <Text
-                      x={80}
-                      y={250}
-                      width={800}
-                      text={editedScene.content}
-                      fontSize={20}
-                      fill="white"
-                      align="center"
-                      shadowColor="black"
-                      shadowBlur={8}
-                      shadowOffset={{ x: 1, y: 1 }}
-                      shadowOpacity={0.6}
                       listening={false}
                     />
                   )}

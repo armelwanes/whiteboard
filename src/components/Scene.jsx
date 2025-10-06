@@ -3,7 +3,6 @@ import SceneObject from './SceneObject';
 
 const Scene = ({ 
   title, 
-  content, 
   isActive, 
   backgroundImage,
   objects = [],
@@ -34,9 +33,6 @@ const Scene = ({
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 text-center drop-shadow-lg">
             {title}
           </h2>
-          <div className="text-xl md:text-2xl text-white text-center max-w-3xl drop-shadow-md">
-            {content}
-          </div>
         </div>
       </div>
 
