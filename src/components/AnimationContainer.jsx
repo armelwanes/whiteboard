@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Scene from './Scene';
 import Timeline from './Timeline';
 
-const AnimationContainer = ({ scenes = [], onOpenEditor }) => {
+const AnimationContainer = ({ scenes = [], updateScene }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
@@ -75,15 +75,18 @@ const AnimationContainer = ({ scenes = [], onOpenEditor }) => {
       {/* Main animation area */}
       <div 
         className="animation-stage flex-1 relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 cursor-pointer"
-        onClick={onOpenEditor}
         title="Cliquez pour éditer la scène"
       >
         {scenes.map((scene, index) => (
           <Scene
             key={scene.id}
             {...scene}
+            scene={scene}
+            selectedSceneIndex={index}
             isActive={currentSceneIndex === index}
+            updateScene={updateScene}
           />
+          
         ))}
         
         {/* Loading state */}

@@ -1,15 +1,15 @@
 import React from 'react';
 import SceneObject from './SceneObject';
+import KonvaSceneEditor from './KonvaSceneEditor';
 
 const Scene = ({ 
   isActive, 
   backgroundImage,
-  objects = [],
-  selectedObjectId,
+  scene,
+  selectedSceneIndex,
   onSelectObject,
-  onUpdateObject,
-  onDeleteObject,
   isEditing = false,
+  updateScene,
 }) => {
   return (
     <div
@@ -23,18 +23,15 @@ const Scene = ({
       }}
       onClick={() => isEditing && onSelectObject && onSelectObject(null)}
     >
-      {/* Render scene objects */}
-      {objects && objects.map((obj) => (
-        <SceneObject
-          key={obj.id}
-          object={obj}
-          isSelected={selectedObjectId === obj.id}
-          onSelect={onSelectObject}
-          onUpdate={onUpdateObject}
-          onDelete={onDeleteObject}
-          isEditing={isEditing}
+
+
+        <KonvaSceneEditor
+          scene={scene}
+          onSave={(updatedScene) => {
+            updateScene(selectedSceneIndex, updatedScene)
+           
+          }}
         />
-      ))}
     </div>
   );
 };

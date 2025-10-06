@@ -170,18 +170,13 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
   const selectedObject = editedScene.objects.find(obj => obj.id === selectedId);
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-gray-900 rounded-xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex border border-gray-700">
+    <div className="bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
+      <div className="bg-gray-900 rounded-xl shadow-2xl w-full  overflow-hidden flex border border-gray-700">
         {/* Left Side - Canvas Editor */}
         <div className="flex-1 bg-gray-800/30 relative flex flex-col">
           {/* Canvas Header */}
-          <div className="bg-gray-800 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold">Éditeur de Scène</h3>
-              <p className="text-sm text-gray-400">
-                Glissez-déposez et redimensionnez les objets
-              </p>
-            </div>
+          <div className="flex items-center justify-between">
+            
             <Button
               variant="outline"
               size="sm"
@@ -200,11 +195,10 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
           </div>
 
           {/* Canvas Area */}
-          <div className="flex-1 overflow-hidden flex items-center justify-center p-4">
+          <div className="flex-1 overflow-hidden flex items-start justify-center p-4">
             <div 
               className="bg-white rounded-lg shadow-xl overflow-hidden border-2 border-gray-700"
-              style={{ width: 960, height: 540 }}
-            >
+             >
               <Stage
                 width={960}
                 height={540}
@@ -234,34 +228,6 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
                     />
                   ))}
                   
-                  {/* Text overlay for title */}
-                  <Rect
-                    x={0}
-                    y={0}
-                    width={960}
-                    height={540}
-                    fill="rgba(0, 0, 0, 0.4)"
-                    listening={false}
-                  />
-                  
-                  {/* Title Text */}
-                  {editedScene.title && (
-                    <Text
-                      x={0}
-                      y={220}
-                      width={960}
-                      text={editedScene.title}
-                      fontSize={48}
-                      fontStyle="bold"
-                      fill="white"
-                      align="center"
-                      shadowColor="black"
-                      shadowBlur={10}
-                      shadowOffset={{ x: 2, y: 2 }}
-                      shadowOpacity={0.8}
-                      listening={false}
-                    />
-                  )}
                 </Layer>
               </Stage>
             </div>
@@ -307,168 +273,6 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Right Side - Properties Panel */}
-        <div className="w-96 bg-gray-800 flex flex-col border-l border-gray-700">
-          {/* Header */}
-          <div className="bg-gray-800 px-6 py-4 border-b border-gray-700 flex items-center justify-between">
-            <h2 className="text-xl font-bold">Propriétés</h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-            >
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="space-y-6">
-              {/* Title */}
-              <div className="space-y-2">
-                <Label htmlFor="title">Titre de la scène</Label>
-                <Input
-                  id="title"
-                  value={editedScene.title}
-                  onChange={(e) => handleChange('title', e.target.value)}
-                  placeholder="Entrez le titre..."
-                />
-              </div>
-
-              {/* Content */}
-              <div className="space-y-2">
-                <Label htmlFor="content">Contenu</Label>
-                <Textarea
-                  id="content"
-                  value={editedScene.content}
-                  onChange={(e) => handleChange('content', e.target.value)}
-                  placeholder="Entrez le contenu..."
-                  rows={4}
-                />
-              </div>
-
-              {/* Duration */}
-              <div className="space-y-2">
-                <Label htmlFor="duration">Durée (secondes)</Label>
-                <Input
-                  id="duration"
-                  type="number"
-                  min="1"
-                  max="60"
-                  value={editedScene.duration}
-                  onChange={(e) => handleChange('duration', parseInt(e.target.value) || 5)}
-                />
-              </div>
-
-              {/* Background Image */}
-              <div className="space-y-2">
-                <Label htmlFor="backgroundImage">Image de fond (URL)</Label>
-                <Input
-                  id="backgroundImage"
-                  value={editedScene.backgroundImage || ''}
-                  onChange={(e) => handleChange('backgroundImage', e.target.value || null)}
-                  placeholder="https://example.com/image.jpg"
-                />
-                {editedScene.backgroundImage && (
-                  <div className="mt-2">
-                    <img
-                      src={editedScene.backgroundImage}
-                      alt="Preview"
-                      className="w-full h-32 object-cover rounded-lg"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Animation Type */}
-              <div className="space-y-2">
-                <Label htmlFor="animation">Type d'animation</Label>
-                <select
-                  id="animation"
-                  value={editedScene.animation}
-                  onChange={(e) => handleChange('animation', e.target.value)}
-                  className="flex h-9 w-full rounded-md border border-gray-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
-                >
-                  <option value="fade">Fade</option>
-                  <option value="slide">Slide</option>
-                  <option value="scale">Scale</option>
-                </select>
-              </div>
-
-              {/* Objects List */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">
-                    Objets ({editedScene.objects.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {editedScene.objects.length === 0 ? (
-                      <p className="text-sm text-gray-400 italic">
-                        Aucun objet pour le moment
-                      </p>
-                    ) : (
-                      editedScene.objects.map((obj) => (
-                        <div
-                          key={obj.id}
-                          className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border ${
-                            selectedId === obj.id
-                              ? 'bg-blue-600/10 border-primary'
-                              : 'bg-gray-800/30 border-gray-700 hover:bg-gray-800/50'
-                          }`}
-                          onClick={() => setSelectedId(obj.id)}
-                        >
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <span className="text-xl">🖼️</span>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">
-                                {obj.name || 'Image'}
-                              </p>
-                              <p className="text-xs text-gray-400">
-                                {Math.round(obj.width)} × {Math.round(obj.height)}
-                              </p>
-                            </div>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteObject(obj.id);
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4 text-red-400" />
-                          </Button>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="bg-gray-800 px-6 py-4 border-t border-gray-700 flex justify-end gap-3">
-            <Button
-              variant="outline"
-              onClick={onClose}
-            >
-              Annuler
-            </Button>
-            <Button
-              onClick={handleSave}
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Enregistrer
-            </Button>
-          </div>
         </div>
       </div>
     </div>

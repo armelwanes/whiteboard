@@ -99,21 +99,9 @@ function App() {
           scenes={scenes} 
           selectedSceneIndex={selectedSceneIndex}
           onSelectScene={setSelectedSceneIndex}
-          onOpenEditor={() => setIsEditorOpen(true)}
+          updateScene={updateScene}
         />
       </div>
-
-      {/* Scene Editor Modal */}
-      {isEditorOpen && (
-        <KonvaSceneEditor
-          scene={scenes[selectedSceneIndex]}
-          onClose={() => setIsEditorOpen(false)}
-          onSave={(updatedScene) => {
-            updateScene(selectedSceneIndex, updatedScene)
-            setIsEditorOpen(false)
-          }}
-        />
-      )}
     </div>
   )
 }

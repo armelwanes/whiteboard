@@ -119,7 +119,7 @@ const SceneObject = ({
     <>
       <div
         ref={objectRef}
-        className={`absolute cursor-move ${isSelected && isEditing ? 'ring-2 ring-blue-500' : ''}`}
+        className={` cursor-move ${isSelected && isEditing ? 'ring-2 ring-blue-500' : ''}`}
         style={{
           width: `${object.width}px`,
           height: `${object.height}px`,
@@ -129,14 +129,14 @@ const SceneObject = ({
         }}
         onMouseDown={handleMouseDown}
       >
-        {object.type === 'image' && (
+        {/**object.type === 'image' && (
           <img
             src={object.src}
             alt={object.name || 'Scene object'}
             className="w-full h-full object-contain pointer-events-none select-none"
             draggable={false}
           />
-        )}
+        )**/}
 
         {/* Resize Handles - only show when selected and editing */}
         {isSelected && isEditing && (
@@ -164,7 +164,7 @@ const SceneObject = ({
       {/* Control Panel - show when selected and editing */}
       {isSelected && isEditing && (
         <div
-          className="absolute bg-gray-800 rounded-lg shadow-xl px-3 py-2 flex items-center gap-2 z-50"
+          className=" bg-gray-800 rounded-lg shadow-xl px-3 py-2 flex items-center gap-2 z-50"
           style={{
             left: `${object.x}px`,
             top: `${object.y - 50}px`,
