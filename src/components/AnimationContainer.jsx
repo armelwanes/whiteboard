@@ -71,7 +71,7 @@ const AnimationContainer = ({ scenes = [] }) => {
   };
 
   return (
-    <div className="animation-container w-full h-screen flex flex-col bg-gray-950">
+    <div className="animation-container w-full h-full flex flex-col bg-gray-950">
       {/* Main animation area */}
       <div className="animation-stage flex-1 relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800">
         {scenes.map((scene, index) => (
@@ -99,6 +99,7 @@ const AnimationContainer = ({ scenes = [] }) => {
           onPlayPause={handlePlayPause}
           onSeek={handleSeek}
           scenes={scenes}
+          currentSceneIndex={currentSceneIndex}
         />
       </div>
     </div>
