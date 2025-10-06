@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button } from './ui/button';
-import { Edit, Type, Square, Image, Camera, Circle } from 'lucide-react';
+import { Edit, Type, Square, Image, Camera, Circle, PenTool } from 'lucide-react';
 
-const Toolbar = ({ onOpenEditor }) => {
+const Toolbar = ({ onOpenEditor, onShowHandWritingTest }) => {
   return (
     <div className="toolbar bg-gradient-to-r from-gray-900 via-gray-900 to-gray-800 border-b border-gray-700 px-6 py-3 flex items-center gap-3 shadow-lg">
       {/* Main Actions */}
@@ -58,6 +58,22 @@ const Toolbar = ({ onOpenEditor }) => {
         <Camera className="w-4 h-4" />
         <span className="text-sm">Caméra</span>
       </Button>
+
+      {onShowHandWritingTest && (
+        <>
+          <div className="h-8 w-px bg-border mx-1"></div>
+          <Button
+            onClick={onShowHandWritingTest}
+            variant="secondary"
+            size="default"
+            className="gap-2"
+            title="Test Hand Writing Animation"
+          >
+            <PenTool className="w-4 h-4" />
+            <span className="text-sm">Hand Writing Test</span>
+          </Button>
+        </>
+      )}
 
       <div className="flex-1"></div>
 
