@@ -25,7 +25,8 @@ function App() {
       content: 'Ajoutez votre contenu ici...',
       duration: 5,
       backgroundImage: null,
-      animation: 'fade'
+      animation: 'fade',
+      objects: []
     }
     setScenes([...scenes, newScene])
     setSelectedSceneIndex(scenes.length)

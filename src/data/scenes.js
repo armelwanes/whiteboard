@@ -6,7 +6,8 @@ export const sampleStory = [
     content: 'Il était une fois un étudiant curieux qui rêvait de maîtriser la programmation...',
     duration: 5,
     backgroundImage: null,
-    animation: 'fade'
+    animation: 'fade',
+    objects: []
   },
   {
     id: 'scene-2',
@@ -14,7 +15,8 @@ export const sampleStory = [
     content: 'Il découvre le monde fascinant du développement web avec React et Vite.',
     duration: 5,
     backgroundImage: null,
-    animation: 'fade'
+    animation: 'fade',
+    objects: []
   },
   {
     id: 'scene-3',
@@ -22,7 +24,8 @@ export const sampleStory = [
     content: 'Le chemin n\'était pas facile. Chaque bug était une énigme à résoudre.',
     duration: 5,
     backgroundImage: null,
-    animation: 'fade'
+    animation: 'fade',
+    objects: []
   },
   {
     id: 'scene-4',
@@ -30,7 +33,8 @@ export const sampleStory = [
     content: 'Mais avec de la pratique et de la détermination, les compétences se développent.',
     duration: 5,
     backgroundImage: null,
-    animation: 'fade'
+    animation: 'fade',
+    objects: []
   },
   {
     id: 'scene-5',
@@ -38,7 +42,8 @@ export const sampleStory = [
     content: 'Finalement, le projet prend vie. Une application magnifique et fonctionnelle!',
     duration: 5,
     backgroundImage: null,
-    animation: 'fade'
+    animation: 'fade',
+    objects: []
   }
 ];
 
