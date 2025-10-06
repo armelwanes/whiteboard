@@ -6,10 +6,15 @@ Une application web interactive pour créer des vidéos d'animation structurées
 
 ## 🎯 Fonctionnalités
 
+- **Gestion de scènes avancée** : Interface complète pour gérer vos scènes
+  - Panneau latéral avec aperçu de toutes les scènes
+  - Ajout, suppression, duplication et réorganisation des scènes
+  - Éditeur modal pour modifier les propriétés des scènes
 - **Scènes multiples** : Divisez votre narration en plusieurs scènes distinctes
 - **Timeline avancée** : Contrôlez précisément la synchronisation des éléments visuels
 - **Animations fluides** : Transitions élégantes entre les scènes
 - **Contrôles de lecture** : Play, pause, et navigation entre les scènes
+- **Persistance des données** : Vos scènes sont sauvegardées automatiquement dans le navigateur
 - **Interface intuitive** : Interface utilisateur moderne construite avec React et Tailwind CSS
 - **Responsive** : Fonctionne sur tous les écrans
 
@@ -52,10 +57,13 @@ whiteboard-anim/
 │   ├── components/
 │   │   ├── AnimationContainer.jsx  # Conteneur principal de l'animation
 │   │   ├── Scene.jsx                # Composant pour chaque scène
+│   │   ├── ScenePanel.jsx           # Panneau de gestion des scènes
+│   │   ├── SceneEditor.jsx          # Éditeur modal de scènes
+│   │   ├── Toolbar.jsx              # Barre d'outils
 │   │   └── Timeline.jsx             # Contrôles de la timeline
 │   ├── data/
-│   │   └── scenes.js                # Données des scènes
-│   ├── App.jsx                      # Composant principal
+│   │   └── scenes.js                # Données des scènes (template initial)
+│   ├── App.jsx                      # Composant principal avec gestion d'état
 │   ├── App.css                      # Styles personnalisés
 │   ├── index.css                    # Styles Tailwind
 │   └── main.jsx                     # Point d'entrée
@@ -69,9 +77,36 @@ whiteboard-anim/
 
 ## 🎬 Utilisation
 
-### Créer une nouvelle histoire
+### Interface de gestion des scènes
 
-Pour créer votre propre histoire avec plusieurs scènes, modifiez le fichier `src/data/scenes.js` :
+L'application dispose maintenant d'une interface complète de gestion des scènes :
+
+#### Panneau latéral (gauche)
+- Visualisez toutes vos scènes avec aperçu
+- Cliquez sur "+ Ajouter une scène" pour créer une nouvelle scène
+- Sélectionnez une scène pour la modifier
+- Utilisez les boutons ↑ ↓ pour réorganiser les scènes
+- Cliquez sur 📋 pour dupliquer une scène
+- Cliquez sur 🗑 pour supprimer une scène
+
+#### Barre d'outils (haut)
+- **✏️ Éditer** : Ouvre l'éditeur de scène
+- **🔤 Texte** : Ajouter du texte (à venir)
+- **⬜ Formes** : Ajouter des formes (à venir)
+- **🖼️ Image** : Ajouter des images (à venir)
+- **📹 Caméra** : Contrôles caméra (à venir)
+
+#### Éditeur de scène
+L'éditeur modal vous permet de personnaliser chaque scène :
+- **Titre** : Nom de la scène
+- **Contenu** : Description ou narration
+- **Durée** : Entre 1 et 60 secondes
+- **Image de fond** : URL d'une image (avec aperçu)
+- **Type d'animation** : Fade, Slide, ou Scale
+
+### Créer une nouvelle histoire (méthode traditionnelle)
+
+Vous pouvez toujours créer des scènes en modifiant le fichier `src/data/scenes.js` :
 
 ```javascript
 export const sampleStory = [
@@ -94,13 +129,18 @@ export const sampleStory = [
 - **content** : Contenu/texte de la scène
 - **duration** : Durée de la scène en secondes
 - **backgroundImage** : URL optionnelle d'une image de fond
-- **animation** : Type d'animation (actuellement 'fade')
+- **animation** : Type d'animation ('fade', 'slide', 'scale')
 
 ### Contrôles de lecture
 
 - **▶ Play / ⏸ Pause** : Démarre ou met en pause l'animation
 - **Timeline** : Cliquez sur la barre de progression pour naviguer
 - **Boutons de scènes** : Cliquez pour sauter directement à une scène
+
+### Persistance des données
+
+Vos scènes sont automatiquement sauvegardées dans le navigateur (localStorage). 
+Pour réinitialiser et revenir à l'histoire d'exemple, effacez les données du site dans les paramètres de votre navigateur.
 
 ## 🎨 Personnalisation
 

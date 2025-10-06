@@ -2,10 +2,81 @@
 
 ## Architecture du Projet
 
+### Vue d'ensemble
+
+L'application suit une architecture React moderne avec gestion d'état centralisée dans le composant App et persistence via localStorage.
+
 ### Composants Principaux
 
-#### 1. AnimationContainer (src/components/AnimationContainer.jsx)
-Le composant principal qui gère l'état de l'animation et coordonne tous les sous-composants.
+#### 0. App (src/App.jsx)
+Le composant racine qui gère l'état global de l'application.
+
+**Responsabilités:**
+- Gestion de l'état des scènes (ajout, suppression, modification, réorganisation)
+- Gestion de la scène sélectionnée
+- Persistence des données via localStorage
+- Coordination entre les composants (ScenePanel, Toolbar, AnimationContainer, SceneEditor)
+
+**État:**
+- `scenes`: Tableau de toutes les scènes
+- `selectedSceneIndex`: Index de la scène actuellement sélectionnée
+- `isEditorOpen`: État d'ouverture de l'éditeur modal
+
+**Méthodes:**
+- `addScene()`: Créer une nouvelle scène
+- `deleteScene(index)`: Supprimer une scène
+- `duplicateScene(index)`: Dupliquer une scène
+- `updateScene(index, updatedScene)`: Mettre à jour une scène
+- `moveScene(index, direction)`: Réorganiser les scènes
+
+#### 1. ScenePanel (src/components/ScenePanel.jsx)
+Panneau latéral pour la gestion et visualisation des scènes.
+
+**Props:**
+- `scenes`: Tableau des scènes
+- `selectedSceneIndex`: Index de la scène sélectionnée
+- `onSelectScene`: Callback pour sélectionner une scène
+- `onAddScene`: Callback pour ajouter une scène
+- `onDeleteScene`: Callback pour supprimer une scène
+- `onDuplicateScene`: Callback pour dupliquer une scène
+- `onMoveScene`: Callback pour réorganiser les scènes
+
+**Fonctionnalités:**
+- Liste scrollable de toutes les scènes
+- Aperçu thumbnail avec image de fond si disponible
+- Affichage du titre, contenu et durée de chaque scène
+- Boutons d'action (↑ ↓ 📋 🗑) pour la scène sélectionnée
+- Compteur de scènes
+- Bouton "+ Ajouter une scène"
+
+#### 2. Toolbar (src/components/Toolbar.jsx)
+Barre d'outils horizontale en haut de l'application.
+
+**Props:**
+- `onOpenEditor`: Callback pour ouvrir l'éditeur de scène
+
+**Fonctionnalités:**
+- Bouton "Éditer" pour ouvrir l'éditeur modal
+- Boutons d'outils (Texte, Formes, Image, Caméra) - placeholders pour futures fonctionnalités
+- Design moderne avec séparateurs
+
+#### 3. SceneEditor (src/components/SceneEditor.jsx)
+Modal pour éditer les propriétés d'une scène.
+
+**Props:**
+- `scene`: Objet de la scène à éditer
+- `onClose`: Callback pour fermer l'éditeur
+- `onSave`: Callback pour sauvegarder les modifications
+
+**Fonctionnalités:**
+- Édition du titre, contenu, durée
+- Sélection de l'image de fond avec aperçu
+- Choix du type d'animation (Fade, Slide, Scale)
+- Validation et sauvegarde
+- Design modal avec overlay
+
+#### 4. AnimationContainer (src/components/AnimationContainer.jsx)
+Le composant qui gère l'animation et l'affichage des scènes.
 
 **Responsabilités:**
 - Gestion de l'état de lecture (play/pause)
@@ -23,7 +94,7 @@ Le composant principal qui gère l'état de l'animation et coordonne tous les so
 - `handlePlayPause()`: Toggle play/pause
 - `handleSeek(time)`: Navigation à un temps spécifique
 
-#### 2. Scene (src/components/Scene.jsx)
+#### 5. Scene (src/components/Scene.jsx)
 Composant pour afficher une scène individuelle.
 
 **Props:**
@@ -37,7 +108,7 @@ Composant pour afficher une scène individuelle.
 - Support pour images de fond personnalisées
 - Animations d'entrée pour le contenu textuel
 
-#### 3. Timeline (src/components/Timeline.jsx)
+#### 6. Timeline (src/components/Timeline.jsx)
 Composant de contrôle de la timeline avec interface utilisateur complète.
 
 **Props:**
@@ -112,12 +183,15 @@ Animations définies:
 2. **Cleanup**: Annulation des animations au démontage
 3. **Transitions CSS**: Utilisent l'accélération hardware
 4. **Refs**: Utilisation de useRef pour éviter les re-renders inutiles
+5. **localStorage**: Persistence des données sans backend
+6. **Lazy Rendering**: Seule la scène active est visible (opacity-based)
 
 ### Métriques de Build
 
-- Taille du bundle JS: ~195 KB (62 KB gzippé)
-- Taille du CSS: ~1.6 KB (0.68 KB gzippé)
-- Temps de build: ~240ms
+- Taille du bundle JS: ~204 KB (64 KB gzippé)
+- Taille du CSS: ~3 KB (1 KB gzippé)
+- Temps de build: ~270ms
+- Composants: 6 composants principaux
 
 ## Extension Future
 
@@ -129,14 +203,29 @@ Animations définies:
    - Contrôle de volume
 
 2. **Animations Avancées**
-   - Types d'animations supplémentaires (slide, scale, rotate)
+   - Types d'animations supplémentaires (rotate, bounce, zoom)
    - Animations d'éléments individuels
    - Keyframes personnalisables
+   - Trajectoires de mouvement
 
-3. **Édition Interactive**
-   - Interface d'édition des scènes
-   - Upload d'images
-   - Prévisualisation en temps réel
+3. **Édition Interactive** ✅ (Partiellement implémenté)
+   - ✅ Interface d'édition des scènes
+   - ✅ Gestion complète des scènes (CRUD)
+   - 🔄 Upload d'images (actuellement via URL)
+   - ✅ Prévisualisation en temps réel
+   - 🔄 Éditeur visuel drag & drop
+
+4. **Outils Créatifs** 🔄 (En développement)
+   - 🔄 Ajout de texte sur le canvas
+   - 🔄 Dessin de formes géométriques
+   - 🔄 Import d'images et médias
+   - 🔄 Contrôles de caméra/zoom
+
+5. **Export et Partage**
+   - Export en vidéo (WebM, MP4)
+   - Export en GIF animé
+   - Partage de projets via URL
+   - Templates de scènes prédéfinis
 
 4. **Export**
    - Export en vidéo (via canvas + FFmpeg.js)
