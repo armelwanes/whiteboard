@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Stage, Layer, Image as KonvaImage, Transformer } from 'react-konva';
+import { Stage, Layer, Image as KonvaImage, Transformer, Text, Rect } from 'react-konva';
 import useImage from 'use-image';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -233,6 +233,53 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
                       onChange={handleUpdateObject}
                     />
                   ))}
+                  
+                  {/* Text overlay for title and content */}
+                  <Rect
+                    x={0}
+                    y={0}
+                    width={960}
+                    height={540}
+                    fill="rgba(0, 0, 0, 0.4)"
+                    listening={false}
+                  />
+                  
+                  {/* Title Text */}
+                  {editedScene.title && (
+                    <Text
+                      x={0}
+                      y={180}
+                      width={960}
+                      text={editedScene.title}
+                      fontSize={48}
+                      fontStyle="bold"
+                      fill="white"
+                      align="center"
+                      shadowColor="black"
+                      shadowBlur={10}
+                      shadowOffset={{ x: 2, y: 2 }}
+                      shadowOpacity={0.8}
+                      listening={false}
+                    />
+                  )}
+                  
+                  {/* Content Text */}
+                  {editedScene.content && (
+                    <Text
+                      x={80}
+                      y={250}
+                      width={800}
+                      text={editedScene.content}
+                      fontSize={20}
+                      fill="white"
+                      align="center"
+                      shadowColor="black"
+                      shadowBlur={8}
+                      shadowOffset={{ x: 1, y: 1 }}
+                      shadowOpacity={0.6}
+                      listening={false}
+                    />
+                  )}
                 </Layer>
               </Stage>
             </div>
