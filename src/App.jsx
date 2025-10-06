@@ -99,6 +99,7 @@ function App() {
           scenes={scenes} 
           selectedSceneIndex={selectedSceneIndex}
           onSelectScene={setSelectedSceneIndex}
+          onOpenEditor={() => setIsEditorOpen(true)}
         />
       </div>
 
