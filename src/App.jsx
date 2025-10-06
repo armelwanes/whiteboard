@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import AnimationContainer from './components/AnimationContainer'
 import ScenePanel from './components/ScenePanel'
-import SceneEditor from './components/SceneEditor'
+import KonvaSceneEditor from './components/KonvaSceneEditor'
 import Toolbar from './components/Toolbar'
 import sampleStory from './data/scenes'
 
@@ -77,7 +77,7 @@ function App() {
   }
 
   return (
-    <div className="app flex h-screen overflow-hidden">
+    <div className="app flex h-screen overflow-hidden dark">
       {/* Left Panel - Scenes List */}
       <ScenePanel
         scenes={scenes}
@@ -104,7 +104,7 @@ function App() {
 
       {/* Scene Editor Modal */}
       {isEditorOpen && (
-        <SceneEditor
+        <KonvaSceneEditor
           scene={scenes[selectedSceneIndex]}
           onClose={() => setIsEditorOpen(false)}
           onSave={(updatedScene) => {
