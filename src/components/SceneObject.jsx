@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 const SceneObject = ({ 
   object, 
@@ -14,25 +14,7 @@ const SceneObject = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const objectRef = useRef(null);
 
-  const handleMouseDown = (e) => {
-    if (!isEditing) return;
-    e.stopPropagation();
-    onSelect(object.id);
-    
-    if (e.target.classList.contains('resize-handle')) {
-      setIsResizing(true);
-      setResizeHandle(e.target.dataset.handle);
-    } else {
-      setIsDragging(true);
-    }
-    
-    setDragStart({
-      x: e.clientX - object.x,
-      y: e.clientY - object.y
-    });
-  };
-
-  const handleMouseMove = (e) => {
+  const handleMouseMove = useCallback((e) => {
     if (!isEditing) return;
     
     if (isDragging) {
@@ -40,10 +22,6 @@ const SceneObject = ({
       const newY = e.clientY - dragStart.y;
       onUpdate(object.id, { x: newX, y: newY });
     } else if (isResizing && resizeHandle) {
-      const rect = objectRef.current.getBoundingClientRect();
-      const deltaX = e.clientX - (rect.left + rect.width / 2);
-      const deltaY = e.clientY - (rect.top + rect.height / 2);
-      
       let newWidth = object.width;
       let newHeight = object.height;
       let newX = object.x;
@@ -81,12 +59,30 @@ const SceneObject = ({
         });
       }
     }
-  };
+  }, [isEditing, isDragging, isResizing, resizeHandle, dragStart, object, onUpdate]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
     setIsResizing(false);
     setResizeHandle(null);
+  }, []);
+
+  const handleMouseDown = (e) => {
+    if (!isEditing) return;
+    e.stopPropagation();
+    onSelect(object.id);
+    
+    if (e.target.classList.contains('resize-handle')) {
+      setIsResizing(true);
+      setResizeHandle(e.target.dataset.handle);
+    } else {
+      setIsDragging(true);
+    }
+    
+    setDragStart({
+      x: e.clientX - object.x,
+      y: e.clientY - object.y
+    });
   };
 
   useEffect(() => {
@@ -98,7 +94,7 @@ const SceneObject = ({
         window.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging, isResizing, dragStart, object]);
+  }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
 
   const handleFlipHorizontal = () => {
     onUpdate(object.id, { flipX: !object.flipX });
