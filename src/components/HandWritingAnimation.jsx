@@ -11,8 +11,8 @@ import { Upload, Play, Download } from "lucide-react";
  * - Upload image
  * - Prétraitement : resize, grayscale, seuillage (approx adaptatif)
  * - Prétraitement main : découpe par mask
- * - Découpage en grille, selection de cellules avec pixels noirs
- * - Dessin progressif en suivant cellule la plus proche
+ * - Découpage en grille, selection de cellules avec pixels noirs -> REMPLACÉ PAR SUIVI DE STROKES
+ * - Dessin progressif en suivant cellule la plus proche -> REMPLACÉ PAR TRACÉ DE STROKES
  * - Enregistrement vidéo via MediaRecorder depuis le canvas
  */
 
@@ -35,9 +35,8 @@ const HandWritingAnimation = () => {
     frameRate: 30,
     resizeWd: 640,
     resizeHt: 360,
-    splitLen: 10,
-    objectSkipRate: 5,
-    bgObjectSkipRate: 20,
+    // splitLen: 10, // Plus utilisé pour le tracé de strokes
+    strokeTraceSpeed: 3, // Nombre de pixels tracés par "étape" d'animation
     endGrayImgDurationInSec: 2,
   };
 
@@ -56,14 +55,8 @@ const HandWritingAnimation = () => {
      Utility functions (browser)
      ----------------------------- */
 
-  const eucDistArr = (arr, point) => {
-    // arr: [[x,y], ...], point: [x,y]
-    return arr.map((p) => {
-      const dx = p[0] - point[0];
-      const dy = p[1] - point[1];
-      return Math.sqrt(dx * dx + dy * dy);
-    });
-  };
+  // Supprimé: eucDistArr, blockHasBlack (plus pertinent pour la logique de cellules)
+  // applyThreshold (plus pertinent car on utilise adaptiveThresholdApprox)
 
   // resize image to target dims and return ImageData
   const resizeAndGetImageData = (img, w, h) => {
@@ -88,28 +81,14 @@ const HandWritingAnimation = () => {
     return imageData;
   };
 
-  // simple global threshold (used after adaptive approximation)
-  const applyThreshold = (imageData, thresh = 128) => {
-    const d = imageData.data;
-    for (let i = 0; i < d.length; i += 4) {
-      const v = d[i];
-      const t = v < thresh ? 0 : 255;
-      d[i] = d[i + 1] = d[i + 2] = t;
-    }
-    return imageData;
-  };
-
   // approximate adaptive threshold by dividing image into tiles and thresholding locally
   const adaptiveThresholdApprox = (imageData, tileSize = 15, offset = 10) => {
     // imageData will be modified in place
     const w = imageData.width;
     const h = imageData.height;
     const d = imageData.data;
-    // compute integral image (sum of grayscale) to quickly compute local mean
-    // but for simplicity iterate tiles
     for (let ty = 0; ty < h; ty += tileSize) {
       for (let tx = 0; tx < w; tx += tileSize) {
-        // compute mean in tile
         let sum = 0,
           count = 0;
         for (let y = ty; y < Math.min(h, ty + tileSize); y++) {
@@ -134,23 +113,8 @@ const HandWritingAnimation = () => {
     return imageData;
   };
 
-  // given grayscale binary imageData, check if block has any black pixels
-  const blockHasBlack = (imageData, startX, startY, blockSize) => {
-    const w = imageData.width;
-    const h = imageData.height;
-    const d = imageData.data;
-    for (let y = startY; y < Math.min(h, startY + blockSize); y++) {
-      for (let x = startX; x < Math.min(w, startX + blockSize); x++) {
-        const idx = (y * w + x) * 4;
-        if (d[idx] < 10) return true;
-      }
-    }
-    return false;
-  };
-
-  // get extreme coordinates from a mask image (mask: HTMLImageElement loaded grayscale or RGBA)
+  // get extreme coordinates from a mask image
   const getExtremeCoordinatesFromMask = (maskImage) => {
-    // draw mask on temp canvas and find bounding box of white (255) pixels
     const canvas = document.createElement("canvas");
     canvas.width = maskImage.width;
     canvas.height = maskImage.height;
@@ -167,9 +131,8 @@ const HandWritingAnimation = () => {
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
         const idx = (y * w + x) * 4;
-        // assume white mask pixels where alpha or value > 128
-        const v = d[idx]; // grayscale expected
-        if (v > 128) {
+        const v = d[idx];
+        if (v > 128) { // Assuming white pixels indicate the mask
           if (x < minX) minX = x;
           if (y < minY) minY = y;
           if (x > maxX) maxX = x;
@@ -194,7 +157,6 @@ const HandWritingAnimation = () => {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(handImg, bounds.minX, bounds.minY, w, h, 0, 0, w, h);
 
-    // process mask into binary array and inverse mask float array
     const maskCanvas = document.createElement("canvas");
     maskCanvas.width = w;
     maskCanvas.height = h;
@@ -202,11 +164,10 @@ const HandWritingAnimation = () => {
     mc.drawImage(handMaskImg, bounds.minX, bounds.minY, w, h, 0, 0, w, h);
     const maskData = mc.getImageData(0, 0, w, h).data;
     const maskArr = new Uint8ClampedArray(w * h);
-    const maskInvArr = new Float32Array(w * h);
+    // const maskInvArr = new Float32Array(w * h); // Not used anymore, simpler mask
     for (let i = 0; i < w * h; i++) {
-      const v = maskData[i * 4]; // grayscale assumed
-      maskArr[i] = v > 128 ? 1 : 0;
-      maskInvArr[i] = v > 128 ? 0 : 1; // inverse (1 where background)
+      const v = maskData[i * 4];
+      maskArr[i] = v > 128 ? 1 : 0; // 1 where hand (foreground), 0 where transparent (background)
     }
 
     return {
@@ -214,57 +175,106 @@ const HandWritingAnimation = () => {
       width: w,
       height: h,
       maskArr,
-      maskInvArr,
     };
+  };
+
+  /* -----------------------------
+     Stroke detection and ordering logic
+     ----------------------------- */
+
+  // Fonction pour trouver et ordonner les strokes (chemins de pixels)
+  const findAndOrderStrokes = (imageData, w, h) => {
+    const d = imageData.data;
+    const visited = new Uint8ClampedArray(w * h).fill(0); // 0: non visité, 1: visité
+    const strokes = [];
+    const blackColor = 0; // Seuil bas pour les pixels noirs (0-255)
+
+    // Directions pour les 8 voisins (y, x)
+    const directions = [
+      [-1, -1], [-1, 0], [-1, 1],
+      [0, -1],           [0, 1],
+      [1, -1], [1, 0], [1, 1],
+    ];
+
+    // Simple fonction pour vérifier si un pixel est noir et non visité
+    const isBlackAndUnvisited = (x, y) => {
+      if (x < 0 || x >= w || y < 0 || y >= h) return false;
+      const idx = (y * w + x) * 4;
+      return d[idx] < 10 && visited[y * w + x] === 0; // d[idx] est la valeur de gris
+    };
+
+    // Parcours en profondeur (DFS) pour trouver un stroke
+    const dfs = (startX, startY) => {
+      const currentStroke = [];
+      const stack = [[startX, startY]];
+      let lastPoint = [startX, startY];
+
+      while (stack.length > 0) {
+        const [cx, cy] = stack.pop(); // On prend le dernier ajouté
+        const flatIdx = cy * w + cx;
+
+        if (visited[flatIdx] === 1) continue;
+        visited[flatIdx] = 1;
+        currentStroke.push([cx, cy]);
+        lastPoint = [cx, cy]; // Mettre à jour le dernier point ajouté au stroke
+
+        // Chercher les voisins noirs et non visités, en favorisant la continuité
+        let nextPointFound = false;
+        // Prioriser les voisins adjacents à lastPoint pour un tracé plus continu
+        // Nous allons regarder autour du point que nous venons d'ajouter
+        const neighbors = [];
+        for (const [dy, dx] of directions) {
+          const nx = cx + dx;
+          const ny = cy + dy;
+          if (isBlackAndUnvisited(nx, ny)) {
+            neighbors.push([nx, ny]);
+          }
+        }
+
+        // Pour un tracé plus "continu", trier les voisins par distance à la "direction précédente"
+        // Ou simplement ajouter les voisins et laisser le stack gérer
+        // Ici, on les ajoute simplement. La qualité du tracé dépendra de l'ordre d'ajout.
+        // On pourrait affiner en choisissant le voisin qui continue le mieux la "direction"
+        for(const neighbor of neighbors) {
+          stack.push(neighbor);
+        }
+      }
+      return currentStroke;
+    };
+
+
+    // Chercher tous les strokes
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const idx = (y * w + x) * 4;
+        if (d[idx] < 10 && visited[y * w + x] === 0) { // Si pixel noir et non visité
+          const newStroke = dfs(x, y);
+          if (newStroke.length > 1) { // Un stroke doit avoir au moins 2 points
+            strokes.push(newStroke);
+          }
+        }
+      }
+    }
+
+    // Ici, nous pourrions ajouter une étape pour "ordonner" les strokes
+    // par exemple, du haut vers le bas, ou de gauche à droite,
+    // pour simuler un ordre d'écriture plus naturel.
+    // Pour l'instant, ils sont dans l'ordre de découverte.
+    // Un simple tri par le point de départ peut suffire pour commencer.
+    strokes.sort((a, b) => {
+      const [ax, ay] = a[0];
+      const [bx, by] = b[0];
+      if (ay !== by) return ay - by;
+      return ax - bx;
+    });
+
+    return strokes;
   };
 
   /* -----------------------------
      Core drawing & generation logic (équivalent Python)
      ----------------------------- */
 
-  // draws a cropped hand onto an RGB imageData buffer (Uint8ClampedArray) - modifies destImageData in place
-  const drawHandOnImageData = (
-    destImageData,
-    handProc,
-    handX,
-    handY,
-    destW,
-    destH
-  ) => {
-    if (!handProc) return;
-    const { canvas: handCanvas, width: handW, height: handH, maskArr } = handProc;
-    const destD = destImageData.data;
-    const w = destW;
-    const h = destH;
-
-    const cropW = Math.min(handW, w - handX);
-    const cropH = Math.min(handH, h - handY);
-    if (cropW <= 0 || cropH <= 0) return;
-
-    // get hand pixels
-    const hc = handCanvas.getContext("2d");
-    const handImgData = hc.getImageData(0, 0, cropW, cropH).data;
-
-    for (let ry = 0; ry < cropH; ry++) {
-      for (let rx = 0; rx < cropW; rx++) {
-        const hi = (ry * handW + rx); // mask index uses original handW
-        const maskVal = maskArr[hi]; // 1 where hand (foreground)
-        const destX = handX + rx;
-        const destY = handY + ry;
-        const di = (destY * w + destX) * 4;
-        const hiPix = (ry * cropW + rx) * 4;
-        // blending: if maskVal==1, overwrite by hand pixel, else leave dest
-        if (maskVal === 1) {
-          destD[di] = handImgData[hiPix];
-          destD[di + 1] = handImgData[hiPix + 1];
-          destD[di + 2] = handImgData[hiPix + 2];
-          destD[di + 3] = 255;
-        }
-      }
-    }
-  };
-
-  // main function that mimics draw_masked_object + draw_whiteboard_animations
   const generateVideoFromImage = async (img, variables, handProc, recordCallback) => {
     const w = variables.resizeWd;
     const h = variables.resizeHt;
@@ -273,29 +283,19 @@ const HandWritingAnimation = () => {
     let imageData = resizeAndGetImageData(img, w, h);
     imageData = toGrayscale(imageData);
     imageData = adaptiveThresholdApprox(imageData, 15, 10); // approx adaptive
-    // keep a color-resized full image for final frames
+
+    // 2) Find and order strokes
+    const strokes = findAndOrderStrokes(imageData, w, h);
+    console.log(`Found ${strokes.length} strokes.`);
+
+    // Keep a color-resized full image for final frames
     const colorCanvas = document.createElement("canvas");
     colorCanvas.width = w;
     colorCanvas.height = h;
     colorCanvas.getContext("2d").drawImage(img, 0, 0, w, h);
     const colorImageData = colorCanvas.getContext("2d").getImageData(0, 0, w, h);
 
-    // 2) grid split & find black cells
-    const splitLen = variables.splitLen;
-    const nCutsVertical = Math.ceil(h / splitLen);
-    const nCutsHorizontal = Math.ceil(w / splitLen);
-    const cells = []; // stores {x:col, y:row}
-    for (let row = 0; row < nCutsVertical; row++) {
-      for (let col = 0; col < nCutsHorizontal; col++) {
-        const sx = col * splitLen;
-        const sy = row * splitLen;
-        if (blockHasBlack(imageData, sx, sy, splitLen)) {
-          cells.push([col, row]);
-        }
-      }
-    }
-
-    // create drawn_frame (initially white)
+    // Create drawn_frame (initially white)
     const drawnCanvas = document.createElement("canvas");
     drawnCanvas.width = w;
     drawnCanvas.height = h;
@@ -303,15 +303,11 @@ const HandWritingAnimation = () => {
     drawnCtx.fillStyle = "white";
     drawnCtx.fillRect(0, 0, w, h);
 
-    // convert drawnCanvas to ImageData for pixel-level ops
-    let drawnImageData = drawnCtx.getImageData(0, 0, w, h);
-
-    // prepare media recorder to record drawCanvasRef stream
+    // Prepare media recorder to record drawCanvasRef stream
     const recordCanvas = drawCanvasRef.current;
     recordCanvas.width = w;
     recordCanvas.height = h;
     const recordCtx = recordCanvas.getContext("2d");
-    // initial blank
     recordCtx.fillStyle = "white";
     recordCtx.fillRect(0, 0, w, h);
 
@@ -324,7 +320,6 @@ const HandWritingAnimation = () => {
     try {
       mediaRecorder = new MediaRecorder(stream, options);
     } catch (e) {
-      // fallback codec
       mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp8" });
     }
     mediaRecorderRef.current = mediaRecorder;
@@ -334,93 +329,76 @@ const HandWritingAnimation = () => {
 
     mediaRecorder.start();
 
-    // algorithm similar to Python: pick nearest cell each iteration
-    let currentCell = [0, 0];
-    let counter = 0;
-    let cellsArr = cells.slice(); // copy
-    // safety: if too many cells, limit to avoid blocking forever
-    const maxIterations = cellsArr.length * 2 + 1000;
+    let currentPointIndex = 0;
+    let currentStrokeIndex = 0;
+    const totalPoints = strokes.flat().length; // Nombre total de pixels à dessiner
+    let drawnPointsCount = 0;
 
-    // helper to draw grid cell from imageData to drawnImageData
-    const drawCellToDrawn = (col, row) => {
-      const sx = col * splitLen;
-      const sy = row * splitLen;
-      const cellW = Math.min(splitLen, w - sx);
-      const cellH = Math.min(splitLen, h - sy);
-      const src = imageData.data;
-      const dest = drawnImageData.data;
-      for (let yy = 0; yy < cellH; yy++) {
-        for (let xx = 0; xx < cellW; xx++) {
-          const sxp = sx + xx;
-          const syp = sy + yy;
-          const si = (syp * w + sxp) * 4;
-          const di = si;
-          // copy R G B from binary image (0 or 255)
-          dest[di] = src[si];
-          dest[di + 1] = src[si + 1];
-          dest[di + 2] = src[si + 2];
-          dest[di + 3] = 255;
+    // Loop through strokes and points
+    while (currentStrokeIndex < strokes.length) {
+      const currentStroke = strokes[currentStrokeIndex];
+      const traceSpeed = variables.strokeTraceSpeed; // Pixels tracés par "frame" ou étape
+
+      for (let i = 0; i < traceSpeed; i++) {
+        if (currentPointIndex >= currentStroke.length) {
+          break; // Fin du stroke actuel
         }
-      }
-    };
+        const [px, py] = currentStroke[currentPointIndex];
 
-    // loop - we'll use async loop with small delays to allow UI updates
-    let iter = 0;
-    while (cellsArr.length > 0 && iter < maxIterations) {
-      iter++;
-      // pick nearest cell to currentCell
-      const dists = eucDistArr(cellsArr.map((c) => [c[0], c[1]]), currentCell);
-      let minIdx = 0;
-      let minVal = dists[0] ?? Infinity;
-      for (let i = 1; i < dists.length; i++) {
-        if (dists[i] < minVal) {
-          minVal = dists[i];
-          minIdx = i;
+        // Draw the pixel on drawnCtx
+        drawnCtx.fillStyle = "black"; // Tracer en noir
+        drawnCtx.fillRect(px, py, 1, 1); // Dessine un pixel
+
+        // Update hand position
+        const handX = px;
+        const handY = py;
+
+        // Compose drawnCtx + hand on recordCanvas
+        recordCtx.clearRect(0, 0, w, h); // Clear previous frame
+        recordCtx.drawImage(drawnCanvas, 0, 0); // Draw what's been drawn so far
+
+        // Draw hand overlay
+        if (handProc) {
+          const hw = handProc.width;
+          const hh = handProc.height;
+          // Ajuster la position de la main pour que la pointe du stylo soit sur (handX, handY)
+          // Ceci nécessitera un ajustement précis basé sur la forme de la main/stylo
+          // Pour l'instant, plaçons le centre du bas de la main sur le point
+          // Cela pourrait être amélioré si la position de la pointe du stylo est connue dans l'image de la main
+          const handDrawX = handX - handProc.width / 2; // Exemple: centrer la main sur le point
+          const handDrawY = handY - handProc.height; // Exemple: positionner le bas de la main sur le point
+
+          recordCtx.drawImage(
+            handProc.canvas,
+            Math.max(0, -handDrawX), Math.max(0, -handDrawY), // Source clipping
+            Math.min(hw, w - handDrawX, handDrawX + hw), Math.min(hh, h - handDrawY, handDrawY + hh), // Source clipping width/height
+            handDrawX, handDrawY, // Destination X, Y
+            Math.min(hw, w - handDrawX), Math.min(hh, h - handDrawY) // Destination W, H
+          );
         }
-      }
-      const sel = cellsArr[minIdx];
-      // draw selection onto drawnImageData
-      drawCellToDrawn(sel[0], sel[1]);
 
-      // compute hand position (center of cell in pixels)
-      const cellStartX = sel[0] * splitLen;
-      const cellStartY = sel[1] * splitLen;
-      const handX = cellStartX + Math.floor(splitLen / 2);
-      const handY = cellStartY + Math.floor(splitLen / 2);
-
-      // create a temp canvas to compose drawnImageData + hand
-      drawnCtx.putImageData(drawnImageData, 0, 0);
-      // draw hand overlay onto drawnCtx (we use handProc which has a canvas and mask)
-      if (handProc) {
-        // draw handProc.canvas at (handX, handY) with clipping to canvas size
-        const hw = handProc.width;
-        const hh = handProc.height;
-        const dx = handX;
-        const dy = handY;
-        drawnCtx.drawImage(handProc.canvas, 0, 0, Math.min(hw, w - dx), Math.min(hh, h - dy), dx, dy, Math.min(hw, w - dx), Math.min(hh, h - dy));
+        drawnPointsCount++;
+        currentPointIndex++;
       }
 
-      // copy composed drawnCtx to recordCanvas for MediaRecorder
-      recordCtx.clearRect(0, 0, w, h);
-      recordCtx.drawImage(drawnCanvas, 0, 0);
-
-      counter++;
-      // write frame to video stream occasionally according to skip_rate (objectSkipRate)
-      if (counter % variables.objectSkipRate === 0) {
-        // let media recorder capture via captureStream; frames are captured automatically at frameRate.
-        // But to ensure capturing intermediate frames, we can draw to canvas repeatedly and wait small time.
-        // Here we just wait for next animation frame (gives MediaRecorder time to sample)
-        await new Promise((r) => setTimeout(r, Math.max(0, 1000 / variables.frameRate)));
+      // If current stroke is finished, move to the next
+      if (currentPointIndex >= currentStroke.length) {
+        currentStrokeIndex++;
+        currentPointIndex = 0; // Reset point index for next stroke
       }
 
-      // remove selected cell from list
-      cellsArr.splice(minIdx, 1);
-      currentCell = sel;
-      // update progress
-      const drawnCount = iter;
-      const totalCount = cells.length || 1;
-      setProgress(Math.floor((drawnCount / totalCount) * 100));
+      // Update progress
+      setProgress(Math.floor((drawnPointsCount / totalPoints) * 100));
+
+      // Wait for next animation frame
+      await new Promise((r) => setTimeout(r, Math.max(0, 1000 / variables.frameRate)));
     }
+
+    // Final frame: remove hand, show full drawing
+    recordCtx.clearRect(0, 0, w, h);
+    recordCtx.drawImage(drawnCanvas, 0, 0);
+    await new Promise((r) => setTimeout(r, Math.max(0, 1000 / variables.frameRate)));
+
 
     // draw final color image for a few seconds to match python behaviour
     const showFinalFrames = variables.frameRate * variables.endGrayImgDurationInSec;
@@ -455,10 +433,8 @@ const HandWritingAnimation = () => {
     const img = new Image();
     img.onload = () => {
       setSourceImage(img);
-      // draw preview
       const ctx = sourceCanvasRef.current.getContext("2d");
       ctx.clearRect(0, 0, sourceCanvasRef.current.width, sourceCanvasRef.current.height);
-      // fit image into preview canvas
       const scale = Math.min(sourceCanvasRef.current.width / img.width, sourceCanvasRef.current.height / img.height);
       const w = img.width * scale;
       const h = img.height * scale;
@@ -476,11 +452,7 @@ const HandWritingAnimation = () => {
     setProgress(0);
     setVideoUrl(null);
 
-    // determine target resolution similar to python find_nearest_res heuristics
     const vars = { ...variablesDefault };
-
-    // attempt to keep aspect ratio and use default resize (we keep defaults)
-    // preprocess hand
     const handProc = await preprocessHand(handImage, handMask);
 
     await generateVideoFromImage(sourceImage, vars, handProc, (url) => {
