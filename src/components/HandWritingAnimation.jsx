@@ -277,7 +277,7 @@ const HandWritingAnimation = () => {
     const isBlackAndUnvisited = (x, y) => {
       if (x < 0 || x >= w || y < 0 || y >= h) return false;
       const idx = (y * w + x) * 4;
-      return d[idx] < 10 && visited[y * w + x] === 0; // d[idx] est la valeur de gris
+      return d[idx] < 128 && visited[y * w + x] === 0; // d[idx] est la valeur de gris (after threshold: 0 or 255)
     };
 
     // Parcours en profondeur (DFS) pour trouver un stroke
@@ -319,7 +319,7 @@ const HandWritingAnimation = () => {
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
         const idx = (y * w + x) * 4;
-        if (d[idx] < 10 && visited[y * w + x] === 0) { // Si pixel noir et non visité
+        if (d[idx] < 128 && visited[y * w + x] === 0) { // Si pixel noir et non visité (threshold: 0 or 255)
           const newStroke = dfs(x, y);
           if (newStroke.length > 1) { // Un stroke doit avoir au moins 2 points
             strokes.push(newStroke);
