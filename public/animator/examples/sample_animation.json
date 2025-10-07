@@ -1,0 +1,104 @@
+{
+  "metadata": {
+    "frame_rate": 30,
+    "width": 640,
+    "height": 360,
+    "split_len": 20,
+    "object_skip_rate": 20,
+    "total_frames": 5,
+    "hand_dimensions": {
+      "width": 284,
+      "height": 467
+    }
+  },
+  "animation": {
+    "drawing_sequence": [],
+    "frames_written": [
+      {
+        "frame_number": 0,
+        "tile_drawn": {
+          "grid_position": [8, 8],
+          "pixel_coords": {
+            "x_start": 160,
+            "x_end": 180,
+            "y_start": 160,
+            "y_end": 180
+          }
+        },
+        "hand_position": {
+          "x": 170,
+          "y": 170
+        },
+        "tiles_remaining": 4
+      },
+      {
+        "frame_number": 1,
+        "tile_drawn": {
+          "grid_position": [8, 9],
+          "pixel_coords": {
+            "x_start": 180,
+            "x_end": 200,
+            "y_start": 160,
+            "y_end": 180
+          }
+        },
+        "hand_position": {
+          "x": 190,
+          "y": 170
+        },
+        "tiles_remaining": 3
+      },
+      {
+        "frame_number": 2,
+        "tile_drawn": {
+          "grid_position": [9, 9],
+          "pixel_coords": {
+            "x_start": 180,
+            "x_end": 200,
+            "y_start": 180,
+            "y_end": 200
+          }
+        },
+        "hand_position": {
+          "x": 190,
+          "y": 190
+        },
+        "tiles_remaining": 2
+      },
+      {
+        "frame_number": 3,
+        "tile_drawn": {
+          "grid_position": [9, 8],
+          "pixel_coords": {
+            "x_start": 160,
+            "x_end": 180,
+            "y_start": 180,
+            "y_end": 200
+          }
+        },
+        "hand_position": {
+          "x": 170,
+          "y": 190
+        },
+        "tiles_remaining": 1
+      },
+      {
+        "frame_number": 4,
+        "tile_drawn": {
+          "grid_position": [8, 10],
+          "pixel_coords": {
+            "x_start": 200,
+            "x_end": 220,
+            "y_start": 160,
+            "y_end": 180
+          }
+        },
+        "hand_position": {
+          "x": 210,
+          "y": 170
+        },
+        "tiles_remaining": 0
+      }
+    ]
+  }
+}
