@@ -86,35 +86,108 @@ const HandWritingAnimation = () => {
     return imageData;
   };
 
-  // approximate adaptive threshold by dividing image into tiles and thresholding locally
-  const adaptiveThresholdApprox = (imageData, tileSize = 15, offset = 10) => {
+  // Apply edge detection to enhance contours
+  const applyEdgeDetection = (imageData) => {
+    const w = imageData.width;
+    const h = imageData.height;
+    const d = imageData.data;
+    
+    // Create a copy for edge detection
+    const gray = new Uint8ClampedArray(w * h);
+    for (let i = 0; i < w * h; i++) {
+      gray[i] = d[i * 4];
+    }
+    
+    const edges = new Uint8ClampedArray(w * h);
+    
+    // Sobel operator kernels
+    const sobelX = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
+    const sobelY = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]];
+    
+    for (let y = 1; y < h - 1; y++) {
+      for (let x = 1; x < w - 1; x++) {
+        let gx = 0;
+        let gy = 0;
+        
+        // Apply Sobel kernels
+        for (let ky = -1; ky <= 1; ky++) {
+          for (let kx = -1; kx <= 1; kx++) {
+            const pixelValue = gray[(y + ky) * w + (x + kx)];
+            gx += pixelValue * sobelX[ky + 1][kx + 1];
+            gy += pixelValue * sobelY[ky + 1][kx + 1];
+          }
+        }
+        
+        // Calculate gradient magnitude
+        const magnitude = Math.sqrt(gx * gx + gy * gy);
+        edges[y * w + x] = Math.min(255, magnitude);
+      }
+    }
+    
+    // Combine edges with original grayscale (weighted)
+    for (let i = 0; i < w * h; i++) {
+      const edgeStrength = edges[i] / 255;
+      const originalValue = gray[i];
+      // Enhance edges: darker where edges are strong
+      const enhanced = Math.max(0, originalValue - edgeStrength * 100);
+      const idx = i * 4;
+      d[idx] = d[idx + 1] = d[idx + 2] = enhanced;
+    }
+    
+    return imageData;
+  };
+
+  // Improved adaptive threshold using Gaussian-like weighted average
+  // Mimics cv2.adaptiveThreshold with ADAPTIVE_THRESH_GAUSSIAN_C more closely
+  const adaptiveThresholdApprox = (imageData, blockSize = 15, C = 10) => {
     // imageData will be modified in place
     const w = imageData.width;
     const h = imageData.height;
     const d = imageData.data;
-    for (let ty = 0; ty < h; ty += tileSize) {
-      for (let tx = 0; tx < w; tx += tileSize) {
-        let sum = 0,
-          count = 0;
-        for (let y = ty; y < Math.min(h, ty + tileSize); y++) {
-          for (let x = tx; x < Math.min(w, tx + tileSize); x++) {
-            const idx = (y * w + x) * 4;
-            sum += d[idx];
-            count++;
+    
+    // Create a copy of grayscale values for calculation
+    const gray = new Uint8ClampedArray(w * h);
+    for (let i = 0; i < w * h; i++) {
+      gray[i] = d[i * 4];
+    }
+    
+    // Apply adaptive threshold pixel by pixel
+    const halfBlock = Math.floor(blockSize / 2);
+    
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const idx = y * w + x;
+        const pixelValue = gray[idx];
+        
+        // Calculate local mean in the neighborhood
+        let sum = 0;
+        let count = 0;
+        
+        for (let dy = -halfBlock; dy <= halfBlock; dy++) {
+          for (let dx = -halfBlock; dx <= halfBlock; dx++) {
+            const ny = y + dy;
+            const nx = x + dx;
+            
+            if (ny >= 0 && ny < h && nx >= 0 && nx < w) {
+              // Apply Gaussian-like weighting (center pixels have more weight)
+              const distance = Math.abs(dx) + Math.abs(dy);
+              const weight = 1.0 / (1.0 + distance * 0.3);
+              sum += gray[ny * w + nx] * weight;
+              count += weight;
+            }
           }
         }
-        const mean = count ? sum / count : 128;
-        const thresh = mean - offset;
-        for (let y = ty; y < Math.min(h, ty + tileSize); y++) {
-          for (let x = tx; x < Math.min(w, tx + tileSize); x++) {
-            const idx = (y * w + x) * 4;
-            const v = d[idx];
-            const t = v < thresh ? 0 : 255;
-            d[idx] = d[idx + 1] = d[idx + 2] = t;
-          }
-        }
+        
+        const localMean = count > 0 ? sum / count : 128;
+        const threshold = localMean - C;
+        
+        // Apply threshold
+        const outputValue = pixelValue < threshold ? 0 : 255;
+        const outIdx = idx * 4;
+        d[outIdx] = d[outIdx + 1] = d[outIdx + 2] = outputValue;
       }
     }
+    
     return imageData;
   };
 
@@ -344,13 +417,14 @@ const HandWritingAnimation = () => {
     sourceCtx.drawImage(sourceImg, 0, 0, w, h);
     const sourceImageData = sourceCtx.getImageData(0, 0, w, h);
 
-    // Convert to grayscale and threshold for drawing
+    // Convert to grayscale, edge detection and threshold for drawing
     const grayCanvas = document.createElement("canvas");
     grayCanvas.width = w;
     grayCanvas.height = h;
     const grayCtx = grayCanvas.getContext("2d");
     let grayImageData = sourceCtx.getImageData(0, 0, w, h);
     grayImageData = toGrayscale(grayImageData);
+    grayImageData = applyEdgeDetection(grayImageData); // Add edge detection
     grayImageData = adaptiveThresholdApprox(grayImageData, 15, 10);
     grayCtx.putImageData(grayImageData, 0, 0);
 
@@ -450,10 +524,11 @@ const HandWritingAnimation = () => {
     const w = variables.resizeWd;
     const h = variables.resizeHt;
 
-    // 1) preprocess: resize + grayscale + adaptive threshold approx
+    // 1) preprocess: resize + grayscale + edge detection + adaptive threshold
     let imageData = resizeAndGetImageData(img, w, h);
     imageData = toGrayscale(imageData);
-    imageData = adaptiveThresholdApprox(imageData, 15, 10); // approx adaptive
+    imageData = applyEdgeDetection(imageData); // Add edge detection for better contour detection
+    imageData = adaptiveThresholdApprox(imageData, 15, 10); // improved adaptive threshold
 
     // 2) Find and order strokes
     const strokes = findAndOrderStrokes(imageData, w, h);
