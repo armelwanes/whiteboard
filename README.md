@@ -10,6 +10,9 @@ Une application web interactive pour créer des vidéos d'animation structurées
   - Panneau latéral avec aperçu de toutes les scènes
   - Ajout, suppression, duplication et réorganisation des scènes
   - Éditeur modal pour modifier les propriétés des scènes
+- **Animation Handwriting** : Deux modes de génération d'animations
+  - **Mode Image** : Génération automatique d'animation à partir d'une image
+  - **Mode JSON** ⭐ NOUVEAU : Replay d'animations exportées depuis Python
 - **Scènes multiples** : Divisez votre narration en plusieurs scènes distinctes
 - **Timeline avancée** : Contrôlez précisément la synchronisation des éléments visuels
 - **Animations fluides** : Transitions élégantes entre les scènes
@@ -172,6 +175,32 @@ L'application inclut un exemple d'histoire "Le parcours de l'apprentissage" avec
 5. Le Succès
 
 Chaque scène dure 5 secondes, pour une durée totale de 25 secondes.
+
+## 🎨 Animation Handwriting - Mode JSON
+
+Le composant HandWriting supporte maintenant le **Mode JSON** qui permet de rejouer des animations exportées depuis le script Python.
+
+### Utilisation rapide
+
+1. Générez le JSON avec Python:
+```bash
+cd public/animator
+python whiteboard_animator.py votre_image.png --export-json
+```
+
+2. Dans l'éditeur web:
+   - Basculez en **"Mode JSON"**
+   - Uploadez le fichier JSON généré
+   - Uploadez l'image source originale
+   - Cliquez sur **"Rejouer"**
+
+### Avantages
+- ⚡ Génération rapide (pas de recalcul)
+- 🔄 Reproductibilité parfaite
+- 📝 Éditable (modifiez le JSON pour ajuster)
+- 💾 Léger (JSON < 1MB vs vidéo plusieurs MB)
+
+📖 **Documentation complète**: Voir `docs/JSON_ANIMATION_MODE.md`
 
 ## 🔧 Développement
 
