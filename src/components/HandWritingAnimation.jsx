@@ -225,7 +225,7 @@ const HandWritingAnimation = () => {
    * Generate animation frames
    */
   const generateAnimationFrames = (sourceImg, handData) => {
-    const { width, height } = config;
+    const { canvasWidth: width, canvasHeight: height } = config;
     const splitLen = config.splitLen;
     
     // Preprocess the source image
