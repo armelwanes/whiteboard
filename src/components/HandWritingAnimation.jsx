@@ -242,11 +242,21 @@ const HandWritingAnimation = () => {
     mc.drawImage(handMaskImg, bounds.minX, bounds.minY, w, h, 0, 0, w, h);
     const maskData = mc.getImageData(0, 0, w, h).data;
     const maskArr = new Uint8ClampedArray(w * h);
-    // const maskInvArr = new Float32Array(w * h); // Not used anymore, simpler mask
+    
+    // Apply transparency to the hand canvas based on mask
+    const handImageData = ctx.getImageData(0, 0, w, h);
+    const handData = handImageData.data;
+    
     for (let i = 0; i < w * h; i++) {
       const v = maskData[i * 4];
       maskArr[i] = v > 128 ? 1 : 0; // 1 where hand (foreground), 0 where transparent (background)
+      
+      // Set alpha channel: transparent where mask is 0, opaque where mask is 1
+      handData[i * 4 + 3] = maskArr[i] * 255;
     }
+    
+    // Put the modified image data back onto the canvas
+    ctx.putImageData(handImageData, 0, 0);
 
     return {
       canvas,
@@ -475,15 +485,17 @@ const HandWritingAnimation = () => {
       recordCtx.drawImage(drawnCanvas, 0, 0);
 
       // Draw hand at position
-      if (handProc && handProc.cropped) {
-        const handW = handProc.cropped.width;
-        const handH = handProc.cropped.height;
+      if (handProc && handProc.canvas) {
+        const handW = handProc.width;
+        const handH = handProc.height;
+        // Center the hand on the drawing position (similar to Python behavior)
         const handX = handPos.x - handW / 2;
         const handY = handPos.y - handH / 2;
         
         // Only draw if hand is within bounds
         if (handX + handW > 0 && handX < w && handY + handH > 0 && handY < h) {
-          recordCtx.drawImage(handProc.cropped, handX, handY);
+          // Draw the hand (now with proper transparency from preprocessHand)
+          recordCtx.drawImage(handProc.canvas, handX, handY);
         }
       }
 
@@ -491,6 +503,34 @@ const HandWritingAnimation = () => {
       setProgress(Math.floor(((i + 1) / frames.length) * 90));
 
       // Wait for next frame
+      await new Promise((r) => setTimeout(r, Math.max(0, 1000 / fps)));
+    }
+
+    // After all tiles are drawn, overlay the colored image on drawn areas
+    // This matches Python behavior: variables.drawn_frame[object_ind] = variables.img[object_ind]
+    const finalDrawnImageData = drawnCtx.getImageData(0, 0, w, h);
+    const finalDrawnData = finalDrawnImageData.data;
+    const grayData = grayImageData.data;
+    const colorData = sourceImageData.data;
+    
+    // Replace black pixels (drawn areas) with original color
+    for (let i = 0; i < w * h; i++) {
+      const idx = i * 4;
+      // If pixel is black (was drawn), replace with color from source
+      if (grayData[idx] < 128) { // Black pixel in thresholded image
+        finalDrawnData[idx] = colorData[idx];       // R
+        finalDrawnData[idx + 1] = colorData[idx + 1]; // G
+        finalDrawnData[idx + 2] = colorData[idx + 2]; // B
+        finalDrawnData[idx + 3] = 255;                // A
+      }
+    }
+    drawnCtx.putImageData(finalDrawnImageData, 0, 0);
+    
+    // Show the final drawn image (black lines replaced with color) for a moment
+    const intermediateFrames = fps * 1; // 1 second
+    for (let i = 0; i < intermediateFrames; i++) {
+      recordCtx.clearRect(0, 0, w, h);
+      recordCtx.drawImage(drawnCanvas, 0, 0);
       await new Promise((r) => setTimeout(r, Math.max(0, 1000 / fps)));
     }
 
