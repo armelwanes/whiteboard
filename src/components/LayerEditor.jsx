@@ -148,17 +148,17 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
         </div>
 
         {/* Right Side - Properties Panel */}
-        <div className="w-96 bg-gray-900 flex flex-col border-l border-gray-700 overflow-hidden">
+        <div className="w-80 bg-gray-900 flex flex-col border-l border-gray-700 overflow-hidden">
           {/* Header */}
-          <div className="bg-gray-800 px-6 py-4 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
-            <h2 className="text-xl font-bold text-white">Propriétés</h2>
+          <div className="bg-gray-800 px-5 py-3 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
+            <h2 className="text-lg font-bold text-white">Propriétés</h2>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm"
                 title="Ajouter une couche"
               >
-                <Upload className="w-4 h-4" />
+                <Upload className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={onClose}
@@ -177,8 +177,8 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
           </div>
 
           {/* Content - Scrollable */}
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="space-y-5">
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="space-y-4">
               {/* Scene Properties */}
               <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
                 <h3 className="text-white font-semibold mb-3 text-sm flex items-center gap-2">
@@ -528,18 +528,18 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-800 px-6 py-4 border-t border-gray-700 flex justify-end gap-3 flex-shrink-0">
+          <div className="bg-gray-800 px-5 py-3 border-t border-gray-700 flex justify-end gap-2 flex-shrink-0">
             <button
               onClick={onClose}
-              className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors"
+              className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm"
             >
               Annuler
             </button>
             <button
               onClick={handleSave}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors shadow-lg flex items-center gap-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors shadow-lg flex items-center gap-2 text-sm"
             >
-              <Save className="w-4 h-4" />
+              <Save className="w-3.5 h-3.5" />
               Enregistrer
             </button>
           </div>

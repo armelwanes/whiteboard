@@ -18,7 +18,7 @@ const CameraToolbar = ({
   const selectedCamera = cameras.find(c => c.id === selectedCameraId);
 
   return (
-    <div className="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between">
+    <div className="bg-gray-800 border-b border-gray-700 px-4 py-2.5 flex items-center justify-between">
       {/* Left Section - Camera List */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 text-white font-semibold">
@@ -31,12 +31,13 @@ const CameraToolbar = ({
           <select
             value={selectedCameraId || ''}
             onChange={(e) => onSelectCamera(e.target.value || null)}
-            className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 max-w-xs"
+            style={{ maxHeight: '300px' }}
           >
             <option value="">Aucune sélection</option>
-            {cameras.map((camera) => (
+            {cameras.map((camera, index) => (
               <option key={camera.id} value={camera.id}>
-                {camera.name || `Camera ${camera.id}`} ({camera.zoom.toFixed(1)}x)
+                {index + 1}. {camera.name || `Camera ${camera.id}`} ({camera.zoom.toFixed(1)}x)
               </option>
             ))}
           </select>
@@ -53,40 +54,40 @@ const CameraToolbar = ({
       </div>
 
       {/* Right Section - Zoom Controls */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* Scene Zoom */}
         <div className="flex items-center gap-2">
-          <span className="text-gray-400 text-sm">Zoom scène:</span>
+          <span className="text-gray-400 text-xs">Zoom scène:</span>
           <button
             onClick={() => onSceneZoom(Math.max(0.1, sceneZoom - 0.1))}
-            className="bg-gray-700 hover:bg-gray-600 text-white p-1.5 rounded transition-colors"
+            className="bg-gray-700 hover:bg-gray-600 text-white p-1 rounded transition-colors"
             title="Dézoom scène"
           >
-            <ZoomOut className="w-4 h-4" />
+            <ZoomOut className="w-3.5 h-3.5" />
           </button>
-          <span className="text-white font-mono text-sm min-w-[4rem] text-center">
+          <span className="text-white font-mono text-xs min-w-[3rem] text-center">
             {(sceneZoom * 100).toFixed(0)}%
           </span>
           <button
             onClick={() => onSceneZoom(Math.min(2.0, sceneZoom + 0.1))}
-            className="bg-gray-700 hover:bg-gray-600 text-white p-1.5 rounded transition-colors"
+            className="bg-gray-700 hover:bg-gray-600 text-white p-1 rounded transition-colors"
             title="Zoom scène"
           >
-            <ZoomIn className="w-4 h-4" />
+            <ZoomIn className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => onSceneZoom(1.0)}
-            className="bg-gray-700 hover:bg-gray-600 text-white p-1.5 rounded transition-colors"
+            className="bg-gray-700 hover:bg-gray-600 text-white p-1 rounded transition-colors"
             title="Réinitialiser zoom"
           >
-            <Maximize2 className="w-4 h-4" />
+            <Maximize2 className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Camera Zoom (if camera selected) */}
         {selectedCamera && (
           <>
-            <div className="w-px h-6 bg-gray-600" />
+            <div className="w-px h-5 bg-gray-600" />
             
             {/* Lock/Unlock Button */}
             {!selectedCamera.isDefault && (
@@ -97,47 +98,47 @@ const CameraToolbar = ({
                     selectedCamera.locked 
                       ? 'bg-blue-600 hover:bg-blue-700' 
                       : 'bg-gray-700 hover:bg-gray-600'
-                  } text-white p-1.5 rounded transition-colors flex items-center gap-1`}
+                  } text-white p-1 rounded transition-colors flex items-center gap-1`}
                   title={selectedCamera.locked ? 'Déverrouiller caméra' : 'Verrouiller caméra'}
                 >
-                  {selectedCamera.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                  {selectedCamera.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
                   <span className="text-xs">{selectedCamera.locked ? 'Verrouillé' : 'Déverrouillé'}</span>
                 </button>
-                <div className="w-px h-6 bg-gray-600" />
+                <div className="w-px h-5 bg-gray-600" />
               </>
             )}
             
             <div className="flex items-center gap-2">
-              <span className="text-gray-400 text-sm">Zoom caméra:</span>
+              <span className="text-gray-400 text-xs">Zoom cam:</span>
               <button
                 onClick={() => onZoomCamera(selectedCameraId, Math.max(0.1, selectedCamera.zoom - 0.1))}
-                className="bg-pink-700 hover:bg-pink-600 text-white p-1.5 rounded transition-colors"
+                className="bg-pink-700 hover:bg-pink-600 text-white p-1 rounded transition-colors"
                 title="Dézoom caméra"
               >
-                <ZoomOut className="w-4 h-4" />
+                <ZoomOut className="w-3.5 h-3.5" />
               </button>
-              <span className="text-white font-mono text-sm min-w-[3rem] text-center">
+              <span className="text-white font-mono text-xs min-w-[2.5rem] text-center">
                 {selectedCamera.zoom.toFixed(1)}x
               </span>
               <button
                 onClick={() => onZoomCamera(selectedCameraId, Math.min(5.0, selectedCamera.zoom + 0.1))}
-                className="bg-pink-700 hover:bg-pink-600 text-white p-1.5 rounded transition-colors"
+                className="bg-pink-700 hover:bg-pink-600 text-white p-1 rounded transition-colors"
                 title="Zoom caméra"
               >
-                <ZoomIn className="w-4 h-4" />
+                <ZoomIn className="w-3.5 h-3.5" />
               </button>
             </div>
             
             {/* Scale Ratio Presets */}
-            <div className="w-px h-6 bg-gray-600" />
-            <div className="flex items-center gap-2">
-              <span className="text-gray-400 text-sm">Ratio:</span>
+            <div className="w-px h-5 bg-gray-600" />
+            <div className="flex items-center gap-1">
+              <span className="text-gray-400 text-xs">Ratio:</span>
               <div className="flex gap-1">
-                {[0.5, 0.7, 0.8, 0.9, 1.0, 1.2, 1.5, 2.0].map((ratio) => (
+                {[0.5, 0.7, 1.0, 1.5, 2.0].map((ratio) => (
                   <button
                     key={ratio}
                     onClick={() => onZoomCamera(selectedCameraId, ratio)}
-                    className={`px-2 py-1 text-xs rounded transition-colors ${
+                    className={`px-1.5 py-0.5 text-xs rounded transition-colors ${
                       Math.abs(selectedCamera.zoom - ratio) < 0.05
                         ? 'bg-pink-600 text-white font-semibold'
                         : 'bg-gray-700 hover:bg-gray-600 text-gray-300'

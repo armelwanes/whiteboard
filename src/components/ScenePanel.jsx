@@ -13,16 +13,16 @@ const ScenePanel = ({
   onMoveScene,
 }) => {
   return (
-    <div className="scene-panel w-72 bg-gradient-to-b from-gray-900 to-gray-950 border-r border-gray-700 flex flex-col shadow-2xl">
+    <div className="scene-panel w-60 bg-gradient-to-b from-gray-900 to-gray-950 border-r border-gray-700 flex flex-col shadow-2xl">
       {/* Header */}
-      <div className="p-5 border-b border-gray-700 bg-gray-800/50">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-4 border-b border-gray-700 bg-gray-800/50">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="text-white font-bold text-xl">Scènes</h2>
+            <h2 className="text-white font-bold text-lg">Scènes</h2>
             <p className="text-gray-400 text-xs mt-0.5">{scenes.length} scène{scenes.length > 1 ? 's' : ''}</p>
           </div>
-          <div className="w-10 h-10 rounded-full bg-blue-600/20 flex items-center justify-center">
-            <span className="text-blue-400 font-bold text-lg">{scenes.length}</span>
+          <div className="w-9 h-9 rounded-full bg-blue-600/20 flex items-center justify-center">
+            <span className="text-blue-400 font-bold text-base">{scenes.length}</span>
           </div>
         </div>
         <Button
@@ -31,27 +31,27 @@ const ScenePanel = ({
           size="sm"
         >
           <Plus className="w-4 h-4" />
-          Ajouter une scène
+          Ajouter
         </Button>
       </div>
 
       {/* Scenes List */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-3">
         {scenes.map((scene, index) => (
           <Card
             key={scene.id}
-            className={`mb-3 cursor-pointer transition-all hover:shadow-lg ${
+            className={`mb-2 cursor-pointer transition-all hover:shadow-lg ${
               selectedSceneIndex === index
                 ? 'border-primary shadow-lg bg-blue-600/5'
                 : 'border-gray-700 hover:border-primary/50'
             }`}
             onClick={() => onSelectScene(index)}
           >
-            <div className="p-3">
+            <div className="p-2.5">
               {/* Thumbnail and Info */}
-              <div className="flex gap-3 mb-3">
+              <div className="flex gap-2 mb-2">
                 {/* Thumbnail */}
-                <div className="flex-shrink-0 w-20 h-14 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 text-xs overflow-hidden shadow-md border border-gray-700">
+                <div className="flex-shrink-0 w-16 h-12 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 text-xs overflow-hidden shadow-md border border-gray-700">
                   {scene.backgroundImage ? (
                     <img
                       src={scene.backgroundImage}
@@ -59,21 +59,21 @@ const ScenePanel = ({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-2xl">📄</span>
+                    <span className="text-xl">📄</span>
                   )}
                 </div>
 
                 {/* Scene Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <h3 className="text-white font-bold text-sm truncate">
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="text-white font-bold text-xs truncate">
                       {index + 1}. {scene.title}
                     </h3>
                   </div>
-                  <p className="text-gray-400 text-xs truncate mb-2 leading-relaxed">
+                  <p className="text-gray-400 text-xs truncate mb-1.5 leading-relaxed">
                     {scene.content}
                   </p>
-                  <div className="flex items-center gap-3 text-gray-400 text-xs">
+                  <div className="flex items-center gap-2 text-gray-400 text-xs">
                     <span className="flex items-center gap-1">
                       ⏱ {scene.duration}s
                     </span>
@@ -88,7 +88,7 @@ const ScenePanel = ({
 
               {/* Scene Actions */}
               {selectedSceneIndex === index && (
-                <div className="flex gap-2 pt-3 border-t border-gray-700">
+                <div className="flex gap-1 pt-2 border-t border-gray-700">
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
