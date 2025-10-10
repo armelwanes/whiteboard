@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Camera, X } from 'lucide-react';
+import { Camera, X, Lock, Unlock } from 'lucide-react';
 
 /**
  * CameraViewport Component
@@ -48,6 +48,9 @@ const CameraViewport = ({
 
   const handleMouseMove = useCallback((e) => {
     if (!isSelected) return;
+    
+    // Prevent moving/resizing if camera is locked
+    if (camera.locked) return;
 
     if (isDragging) {
       const deltaX = (e.clientX - dragStart.x) / canvasZoom;
@@ -119,6 +122,11 @@ const CameraViewport = ({
       return;
     }
 
+    // Don't allow dragging/resizing if camera is locked
+    if (camera.locked) {
+      return;
+    }
+
     e.stopPropagation();
 
     // Check if clicking on a resize handle
@@ -167,13 +175,19 @@ const CameraViewport = ({
     >
       {/* Camera Frame */}
       <div
-        className={`camera-frame absolute inset-0 border-4 cursor-move ${
+        className={`camera-frame absolute inset-0 border-4 ${
+          camera.locked ? 'cursor-default' : 'cursor-move'
+        } ${
           isSelected
-            ? 'border-pink-500 bg-pink-500/10'
-            : 'border-pink-300 bg-pink-300/5 hover:border-pink-400'
+            ? camera.locked 
+              ? 'border-blue-500 bg-blue-500/10'
+              : 'border-pink-500 bg-pink-500/10'
+            : camera.locked
+              ? 'border-blue-300 bg-blue-300/5 hover:border-blue-400'
+              : 'border-pink-300 bg-pink-300/5 hover:border-pink-400'
         }`}
         style={{
-          borderStyle: 'dashed',
+          borderStyle: camera.locked ? 'solid' : 'dashed',
           borderWidth: '3px',
         }}
       >
@@ -204,12 +218,15 @@ const CameraViewport = ({
 
         {/* Camera Label */}
         <div
-          className="camera-label absolute -top-8 left-0 bg-pink-500 text-white px-3 py-1 rounded-t-lg flex items-center gap-2 text-sm font-semibold cursor-move shadow-lg"
+          className={`camera-label absolute -top-8 left-0 text-white px-3 py-1 rounded-t-lg flex items-center gap-2 text-sm font-semibold shadow-lg ${
+            camera.locked ? 'bg-blue-500 cursor-default' : 'bg-pink-500 cursor-move'
+          }`}
         >
           <Camera className="w-4 h-4" />
+          {camera.locked && <Lock className="w-3 h-3" />}
           <span>{camera.name || `Camera ${camera.id}`}</span>
           <span className="text-xs opacity-80">({camera.zoom.toFixed(1)}x)</span>
-          {isSelected && (
+          {isSelected && !camera.isDefault && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -221,11 +238,14 @@ const CameraViewport = ({
               <X className="w-3 h-3" />
             </button>
           )}
+          {isSelected && camera.isDefault && (
+            <span className="ml-2 text-xs opacity-70">(Par défaut)</span>
+          )}
         </div>
       </div>
 
-      {/* Resize Handles - only show when selected */}
-      {isSelected && (
+      {/* Resize Handles - only show when selected and not locked */}
+      {isSelected && !camera.locked && (
         <>
           {/* Corner Handles */}
           <div

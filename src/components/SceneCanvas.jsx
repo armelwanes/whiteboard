@@ -3,6 +3,7 @@ import { Stage, Layer as KonvaLayer, Image as KonvaImage, Transformer } from 're
 import useImage from 'use-image';
 import CameraViewport from './CameraViewport';
 import CameraToolbar from './CameraToolbar';
+import { createDefaultCamera } from '../utils/cameraAnimator';
 
 // Konva Layer Image Component
 const LayerImage = ({ layer, isSelected, onSelect, onChange }) => {
@@ -84,7 +85,18 @@ const SceneCanvas = ({
   selectedLayerId,
   onSelectLayer,
 }) => {
-  const [sceneCameras, setSceneCameras] = useState(scene.sceneCameras || []);
+  const [sceneCameras, setSceneCameras] = useState(() => {
+    // Initialize with default camera if scene has no cameras
+    if (!scene.sceneCameras || scene.sceneCameras.length === 0) {
+      return [createDefaultCamera('16:9')];
+    }
+    // Check if default camera exists, add it if not
+    const hasDefaultCamera = scene.sceneCameras.some(cam => cam.isDefault);
+    if (!hasDefaultCamera) {
+      return [createDefaultCamera('16:9'), ...scene.sceneCameras];
+    }
+    return scene.sceneCameras;
+  });
   const [selectedCameraId, setSelectedCameraId] = useState(null);
   const [sceneZoom, setSceneZoom] = useState(1.0);
   const canvasRef = useRef(null);
@@ -97,11 +109,18 @@ const SceneCanvas = ({
   const handleAddCamera = useCallback(() => {
     const newCamera = {
       id: `camera-${Date.now()}`,
-      name: `Camera ${sceneCameras.length + 1}`,
+      name: `Camera ${sceneCameras.length}`,
       position: { x: 0.3 + (sceneCameras.length * 0.1), y: 0.3 },
       width: 800,
       height: 450,
       zoom: 1.0,
+      duration: 2.0,
+      transition_duration: 1.0,
+      easing: 'ease_out',
+      locked: false,
+      isDefault: false,
+      pauseDuration: 0,
+      movementType: 'ease_out',
     };
     const updatedCameras = [...sceneCameras, newCamera];
     setSceneCameras(updatedCameras);
@@ -124,6 +143,13 @@ const SceneCanvas = ({
 
   // Delete camera
   const handleDeleteCamera = useCallback((cameraId) => {
+    // Prevent deleting the default camera
+    const cameraToDelete = sceneCameras.find(cam => cam.id === cameraId);
+    if (cameraToDelete && cameraToDelete.isDefault) {
+      alert('La caméra par défaut ne peut pas être supprimée');
+      return;
+    }
+    
     const updatedCameras = sceneCameras.filter(cam => cam.id !== cameraId);
     setSceneCameras(updatedCameras);
     if (selectedCameraId === cameraId) {
@@ -139,10 +165,28 @@ const SceneCanvas = ({
     handleUpdateCamera(cameraId, { zoom: newZoom });
   }, [handleUpdateCamera]);
 
+  // Toggle lock/unlock camera
+  const handleToggleLock = useCallback((cameraId) => {
+    const camera = sceneCameras.find(cam => cam.id === cameraId);
+    if (camera && !camera.isDefault) {
+      handleUpdateCamera(cameraId, { locked: !camera.locked });
+    }
+  }, [sceneCameras, handleUpdateCamera]);
+
   // Sync cameras from scene prop when scene changes
   React.useEffect(() => {
     if (scene.sceneCameras) {
-      setSceneCameras(scene.sceneCameras);
+      // Always ensure default camera exists
+      const hasDefaultCamera = scene.sceneCameras.some(cam => cam.isDefault);
+      if (!hasDefaultCamera && scene.sceneCameras.length > 0) {
+        setSceneCameras([createDefaultCamera('16:9'), ...scene.sceneCameras]);
+      } else if (!hasDefaultCamera && scene.sceneCameras.length === 0) {
+        setSceneCameras([createDefaultCamera('16:9')]);
+      } else {
+        setSceneCameras(scene.sceneCameras);
+      }
+    } else {
+      setSceneCameras([createDefaultCamera('16:9')]);
     }
   }, [scene.sceneCameras]);
 
@@ -160,6 +204,7 @@ const SceneCanvas = ({
         onAddCamera={handleAddCamera}
         onSelectCamera={setSelectedCameraId}
         onZoomCamera={handleZoomCamera}
+        onToggleLock={handleToggleLock}
         sceneZoom={sceneZoom}
         onSceneZoom={setSceneZoom}
       />
