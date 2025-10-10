@@ -22,6 +22,7 @@ const CameraViewport = ({
   const [resizeHandle, setResizeHandle] = useState(null);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialDimensions, setInitialDimensions] = useState({ width: 0, height: 0 });
+  const [initialZoom, setInitialZoom] = useState(1.0);
   const viewportRef = useRef(null);
 
   // Calculate pixel dimensions based on camera zoom
@@ -99,9 +100,16 @@ const CameraViewport = ({
         newHeight = Math.max(100, initialDimensions.height - deltaY);
       }
       
+      // Calculate inverse zoom relationship with frame size
+      // Smaller frame = higher zoom (inverse relationship)
+      // Use width as the primary dimension for zoom calculation
+      const widthRatio = initialDimensions.width / newWidth;
+      const newZoom = Math.max(0.1, Math.min(5.0, initialZoom * widthRatio));
+      
       onUpdate(camera.id, {
         width: newWidth,
         height: newHeight,
+        zoom: newZoom,
       });
     }
   }, [
@@ -111,6 +119,7 @@ const CameraViewport = ({
     resizeHandle,
     dragStart,
     initialDimensions,
+    initialZoom,
     camera,
     onUpdate,
     canvasZoom,
@@ -147,6 +156,7 @@ const CameraViewport = ({
         width: camera.width || 800,
         height: camera.height || 450,
       });
+      setInitialZoom(camera.zoom || 1.0);
     } else if (e.target.classList.contains('camera-frame') || 
                e.target.classList.contains('camera-label')) {
       setIsDragging(true);

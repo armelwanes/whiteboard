@@ -23,6 +23,10 @@ The Camera Viewport System allows you to create, position, resize, and zoom **vi
 - Zoom range: 0.1x to 5.0x
 - Viewport size = `baseSize / zoomLevel`
 - Example: 2.0x zoom = viewport is half the base size
+- **Auto-adjustment on resize**:
+  - When you resize the camera frame, zoom automatically adjusts
+  - Maintains inverse relationship: resize smaller → zoom increases
+  - This ensures consistent zoom behavior during manual frame adjustments
 
 ## Features
 
@@ -54,7 +58,10 @@ The Camera Viewport System allows you to create, position, resize, and zoom **vi
   - 4 edge handles (horizontal/vertical resize)
 - Drag handles to adjust viewport size
 - Minimum size: 100x100 pixels
-- Zoom adjusts automatically to maintain aspect ratio
+- **Zoom adjusts automatically with inverse relationship**:
+  - Smaller frame → Higher zoom (zooming in)
+  - Larger frame → Lower zoom (zooming out)
+  - Formula: `newZoom = (initialWidth / newWidth) × initialZoom`
 
 ### 5. Zoom Controls
 - **Scene Zoom** (top right):
