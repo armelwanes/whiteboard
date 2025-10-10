@@ -199,10 +199,10 @@ const SceneCanvas = ({
       if (selectedCamera) {
         const container = scrollContainerRef.current;
         
-        // Calculate camera position in pixels
-        const cameraX = selectedCamera.position.x * sceneWidth * sceneZoom;
-        const cameraY = selectedCamera.position.y * sceneHeight * sceneZoom;
-        
+  // Calculate camera position in pixels
+  const cameraX = selectedCamera.position.x * sceneWidth * sceneZoom;
+  const cameraY = selectedCamera.position.y * sceneHeight * sceneZoom;
+
         // Calculate scroll position to center the camera
         const scrollX = cameraX - (container.clientWidth / 2);
         const scrollY = cameraY - (container.clientHeight / 2);
@@ -224,8 +224,11 @@ const SceneCanvas = ({
     (a.z_index || 0) - (b.z_index || 0)
   );
 
+  const scaledSceneWidth = sceneWidth * sceneZoom;
+  const scaledSceneHeight = sceneHeight * sceneZoom;
+
   return (
-    <div className="flex flex-col h-full bg-gray-950 overflow-hidden">
+    <div className="flex flex-col h-full bg-gray-950" style={{ width: '100vw', height: '100vh' }}>
       {/* Camera Toolbar */}
       <CameraToolbar
         cameras={sceneCameras}
@@ -237,43 +240,45 @@ const SceneCanvas = ({
         sceneZoom={sceneZoom}
         onSceneZoom={setSceneZoom}
       />
-
       {/* Main Content Area */}
-      <div className="flex flex-1 min-h-0 bg-gray-800" style={{ height: '100%' }}>
-        {/* Canvas Area - Scrollable infinite canvas */}
+      <div className="flex flex-1 min-h-0 bg-white" style={{ height: '100%' }}>
+        {/* Canvas Area - Scrollable viewport */}
         <div 
           ref={scrollContainerRef}
-          className="flex-1 bg-gray-800 relative overflow-auto"
+          className="flex-1 bg-white relative overflow-auto"
           style={{ 
+            width: '100%',
             height: '100%',
             backgroundImage: 'radial-gradient(circle, #4b5563 1px, transparent 1px)',
             backgroundSize: '20px 20px',
             backgroundPosition: '0 0'
           }}
         >
-          {/* Padding container for infinite scroll */}
-          <div 
-            className="relative"
-            style={{ 
-              minWidth: `${sceneWidth * sceneZoom + 1000}px`,
-              minHeight: `${sceneHeight * sceneZoom + 1000}px`,
-              padding: '500px'
+          {/* Scene Canvas - The actual stage */}
+          <div
+            ref={canvasRef}
+            className="bg-white shadow-2xl"
+            style={{
+              width: `${scaledSceneWidth}px`,
+              height: `${scaledSceneHeight}px`,
+              position: 'relative'
             }}
           >
-            {/* Scene Canvas - The actual stage */}
-            <div
-              ref={canvasRef}
-              className="bg-white shadow-2xl"
-              style={{
-                width: `${sceneWidth * sceneZoom}px`,
-                height: `${sceneHeight * sceneZoom}px`,
-                position: 'relative'
-              }}
-            >
             {/* Konva Stage for layers */}
             <Stage
               width={sceneWidth}
               height={sceneHeight}
+              scaleX={sceneZoom}
+              scaleY={sceneZoom}
+              style={{
+                width: `${scaledSceneWidth}px`,
+                height: `${scaledSceneHeight}px`,
+                backgroundImage: scene.backgroundImage 
+                  ? `url(${scene.backgroundImage})` 
+                  : 'linear-gradient(to bottom right, #f3f4f6, #e5e7eb)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
               ref={stageRef}
               onMouseDown={(e) => {
                 const clickedOnEmpty = e.target === e.target.getStage();
@@ -281,15 +286,6 @@ const SceneCanvas = ({
                   onSelectLayer(null);
                   setSelectedCameraId(null);
                 }
-              }}
-              style={{
-                backgroundImage: scene.backgroundImage 
-                  ? `url(${scene.backgroundImage})` 
-                  : 'linear-gradient(to bottom right, #f3f4f6, #e5e7eb)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                transform: `scale(${sceneZoom})`,
-                transformOrigin: 'top left',
               }}
             >
               <KonvaLayer>
@@ -307,7 +303,6 @@ const SceneCanvas = ({
                 ))}
               </KonvaLayer>
             </Stage>
-
             {/* Camera Viewports Overlay */}
             <div className="absolute inset-0 pointer-events-none">
               {sceneCameras.map((camera) => (
@@ -325,9 +320,7 @@ const SceneCanvas = ({
               ))}
             </div>
           </div>
-          </div>
         </div>
-
         {/* Right Panel - Camera Settings */}
         {/**<div className="w-80 bg-gray-900 border-l border-gray-700 overflow-y-auto p-4">
           <CameraSettingsPanel
