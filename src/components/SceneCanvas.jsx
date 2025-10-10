@@ -198,14 +198,15 @@ const SceneCanvas = ({
       const selectedCamera = sceneCameras.find(cam => cam.id === selectedCameraId);
       if (selectedCamera) {
         const container = scrollContainerRef.current;
+        const paddingOffset = 2000; // Match the padding value
         
-  // Calculate camera position in pixels
-  const cameraX = selectedCamera.position.x * sceneWidth * sceneZoom;
-  const cameraY = selectedCamera.position.y * sceneHeight * sceneZoom;
+        // Calculate camera position in pixels (relative to the stage)
+        const cameraX = selectedCamera.position.x * sceneWidth * sceneZoom;
+        const cameraY = selectedCamera.position.y * sceneHeight * sceneZoom;
 
-        // Calculate scroll position to center the camera
-        const scrollX = cameraX - (container.clientWidth / 2);
-        const scrollY = cameraY - (container.clientHeight / 2);
+        // Calculate scroll position to center the camera (add padding offset)
+        const scrollX = cameraX + paddingOffset - (container.clientWidth / 2);
+        const scrollY = cameraY + paddingOffset - (container.clientHeight / 2);
         
         // Smooth scroll to camera position
         container.scrollTo({
@@ -254,16 +255,23 @@ const SceneCanvas = ({
             backgroundPosition: '0 0'
           }}
         >
-          {/* Scene Canvas - The actual stage */}
-          <div
-            ref={canvasRef}
-            className="bg-white shadow-2xl"
-            style={{
-              width: `${scaledSceneWidth}px`,
-              height: `${scaledSceneHeight}px`,
-              position: 'relative'
-            }}
-          >
+          {/* Padding container for infinite scrollable space */}
+          <div style={{
+            minWidth: `${scaledSceneWidth + 4000}px`,
+            minHeight: `${scaledSceneHeight + 4000}px`,
+            padding: '2000px',
+            position: 'relative'
+          }}>
+            {/* Scene Canvas - The actual stage */}
+            <div
+              ref={canvasRef}
+              className="bg-white shadow-2xl"
+              style={{
+                width: `${scaledSceneWidth}px`,
+                height: `${scaledSceneHeight}px`,
+                position: 'relative'
+              }}
+            >
             {/* Konva Stage for layers */}
             <Stage
               width={sceneWidth}
@@ -319,6 +327,8 @@ const SceneCanvas = ({
                 />
               ))}
             </div>
+          </div>
+          {/* End of padding container */}
           </div>
         </div>
         {/* Right Panel - Camera Settings */}
