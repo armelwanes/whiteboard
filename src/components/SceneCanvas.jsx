@@ -253,7 +253,7 @@ const SceneCanvas = ({
           </Stage>
 
           {/* Camera Viewports Overlay */}
-          <div className="absolute inset-0 pointer-events-auto">
+          <div className="absolute inset-0 pointer-events-none">
             {sceneCameras.map((camera) => (
               <CameraViewport
                 key={camera.id}
