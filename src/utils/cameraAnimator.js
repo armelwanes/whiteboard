@@ -14,6 +14,12 @@ export const DEFAULT_CAMERA = {
   duration: 2.0,
   transition_duration: 0,
   easing: 'ease_out',
+  width: 800,
+  height: 450,
+  locked: false,
+  isDefault: false,
+  pauseDuration: 0,
+  movementType: 'ease_out',
 };
 
 /**
@@ -29,6 +35,45 @@ export const createCamera = (overrides = {}) => {
       ...DEFAULT_CAMERA.position,
       ...(overrides.position || {}),
     },
+  };
+};
+
+/**
+ * Create the initial default camera for a scene
+ * This camera is centered and locked by default
+ * @param {string} aspectRatio - Aspect ratio (e.g., '16:9', '4:3')
+ * @returns {object} Default camera configuration
+ */
+export const createDefaultCamera = (aspectRatio = '16:9') => {
+  // Calculate camera dimensions based on aspect ratio
+  let cameraWidth = 800;
+  let cameraHeight = 450;
+  
+  if (aspectRatio === '16:9') {
+    cameraWidth = 800;
+    cameraHeight = 450;
+  } else if (aspectRatio === '4:3') {
+    cameraWidth = 800;
+    cameraHeight = 600;
+  } else if (aspectRatio === '1:1') {
+    cameraWidth = 600;
+    cameraHeight = 600;
+  }
+  
+  return {
+    id: 'default-camera',
+    name: 'Caméra Par Défaut',
+    zoom: 1.0,
+    position: { x: 0.5, y: 0.5 }, // Centered
+    duration: 2.0,
+    transition_duration: 0,
+    easing: 'ease_out',
+    width: cameraWidth,
+    height: cameraHeight,
+    locked: true,
+    isDefault: true,
+    pauseDuration: 0,
+    movementType: 'ease_out',
   };
 };
 
@@ -195,6 +240,7 @@ export const normalizePosition = (position) => {
 
 export default {
   createCamera,
+  createDefaultCamera,
   getCameraAtTime,
   getTotalCameraDuration,
   getLayerCamera,

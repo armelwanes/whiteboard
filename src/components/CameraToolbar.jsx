@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, Plus, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { Camera, Plus, ZoomIn, ZoomOut, Maximize2, Lock, Unlock } from 'lucide-react';
 
 /**
  * CameraToolbar Component
@@ -11,6 +11,7 @@ const CameraToolbar = ({
   onAddCamera,
   onSelectCamera,
   onZoomCamera,
+  onToggleLock,
   sceneZoom = 1.0,
   onSceneZoom,
 }) => {
@@ -86,6 +87,26 @@ const CameraToolbar = ({
         {selectedCamera && (
           <>
             <div className="w-px h-6 bg-gray-600" />
+            
+            {/* Lock/Unlock Button */}
+            {!selectedCamera.isDefault && (
+              <>
+                <button
+                  onClick={() => onToggleLock(selectedCameraId)}
+                  className={`${
+                    selectedCamera.locked 
+                      ? 'bg-blue-600 hover:bg-blue-700' 
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  } text-white p-1.5 rounded transition-colors flex items-center gap-1`}
+                  title={selectedCamera.locked ? 'Déverrouiller caméra' : 'Verrouiller caméra'}
+                >
+                  {selectedCamera.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                  <span className="text-xs">{selectedCamera.locked ? 'Verrouillé' : 'Déverrouillé'}</span>
+                </button>
+                <div className="w-px h-6 bg-gray-600" />
+              </>
+            )}
+            
             <div className="flex items-center gap-2">
               <span className="text-gray-400 text-sm">Zoom caméra:</span>
               <button
