@@ -109,9 +109,9 @@ const SceneCanvas = ({
   const sceneWidth = 1920;
   const sceneHeight = 1080;
   
-  // Infinite workspace dimensions (3x scene size in each direction)
-  const workspaceWidth = sceneWidth * 3;
-  const workspaceHeight = sceneHeight * 3;
+  // Workspace dimensions optimized to minimize unused space (1.2x scene size in each direction)
+  const workspaceWidth = sceneWidth * 1.2;
+  const workspaceHeight = sceneHeight * 1.2;
 
   // Create a new camera
   const handleAddCamera = useCallback(() => {
@@ -296,8 +296,8 @@ const SceneCanvas = ({
               style={{
                 width: `${sceneWidth * sceneZoom}px`,
                 height: `${sceneHeight * sceneZoom}px`,
-                left: `${sceneWidth * sceneZoom}px`, // Center horizontally (1x offset)
-                top: `${sceneHeight * sceneZoom}px`, // Center vertically (1x offset)
+                left: `${(workspaceWidth - sceneWidth) * sceneZoom / 2}px`, // Center horizontally
+                top: `${(workspaceHeight - sceneHeight) * sceneZoom / 2}px`, // Center vertically
               }}
             >
               {/* Konva Stage for layers */}
