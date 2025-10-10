@@ -1,6 +1,4 @@
 import React, { useState, useRef } from 'react';
-import { Stage, Layer as KonvaLayer, Image as KonvaImage, Transformer } from 'react-konva';
-import useImage from 'use-image';
 import { 
   Upload, X, Save, Trash2, Eye, EyeOff, 
   MoveUp, MoveDown, Copy, Image as ImageIcon,
@@ -8,92 +6,23 @@ import {
 } from 'lucide-react';
 import CameraControls from './CameraControls';
 import LayerAnimationControls from './LayerAnimationControls';
-
-// Konva Layer Image Component
-const LayerImage = ({ layer, isSelected, onSelect, onChange }) => {
-  const [img] = useImage(layer.image_path);
-  const imageRef = useRef();
-  const transformerRef = useRef();
-
-  React.useEffect(() => {
-    if (isSelected && transformerRef.current && imageRef.current) {
-      transformerRef.current.nodes([imageRef.current]);
-      transformerRef.current.getLayer().batchDraw();
-    }
-  }, [isSelected]);
-
-  if (!img) return null;
-
-  return (
-    <>
-      <KonvaImage
-        image={img}
-        x={layer.position?.x || 0}
-        y={layer.position?.y || 0}
-        scaleX={layer.scale || 1.0}
-        scaleY={layer.scale || 1.0}
-        opacity={layer.opacity || 1.0}
-        draggable
-        onClick={onSelect}
-        onTap={onSelect}
-        ref={imageRef}
-        onDragEnd={(e) => {
-          onChange({
-            ...layer,
-            position: {
-              x: e.target.x(),
-              y: e.target.y(),
-            }
-          });
-        }}
-        onTransformEnd={() => {
-          const node = imageRef.current;
-          const scaleX = node.scaleX();
-          const scaleY = node.scaleY();
-
-          onChange({
-            ...layer,
-            position: {
-              x: node.x(),
-              y: node.y(),
-            },
-            scale: scaleX, // Using scaleX as the primary scale
-          });
-          
-          // Reset scale to prevent compound scaling
-          node.scaleX(1);
-          node.scaleY(1);
-        }}
-      />
-      {isSelected && (
-        <Transformer
-          ref={transformerRef}
-          boundBoxFunc={(oldBox, newBox) => {
-            if (newBox.width < 5 || newBox.height < 5) {
-              return oldBox;
-            }
-            return newBox;
-          }}
-        />
-      )}
-    </>
-  );
-};
+import SceneCanvas from './SceneCanvas';
 
 const LayerEditor = ({ scene, onClose, onSave }) => {
   const [editedScene, setEditedScene] = useState({ 
     ...scene,
-    layers: scene.layers || []
+    layers: scene.layers || [],
+    sceneCameras: scene.sceneCameras || []
   });
   const [selectedLayerId, setSelectedLayerId] = useState(null);
   const fileInputRef = useRef(null);
-  const stageRef = useRef(null);
 
   // Update editedScene when scene prop changes (switching between scenes)
   React.useEffect(() => {
     setEditedScene({
       ...scene,
-      layers: scene.layers || []
+      layers: scene.layers || [],
+      sceneCameras: scene.sceneCameras || []
     });
     setSelectedLayerId(null); // Reset selection when scene changes
   }, [scene]);
@@ -204,82 +133,18 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
 
   const selectedLayer = editedScene.layers.find(layer => layer.id === selectedLayerId);
 
-  // Sort layers by z_index for rendering
-  const sortedLayers = [...editedScene.layers].sort((a, b) => 
-    (a.z_index || 0) - (b.z_index || 0)
-  );
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-900 rounded-lg shadow-xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex">
-        {/* Left Side - Canvas Preview */}
+      <div className="bg-gray-900 rounded-xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex border border-gray-700">
+        {/* Left Side - Canvas Preview with Camera Viewports */}
         <div className="flex-1 bg-gray-950 flex flex-col">
-          {/* Canvas Header */}
-          <div className="bg-gray-800 px-4 py-3 border-b border-gray-700 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <LayersIcon className="w-5 h-5 text-blue-400" />
-              <h3 className="text-white font-semibold">Éditeur de Couches</h3>
-            </div>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors"
-            >
-              <Upload className="w-4 h-4" />
-              Ajouter une couche
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-          </div>
-
-          {/* Canvas Area */}
-          <div className="flex-1 overflow-auto flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 to-gray-800">
-            <div className="bg-white rounded-lg shadow-xl overflow-hidden border-2 border-gray-700">
-              <Stage
-                width={960}
-                height={540}
-                ref={stageRef}
-                onMouseDown={(e) => {
-                  const clickedOnEmpty = e.target === e.target.getStage();
-                  if (clickedOnEmpty) {
-                    setSelectedLayerId(null);
-                  }
-                }}
-                style={{
-                  backgroundImage: editedScene.backgroundImage 
-                    ? `url(${editedScene.backgroundImage})` 
-                    : 'linear-gradient(to bottom right, #f3f4f6, #e5e7eb)',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                }}
-              >
-                <KonvaLayer>
-                  {sortedLayers.map((layer) => (
-                    <LayerImage
-                      key={layer.id}
-                      layer={layer}
-                      isSelected={layer.id === selectedLayerId}
-                      onSelect={() => setSelectedLayerId(layer.id)}
-                      onChange={handleUpdateLayer}
-                    />
-                  ))}
-                </KonvaLayer>
-              </Stage>
-            </div>
-          </div>
-
-          {/* Instructions */}
-          <div className="bg-gray-800 px-4 py-3 border-t border-gray-700">
-            <p className="text-xs text-gray-400">
-              💡 <span className="font-semibold">Aide:</span> Cliquez sur "Ajouter une couche" pour importer une image • 
-              Glissez-déposez pour repositionner • Redimensionnez avec les poignées • 
-              Utilisez le panneau de droite pour ajuster les propriétés
-            </p>
-          </div>
+          <SceneCanvas
+            scene={editedScene}
+            onUpdateScene={(updates) => setEditedScene({ ...editedScene, ...updates })}
+            onUpdateLayer={handleUpdateLayer}
+            selectedLayerId={selectedLayerId}
+            onSelectLayer={setSelectedLayerId}
+          />
         </div>
 
         {/* Right Side - Properties Panel */}
@@ -287,12 +152,28 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
           {/* Header */}
           <div className="bg-gray-800 px-6 py-4 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
             <h2 className="text-xl font-bold text-white">Propriétés</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-white text-2xl leading-none"
-            >
-              ×
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
+                title="Ajouter une couche"
+              >
+                <Upload className="w-4 h-4" />
+              </button>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-white text-2xl leading-none"
+              >
+                ×
+              </button>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
           </div>
 
           {/* Content - Scrollable */}

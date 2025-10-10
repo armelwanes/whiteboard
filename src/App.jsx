@@ -12,8 +12,11 @@ function App() {
     return saved ? JSON.parse(saved) : sampleStory
   })
   const [selectedSceneIndex, setSelectedSceneIndex] = useState(0)
-  const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [showHandWritingTest, setShowHandWritingTest] = useState(false)
+  
+  const handleOpenEditor = () => {
+    // Editor is handled by AnimationContainer
+  }
 
   // Save scenes to localStorage whenever they change
   useEffect(() => {
@@ -29,7 +32,8 @@ function App() {
       backgroundImage: null,
       animation: 'fade',
       layers: [],
-      cameras: []
+      cameras: [],
+      sceneCameras: []
     }
     setScenes([...scenes, newScene])
     setSelectedSceneIndex(scenes.length)
@@ -101,7 +105,7 @@ function App() {
       <div className="flex-1 flex flex-col">
         {/* Toolbar */}
         <Toolbar 
-          onOpenEditor={() => setIsEditorOpen(true)}
+          onOpenEditor={handleOpenEditor}
           onShowHandWritingTest={() => setShowHandWritingTest(true)}
         />
 
