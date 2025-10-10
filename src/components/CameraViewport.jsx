@@ -3,8 +3,9 @@ import { Camera, X } from 'lucide-react';
 
 /**
  * CameraViewport Component
- * Represents a visual camera frame that can be positioned, resized, and zoomed
- * on a scrollable scene canvas
+ * Represents a visual camera frame that can be positioned and zoomed
+ * on a scrollable scene canvas. The viewport has a fixed size and only
+ * the zoom level can be adjusted (not the frame size itself).
  */
 const CameraViewport = ({
   camera,
