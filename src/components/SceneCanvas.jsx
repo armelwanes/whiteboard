@@ -198,7 +198,6 @@ const SceneCanvas = ({
       const selectedCamera = sceneCameras.find(cam => cam.id === selectedCameraId);
       if (selectedCamera) {
         const container = scrollContainerRef.current;
-        const canvas = canvasRef.current;
         
         // Calculate camera position in pixels
         const cameraX = selectedCamera.position.x * sceneWidth * sceneZoom;
