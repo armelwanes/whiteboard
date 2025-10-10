@@ -87,6 +87,15 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   const fileInputRef = useRef(null);
   const stageRef = useRef(null);
 
+  // Update editedScene when scene prop changes (switching between scenes)
+  React.useEffect(() => {
+    setEditedScene({
+      ...scene,
+      layers: scene.layers || []
+    });
+    setSelectedLayerId(null); // Reset selection when scene changes
+  }, [scene]);
+
   const handleChange = (field, value) => {
     setEditedScene({ ...editedScene, [field]: value });
   };
