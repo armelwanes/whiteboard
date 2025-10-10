@@ -285,46 +285,48 @@ const SceneCanvas = ({
               }}
             >
             {/* Konva Stage for layers */}
-            <Stage
-              width={sceneWidth}
-              height={sceneHeight}
-              scaleX={sceneZoom}
-              scaleY={sceneZoom}
-              style={{
-                width: `${scaledSceneWidth}px`,
-                height: `${scaledSceneHeight}px`,
-                backgroundImage: scene.backgroundImage 
-                  ? `url(${scene.backgroundImage})` 
-                  : 'linear-gradient(to bottom right, #f3f4f6, #e5e7eb)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}
-              ref={stageRef}
-              onMouseDown={(e) => {
-                const clickedOnEmpty = e.target === e.target.getStage();
-                if (clickedOnEmpty) {
-                  onSelectLayer(null);
-                  setSelectedCameraId(null);
-                }
-              }}
-            >
-              <KonvaLayer>
-                {sortedLayers.map((layer) => (
-                  <LayerImage
-                    key={layer.id}
-                    layer={layer}
-                    isSelected={layer.id === selectedLayerId}
-                    onSelect={() => {
-                      onSelectLayer(layer.id);
-                      setSelectedCameraId(null);
-                    }}
-                    onChange={onUpdateLayer}
-                  />
-                ))}
-              </KonvaLayer>
-            </Stage>
+            <div style={{ position: 'relative', zIndex: 10 }}>
+              <Stage
+                width={sceneWidth}
+                height={sceneHeight}
+                scaleX={sceneZoom}
+                scaleY={sceneZoom}
+                style={{
+                  width: `${scaledSceneWidth}px`,
+                  height: `${scaledSceneHeight}px`,
+                  backgroundImage: scene.backgroundImage 
+                    ? `url(${scene.backgroundImage})` 
+                    : 'linear-gradient(to bottom right, #f3f4f6, #e5e7eb)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+                ref={stageRef}
+                onMouseDown={(e) => {
+                  const clickedOnEmpty = e.target === e.target.getStage();
+                  if (clickedOnEmpty) {
+                    onSelectLayer(null);
+                    setSelectedCameraId(null);
+                  }
+                }}
+              >
+                <KonvaLayer>
+                  {sortedLayers.map((layer) => (
+                    <LayerImage
+                      key={layer.id}
+                      layer={layer}
+                      isSelected={layer.id === selectedLayerId}
+                      onSelect={() => {
+                        onSelectLayer(layer.id);
+                        setSelectedCameraId(null);
+                      }}
+                      onChange={onUpdateLayer}
+                    />
+                  ))}
+                </KonvaLayer>
+              </Stage>
+            </div>
             {/* Camera Viewports Overlay */}
-            <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 9999 }}>
+            <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
               {sceneCameras.map((camera) => (
                 <CameraViewport
                   key={camera.id}
