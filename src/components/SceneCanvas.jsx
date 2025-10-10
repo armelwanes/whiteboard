@@ -192,6 +192,32 @@ const SceneCanvas = ({
     }
   }, [scene.sceneCameras]);
 
+  // Auto-scroll to selected camera
+  React.useEffect(() => {
+    if (selectedCameraId && scrollContainerRef.current && canvasRef.current) {
+      const selectedCamera = sceneCameras.find(cam => cam.id === selectedCameraId);
+      if (selectedCamera) {
+        const container = scrollContainerRef.current;
+        const canvas = canvasRef.current;
+        
+        // Calculate camera position in pixels
+        const cameraX = selectedCamera.position.x * sceneWidth * sceneZoom;
+        const cameraY = selectedCamera.position.y * sceneHeight * sceneZoom;
+        
+        // Calculate scroll position to center the camera
+        const scrollX = cameraX - (container.clientWidth / 2);
+        const scrollY = cameraY - (container.clientHeight / 2);
+        
+        // Smooth scroll to camera position
+        container.scrollTo({
+          left: scrollX,
+          top: scrollY,
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [selectedCameraId, sceneCameras, sceneWidth, sceneHeight, sceneZoom]);
+
   // No longer needed - canvas fills viewport
 
   // Sort layers by z_index for rendering
@@ -214,22 +240,37 @@ const SceneCanvas = ({
       />
 
       {/* Main Content Area */}
-      <div className="flex flex-1 min-h-0 bg-white" style={{ height: '100%' }}>
-        {/* Canvas Area - Fills entire viewport */}
+      <div className="flex flex-1 min-h-0 bg-gray-800" style={{ height: '100%' }}>
+        {/* Canvas Area - Scrollable infinite canvas */}
         <div 
           ref={scrollContainerRef}
-          className="flex-1 bg-white relative flex items-center justify-center"
-          style={{ height: '100%' }}
+          className="flex-1 bg-gray-800 relative overflow-auto"
+          style={{ 
+            height: '100%',
+            backgroundImage: 'radial-gradient(circle, #4b5563 1px, transparent 1px)',
+            backgroundSize: '20px 20px',
+            backgroundPosition: '0 0'
+          }}
         >
-          {/* Scene Canvas - Fills container */}
-          <div
-            ref={canvasRef}
-            className="bg-white"
-            style={{
-              width: `${sceneWidth * sceneZoom}px`,
-              height: `${sceneHeight * sceneZoom}px`,
+          {/* Padding container for infinite scroll */}
+          <div 
+            className="relative"
+            style={{ 
+              minWidth: `${sceneWidth * sceneZoom + 1000}px`,
+              minHeight: `${sceneHeight * sceneZoom + 1000}px`,
+              padding: '500px'
             }}
           >
+            {/* Scene Canvas - The actual stage */}
+            <div
+              ref={canvasRef}
+              className="bg-white shadow-2xl"
+              style={{
+                width: `${sceneWidth * sceneZoom}px`,
+                height: `${sceneHeight * sceneZoom}px`,
+                position: 'relative'
+              }}
+            >
             {/* Konva Stage for layers */}
             <Stage
               width={sceneWidth}
@@ -284,6 +325,7 @@ const SceneCanvas = ({
                 />
               ))}
             </div>
+          </div>
           </div>
         </div>
 
