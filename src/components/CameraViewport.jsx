@@ -24,14 +24,6 @@ const CameraViewport = ({
   const [initialDimensions, setInitialDimensions] = useState({ width: 0, height: 0 });
   const viewportRef = useRef(null);
 
-  // Calculate pixel position from normalized coordinates
-  const getPixelPosition = useCallback(() => {
-    return {
-      x: camera.position.x * sceneWidth,
-      y: camera.position.y * sceneHeight,
-    };
-  }, [camera.position, sceneWidth, sceneHeight]);
-
   // Calculate pixel dimensions based on camera zoom
   // Camera viewport represents a fixed output size (e.g., 1920x1080 or 800x450)
   // Zoom affects what portion of the scene is visible, not the viewport size
@@ -46,6 +38,16 @@ const CameraViewport = ({
     };
   }, [camera.width, camera.height]);
 
+  // Calculate pixel position from normalized coordinates
+  // Position represents the center of the camera, so we offset by half dimensions
+  const getPixelPosition = useCallback(() => {
+    const pixelDims = getPixelDimensions();
+    return {
+      x: (camera.position.x * sceneWidth) - (pixelDims.width / 2),
+      y: (camera.position.y * sceneHeight) - (pixelDims.height / 2),
+    };
+  }, [camera.position, sceneWidth, sceneHeight, getPixelDimensions]);
+
   const handleMouseMove = useCallback((e) => {
     if (!isSelected) return;
     
@@ -57,14 +59,21 @@ const CameraViewport = ({
       const deltaY = (e.clientY - dragStart.y) / canvasZoom;
       
       const pixelPos = getPixelPosition();
+      const pixelDims = getPixelDimensions();
+      
+      // newX and newY are top-left corner positions after drag
       const newX = pixelPos.x + deltaX;
       const newY = pixelPos.y + deltaY;
+      
+      // Convert top-left corner back to center position for normalized coordinates
+      const centerX = newX + (pixelDims.width / 2);
+      const centerY = newY + (pixelDims.height / 2);
       
       // Convert pixel position back to normalized coordinates
       onUpdate(camera.id, {
         position: {
-          x: Math.max(0, Math.min(1, newX / sceneWidth)),
-          y: Math.max(0, Math.min(1, newY / sceneHeight)),
+          x: Math.max(0, Math.min(1, centerX / sceneWidth)),
+          y: Math.max(0, Math.min(1, centerY / sceneHeight)),
         },
       });
       
@@ -108,6 +117,7 @@ const CameraViewport = ({
     sceneWidth,
     sceneHeight,
     getPixelPosition,
+    getPixelDimensions,
   ]);
 
   const handleMouseUp = useCallback(() => {
