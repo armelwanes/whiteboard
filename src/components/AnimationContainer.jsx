@@ -94,7 +94,7 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
     <div className="animation-container w-full h-full flex flex-col bg-gray-950">
       {/* Main animation area */}
       <div 
-        className="animation-stage flex-1 relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 cursor-pointer"
+        className="animation-stage flex-1 min-h-0 relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 cursor-pointer"
         title="Cliquez pour éditer la scène"
         onClick={() => !isPlaying && setIsEditorOpen(true)}
       >
@@ -135,7 +135,7 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
         />
       )}
 
-       <div className="timeline-container p-4">
+       <div className="timeline-container p-4 flex-shrink-0">
         <Timeline
           currentTime={currentTime}
           totalDuration={totalDuration}

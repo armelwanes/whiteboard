@@ -29,6 +29,7 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
       sceneCameras: scene.sceneCameras || []
     });
     setSelectedLayerId(null); // Reset selection when scene changes
+    setSelectedCamera(null); // Reset camera selection when scene changes
   }, [scene]);
 
   const handleChange = (field, value) => {
@@ -45,8 +46,9 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
       const reader = new FileReader();
       reader.onload = (event) => {
         // Calculate initial position based on selected camera
-        let initialX = 100;
-        let initialY = 100;
+        // Default to center of scene if no camera is selected
+        let initialX = sceneWidth / 2;
+        let initialY = sceneHeight / 2;
         
         if (selectedCamera && selectedCamera.position) {
           // Position the new layer at the center of the selected camera viewport
