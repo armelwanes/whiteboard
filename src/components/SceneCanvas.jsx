@@ -227,15 +227,15 @@ const SceneCanvas = ({
       />
 
       {/* Main Content Area */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex">
         {/* Canvas Area - Scrollable */}
         <div 
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-auto bg-gradient-to-br from-gray-900 to-gray-800 p-8 relative"
+          className="overflow-auto bg-gradient-to-br from-gray-900 to-gray-800 relative"
         >
           {/* Scroll Progress Indicators */}
-          <div className="fixed top-16 left-0 right-80 z-50 bg-gray-800/90 backdrop-blur-sm border-b border-gray-700">
+          <div className="z-50 bg-gray-800/90 backdrop-blur-sm border-b border-gray-700">
             <div className="px-4 py-2 flex items-center justify-between text-xs text-gray-400">
               <div className="flex items-center gap-4">
                 <span>Position: X {scrollProgress.x.toFixed(0)}%, Y {scrollProgress.y.toFixed(0)}%</span>
@@ -256,7 +256,7 @@ const SceneCanvas = ({
 
           <div
             ref={canvasRef}
-            className="relative bg-white rounded-lg shadow-2xl mt-12"
+            className="relative bg-white rounded-lg shadow-2xl"
             style={{
               width: `${sceneWidth * sceneZoom}px`,
               height: `${sceneHeight * sceneZoom}px`,
@@ -320,16 +320,6 @@ const SceneCanvas = ({
             </div>
           </div>
 
-          {/* Instructions */}
-          <div className="mt-4 text-center">
-            <p className="text-xs text-gray-400">
-              💡 <span className="font-semibold">Astuce:</span> Cliquez sur "Nouvelle Caméra" pour ajouter une caméra • 
-              Glissez pour repositionner la caméra • 
-              Utilisez les poignées sur les bords pour redimensionner la caméra • 
-              Utilisez les ratios prédéfinis (0.7x, 0.8x, etc.) pour ajuster le zoom rapidement • 
-              La scène est scrollable pour naviguer dans l'espace de travail
-            </p>
-          </div>
         </div>
 
         {/* Right Panel - Camera Settings */}

@@ -296,13 +296,6 @@ const CameraControls = ({ cameras = [], onChange, type = 'scene' }) => {
           ))
         )}
       </div>
-
-      {type === 'scene' && cameras.length > 0 && (
-        <div className="mt-3 p-2 bg-gray-700 rounded text-xs text-gray-400">
-          💡 <span className="font-semibold">Astuce:</span> Les caméras s'exécutent séquentiellement.
-          Utilisez la durée de transition pour des mouvements fluides entre les caméras.
-        </div>
-      )}
     </div>
   );
 };

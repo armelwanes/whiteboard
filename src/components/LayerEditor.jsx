@@ -134,10 +134,10 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   const selectedLayer = editedScene.layers.find(layer => layer.id === selectedLayerId);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-900 rounded-xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex border border-gray-700">
+    <div className="bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-gray-900  shadow-2xl w-full max-h-[95vh] overflow-hidden  border border-gray-700">
         {/* Left Side - Canvas Preview with Camera Viewports */}
-        <div className="flex-1 bg-gray-950 flex flex-col">
+        <div className="bg-gray-950 flex flex-col">
           <SceneCanvas
             scene={editedScene}
             onUpdateScene={(updates) => setEditedScene({ ...editedScene, ...updates })}

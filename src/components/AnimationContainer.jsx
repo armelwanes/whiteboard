@@ -101,17 +101,7 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
       </div>
 
       {/* Timeline controls */}
-      <div className="timeline-container p-4">
-        <Timeline
-          currentTime={currentTime}
-          totalDuration={totalDuration}
-          isPlaying={isPlaying}
-          onPlayPause={handlePlayPause}
-          onSeek={handleSeek}
-          scenes={scenes}
-          currentSceneIndex={currentSceneIndex}
-        />
-      </div>
+     
 
       {/* Layer Editor Modal */}
       {isEditorOpen && scenes[selectedSceneIndex] && (
@@ -124,6 +114,18 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
           onClose={() => setIsEditorOpen(false)}
         />
       )}
+
+       <div className="timeline-container p-4">
+        <Timeline
+          currentTime={currentTime}
+          totalDuration={totalDuration}
+          isPlaying={isPlaying}
+          onPlayPause={handlePlayPause}
+          onSeek={handleSeek}
+          scenes={scenes}
+          currentSceneIndex={currentSceneIndex}
+        />
+      </div>
     </div>
   );
 };

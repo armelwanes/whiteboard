@@ -103,11 +103,7 @@ function App() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
-        {/* Toolbar */}
-        <Toolbar 
-          onOpenEditor={handleOpenEditor}
-          onShowHandWritingTest={() => setShowHandWritingTest(true)}
-        />
+        
 
         {/* Animation Container */}
         <AnimationContainer 
