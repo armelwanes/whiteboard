@@ -6,6 +6,8 @@ import {
   MoveUp, MoveDown, Copy, Image as ImageIcon,
   Layers as LayersIcon
 } from 'lucide-react';
+import CameraControls from './CameraControls';
+import LayerAnimationControls from './LayerAnimationControls';
 
 // Konva Layer Image Component
 const LayerImage = ({ layer, isSelected, onSelect, onChange }) => {
@@ -376,6 +378,13 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                 </div>
               </div>
 
+              {/* Scene Camera Sequence */}
+              <CameraControls
+                cameras={editedScene.cameras || []}
+                onChange={(cameras) => handleChange('cameras', cameras)}
+                type="scene"
+              />
+
               {/* Layers List */}
               <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
                 <h3 className="text-white font-semibold mb-3 text-sm flex items-center gap-2">
@@ -611,6 +620,28 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                     </select>
                   </div>
                 </div>
+              )}
+
+              {/* Layer Camera Controls */}
+              {selectedLayer && (
+                <CameraControls
+                  cameras={selectedLayer.camera ? [selectedLayer.camera] : []}
+                  onChange={(cameras) => {
+                    const camera = cameras.length > 0 ? cameras[0] : null;
+                    handleLayerPropertyChange(selectedLayer.id, 'camera', camera);
+                  }}
+                  type="layer"
+                />
+              )}
+
+              {/* Layer Animation Controls */}
+              {selectedLayer && (
+                <LayerAnimationControls
+                  animation={selectedLayer.animation || null}
+                  onChange={(animation) => 
+                    handleLayerPropertyChange(selectedLayer.id, 'animation', animation)
+                  }
+                />
               )}
             </div>
           </div>

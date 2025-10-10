@@ -28,7 +28,8 @@ function App() {
       duration: 5,
       backgroundImage: null,
       animation: 'fade',
-      layers: []
+      layers: [],
+      cameras: []
     }
     setScenes([...scenes, newScene])
     setSelectedSceneIndex(scenes.length)
