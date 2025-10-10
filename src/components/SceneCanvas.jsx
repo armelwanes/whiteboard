@@ -100,18 +100,12 @@ const SceneCanvas = ({
   });
   const [selectedCameraId, setSelectedCameraId] = useState(null);
   const [sceneZoom, setSceneZoom] = useState(1.0);
-  const [scrollProgress, setScrollProgress] = useState({ x: 0, y: 0 });
   const canvasRef = useRef(null);
   const stageRef = useRef(null);
   const scrollContainerRef = useRef(null);
-  const [isInitialScrollSet, setIsInitialScrollSet] = useState(false);
 
   const sceneWidth = 1920;
   const sceneHeight = 1080;
-  
-  // Workspace dimensions optimized to minimize unused space (1.2x scene size in each direction)
-  const workspaceWidth = sceneWidth * 1.2;
-  const workspaceHeight = sceneHeight * 1.2;
 
   // Create a new camera
   const handleAddCamera = useCallback(() => {
@@ -198,38 +192,7 @@ const SceneCanvas = ({
     }
   }, [scene.sceneCameras]);
 
-  // Track scroll position for progress indicator
-  const handleScroll = useCallback((e) => {
-    const container = e.target;
-    const scrollX = container.scrollLeft;
-    const scrollY = container.scrollTop;
-    const maxScrollX = container.scrollWidth - container.clientWidth;
-    const maxScrollY = container.scrollHeight - container.clientHeight;
-    
-    setScrollProgress({
-      x: maxScrollX > 0 ? (scrollX / maxScrollX) * 100 : 0,
-      y: maxScrollY > 0 ? (scrollY / maxScrollY) * 100 : 0,
-    });
-  }, []);
-
-  // Center scroll on default camera on mount
-  React.useEffect(() => {
-    if (scrollContainerRef.current && !isInitialScrollSet) {
-      const container = scrollContainerRef.current;
-      const defaultCamera = sceneCameras.find(cam => cam.isDefault);
-      
-      if (defaultCamera) {
-        // Center the viewport on the default camera position
-        // Default camera is at center (0.5, 0.5)
-        const targetX = (workspaceWidth * sceneZoom - container.clientWidth) / 2;
-        const targetY = (workspaceHeight * sceneZoom - container.clientHeight) / 2;
-        
-        container.scrollLeft = targetX;
-        container.scrollTop = targetY;
-        setIsInitialScrollSet(true);
-      }
-    }
-  }, [sceneCameras, sceneZoom, workspaceWidth, workspaceHeight, isInitialScrollSet]);
+  // No longer needed - canvas fills viewport
 
   // Sort layers by z_index for rendering
   const sortedLayers = [...(scene.layers || [])].sort((a, b) => 
@@ -251,112 +214,77 @@ const SceneCanvas = ({
       />
 
       {/* Main Content Area */}
-      <div className="flex flex-1 min-h-0" style={{ height: '100%' }}>
-        {/* Canvas Area - Fixed viewport with scrollable content */}
+      <div className="flex flex-1 min-h-0 bg-white" style={{ height: '100%' }}>
+        {/* Canvas Area - Fills entire viewport */}
         <div 
           ref={scrollContainerRef}
-          onScroll={handleScroll}
-          className="flex-1 overflow-auto bg-gradient-to-br from-gray-900 to-gray-800 relative"
+          className="flex-1 bg-white relative flex items-center justify-center"
           style={{ height: '100%' }}
         >
-          {/* Scroll Progress Indicators - Sticky */}
-          {/**<div className="sticky top-0 z-50 bg-gray-800/90 backdrop-blur-sm border-b border-gray-700">
-            <div className="px-4 py-2 flex items-center justify-between text-xs text-gray-400">
-              <div className="flex items-center gap-4">
-                <span>Position: X {scrollProgress.x.toFixed(0)}%, Y {scrollProgress.y.toFixed(0)}%</span>
-                <span className="text-gray-600">|</span>
-                <span>Zoom: {(sceneZoom * 100).toFixed(0)}%</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-gray-500">Espace de travail infini</span>
-                <div className="w-32 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-pink-500 transition-all duration-150"
-                    style={{ width: `${Math.max(scrollProgress.x, 1)}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>**/}
-
-          {/* Infinite Workspace Container */}
+          {/* Scene Canvas - Fills container */}
           <div
-            className="relative"
+            ref={canvasRef}
+            className="bg-white"
             style={{
-              width: `${workspaceWidth * sceneZoom}px`,
-              height: `${workspaceHeight * sceneZoom}px`,
-              minWidth: `${workspaceWidth * sceneZoom}px`,
-              minHeight: `${workspaceHeight * sceneZoom}px`,
+              width: `${sceneWidth * sceneZoom}px`,
+              height: `${sceneHeight * sceneZoom}px`,
             }}
           >
-            {/* Scene Canvas - Centered within workspace */}
-            <div
-              ref={canvasRef}
-              className="absolute bg-white rounded-lg shadow-2xl"
+            {/* Konva Stage for layers */}
+            <Stage
+              width={sceneWidth}
+              height={sceneHeight}
+              ref={stageRef}
+              onMouseDown={(e) => {
+                const clickedOnEmpty = e.target === e.target.getStage();
+                if (clickedOnEmpty) {
+                  onSelectLayer(null);
+                  setSelectedCameraId(null);
+                }
+              }}
               style={{
-                width: `${sceneWidth * sceneZoom}px`,
-                height: `${sceneHeight * sceneZoom}px`,
-                left: `${(workspaceWidth - sceneWidth) * sceneZoom / 2}px`, // Center horizontally
-                top: `${(workspaceHeight - sceneHeight) * sceneZoom / 2}px`, // Center vertically
+                backgroundImage: scene.backgroundImage 
+                  ? `url(${scene.backgroundImage})` 
+                  : 'linear-gradient(to bottom right, #f3f4f6, #e5e7eb)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                transform: `scale(${sceneZoom})`,
+                transformOrigin: 'top left',
               }}
             >
-              {/* Konva Stage for layers */}
-              <Stage
-                width={sceneWidth}
-                height={sceneHeight}
-                ref={stageRef}
-                onMouseDown={(e) => {
-                  const clickedOnEmpty = e.target === e.target.getStage();
-                  if (clickedOnEmpty) {
-                    onSelectLayer(null);
-                    setSelectedCameraId(null);
-                  }
-                }}
-                style={{
-                  backgroundImage: scene.backgroundImage 
-                    ? `url(${scene.backgroundImage})` 
-                    : 'linear-gradient(to bottom right, #f3f4f6, #e5e7eb)',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  transform: `scale(${sceneZoom})`,
-                  transformOrigin: 'top left',
-                }}
-              >
-                <KonvaLayer>
-                  {sortedLayers.map((layer) => (
-                    <LayerImage
-                      key={layer.id}
-                      layer={layer}
-                      isSelected={layer.id === selectedLayerId}
-                      onSelect={() => {
-                        onSelectLayer(layer.id);
-                        setSelectedCameraId(null);
-                      }}
-                      onChange={onUpdateLayer}
-                    />
-                  ))}
-                </KonvaLayer>
-              </Stage>
-
-              {/* Camera Viewports Overlay */}
-              <div className="absolute inset-0 pointer-events-none">
-                {sceneCameras.map((camera) => (
-                  <CameraViewport
-                    key={camera.id}
-                    camera={camera}
-                    isSelected={selectedCameraId === camera.id}
-                    onSelect={setSelectedCameraId}
-                    onUpdate={handleUpdateCamera}
-                    onDelete={handleDeleteCamera}
-                    sceneWidth={sceneWidth}
-                    sceneHeight={sceneHeight}
-                    canvasZoom={sceneZoom}
+              <KonvaLayer>
+                {sortedLayers.map((layer) => (
+                  <LayerImage
+                    key={layer.id}
+                    layer={layer}
+                    isSelected={layer.id === selectedLayerId}
+                    onSelect={() => {
+                      onSelectLayer(layer.id);
+                      setSelectedCameraId(null);
+                    }}
+                    onChange={onUpdateLayer}
                   />
                 ))}
-              </div>
+              </KonvaLayer>
+            </Stage>
+
+            {/* Camera Viewports Overlay */}
+            <div className="absolute inset-0 pointer-events-none">
+              {sceneCameras.map((camera) => (
+                <CameraViewport
+                  key={camera.id}
+                  camera={camera}
+                  isSelected={selectedCameraId === camera.id}
+                  onSelect={setSelectedCameraId}
+                  onUpdate={handleUpdateCamera}
+                  onDelete={handleDeleteCamera}
+                  sceneWidth={sceneWidth}
+                  sceneHeight={sceneHeight}
+                  canvasZoom={sceneZoom}
+                />
+              ))}
             </div>
           </div>
-
         </div>
 
         {/* Right Panel - Camera Settings */}
