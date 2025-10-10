@@ -2,17 +2,31 @@ import React, { useState, useEffect, useRef } from 'react';
 import Scene from './Scene';
 import Timeline from './Timeline';
 import LayerEditor from './LayerEditor';
+import { createTimeline } from '../utils/timelineSystem';
 
 const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [globalTimeline, setGlobalTimeline] = useState(() => {
+    // Initialize with empty timeline
+    const totalDuration = scenes.reduce((sum, scene) => sum + scene.duration, 0);
+    return createTimeline(totalDuration, 30);
+  });
   const animationRef = useRef(null);
   const lastTimeRef = useRef(Date.now());
 
   // Calculate total duration
   const totalDuration = scenes.reduce((sum, scene) => sum + scene.duration, 0);
+
+  // Update timeline duration when scenes change
+  useEffect(() => {
+    setGlobalTimeline(prev => ({
+      ...prev,
+      duration: totalDuration,
+    }));
+  }, [totalDuration]);
 
   // Determine current scene based on time
   useEffect(() => {
@@ -72,6 +86,10 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
     lastTimeRef.current = Date.now();
   };
 
+  const handleUpdateTimeline = (updatedTimeline) => {
+    setGlobalTimeline(updatedTimeline);
+  };
+
   return (
     <div className="animation-container w-full h-full flex flex-col bg-gray-950">
       {/* Main animation area */}
@@ -88,6 +106,8 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
             selectedSceneIndex={index}
             isActive={currentSceneIndex === index}
             updateScene={updateScene}
+            currentTime={currentTime}
+            timeline={globalTimeline}
           />
           
         ))}
@@ -124,6 +144,8 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
           onSeek={handleSeek}
           scenes={scenes}
           currentSceneIndex={currentSceneIndex}
+          timeline={globalTimeline}
+          onUpdateTimeline={handleUpdateTimeline}
         />
       </div>
     </div>
