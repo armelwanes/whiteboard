@@ -18,7 +18,10 @@ const CameraViewport = ({
   canvasZoom = 1.0,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeHandle, setResizeHandle] = useState(null);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [initialDimensions, setInitialDimensions] = useState({ width: 0, height: 0 });
   const viewportRef = useRef(null);
 
   // Calculate pixel position from normalized coordinates
@@ -63,11 +66,39 @@ const CameraViewport = ({
       });
       
       setDragStart({ x: e.clientX, y: e.clientY });
+    } else if (isResizing && resizeHandle) {
+      const deltaX = (e.clientX - dragStart.x) / canvasZoom;
+      const deltaY = (e.clientY - dragStart.y) / canvasZoom;
+      
+      let newWidth = initialDimensions.width;
+      let newHeight = initialDimensions.height;
+      
+      // Handle different resize directions
+      if (resizeHandle.includes('e')) {
+        newWidth = Math.max(100, initialDimensions.width + deltaX);
+      }
+      if (resizeHandle.includes('w')) {
+        newWidth = Math.max(100, initialDimensions.width - deltaX);
+      }
+      if (resizeHandle.includes('s')) {
+        newHeight = Math.max(100, initialDimensions.height + deltaY);
+      }
+      if (resizeHandle.includes('n')) {
+        newHeight = Math.max(100, initialDimensions.height - deltaY);
+      }
+      
+      onUpdate(camera.id, {
+        width: newWidth,
+        height: newHeight,
+      });
     }
   }, [
     isSelected,
     isDragging,
+    isResizing,
+    resizeHandle,
     dragStart,
+    initialDimensions,
     camera,
     onUpdate,
     canvasZoom,
@@ -78,6 +109,8 @@ const CameraViewport = ({
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
+    setIsResizing(false);
+    setResizeHandle(null);
   }, []);
 
   const handleMouseDown = (e) => {
@@ -88,7 +121,15 @@ const CameraViewport = ({
 
     e.stopPropagation();
 
-    if (e.target.classList.contains('camera-frame') || 
+    // Check if clicking on a resize handle
+    if (e.target.classList.contains('resize-handle')) {
+      setIsResizing(true);
+      setResizeHandle(e.target.dataset.handle);
+      setInitialDimensions({
+        width: camera.width || 800,
+        height: camera.height || 450,
+      });
+    } else if (e.target.classList.contains('camera-frame') || 
                e.target.classList.contains('camera-label')) {
       setIsDragging(true);
     }
@@ -97,7 +138,7 @@ const CameraViewport = ({
   };
 
   useEffect(() => {
-    if (isDragging) {
+    if (isDragging || isResizing) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
       return () => {
@@ -105,7 +146,7 @@ const CameraViewport = ({
         window.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
+  }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
 
   const pixelPos = getPixelPosition();
   const pixelDims = getPixelDimensions();
@@ -182,6 +223,47 @@ const CameraViewport = ({
           )}
         </div>
       </div>
+
+      {/* Resize Handles - only show when selected */}
+      {isSelected && (
+        <>
+          {/* Corner Handles */}
+          <div
+            className="resize-handle absolute -top-2 -left-2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-nwse-resize z-10"
+            data-handle="nw"
+          />
+          <div
+            className="resize-handle absolute -top-2 -right-2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-nesw-resize z-10"
+            data-handle="ne"
+          />
+          <div
+            className="resize-handle absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-nesw-resize z-10"
+            data-handle="sw"
+          />
+          <div
+            className="resize-handle absolute -bottom-2 -right-2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-nwse-resize z-10"
+            data-handle="se"
+          />
+
+          {/* Edge Handles */}
+          <div
+            className="resize-handle absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-ns-resize z-10"
+            data-handle="n"
+          />
+          <div
+            className="resize-handle absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-ns-resize z-10"
+            data-handle="s"
+          />
+          <div
+            className="resize-handle absolute top-1/2 -translate-y-1/2 -left-2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-ew-resize z-10"
+            data-handle="w"
+          />
+          <div
+            className="resize-handle absolute top-1/2 -translate-y-1/2 -right-2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-ew-resize z-10"
+            data-handle="e"
+          />
+        </>
+      )}
     </div>
   );
 };

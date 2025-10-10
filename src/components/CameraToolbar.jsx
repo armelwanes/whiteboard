@@ -106,6 +106,28 @@ const CameraToolbar = ({
                 <ZoomIn className="w-4 h-4" />
               </button>
             </div>
+            
+            {/* Scale Ratio Presets */}
+            <div className="w-px h-6 bg-gray-600" />
+            <div className="flex items-center gap-2">
+              <span className="text-gray-400 text-sm">Ratio:</span>
+              <div className="flex gap-1">
+                {[0.5, 0.7, 0.8, 0.9, 1.0, 1.2, 1.5, 2.0].map((ratio) => (
+                  <button
+                    key={ratio}
+                    onClick={() => onZoomCamera(selectedCameraId, ratio)}
+                    className={`px-2 py-1 text-xs rounded transition-colors ${
+                      Math.abs(selectedCamera.zoom - ratio) < 0.05
+                        ? 'bg-pink-600 text-white font-semibold'
+                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                    }`}
+                    title={`Régler le zoom à ${ratio}x`}
+                  >
+                    {ratio}x
+                  </button>
+                ))}
+              </div>
+            </div>
           </>
         )}
       </div>

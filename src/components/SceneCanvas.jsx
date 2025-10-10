@@ -87,9 +87,6 @@ const SceneCanvas = ({
   const [sceneCameras, setSceneCameras] = useState(scene.sceneCameras || []);
   const [selectedCameraId, setSelectedCameraId] = useState(null);
   const [sceneZoom, setSceneZoom] = useState(1.0);
-  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
-  const [isPanning, setIsPanning] = useState(false);
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const canvasRef = useRef(null);
   const stageRef = useRef(null);
 
@@ -142,40 +139,6 @@ const SceneCanvas = ({
     handleUpdateCamera(cameraId, { zoom: newZoom });
   }, [handleUpdateCamera]);
 
-  // Handle canvas panning
-  const handleCanvasMouseDown = (e) => {
-    // Check if we're clicking on empty space (not on a camera or layer)
-    if (e.target === canvasRef.current || e.target === stageRef.current?.container()) {
-      setIsPanning(true);
-      setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
-      setSelectedCameraId(null);
-    }
-  };
-
-  const handleCanvasMouseMove = useCallback((e) => {
-    if (isPanning) {
-      setPanOffset({
-        x: e.clientX - panStart.x,
-        y: e.clientY - panStart.y,
-      });
-    }
-  }, [isPanning, panStart]);
-
-  const handleCanvasMouseUp = useCallback(() => {
-    setIsPanning(false);
-  }, []);
-
-  React.useEffect(() => {
-    if (isPanning) {
-      window.addEventListener('mousemove', handleCanvasMouseMove);
-      window.addEventListener('mouseup', handleCanvasMouseUp);
-      return () => {
-        window.removeEventListener('mousemove', handleCanvasMouseMove);
-        window.removeEventListener('mouseup', handleCanvasMouseUp);
-      };
-    }
-  }, [isPanning, handleCanvasMouseMove, handleCanvasMouseUp]);
-
   // Sync cameras from scene prop when scene changes
   React.useEffect(() => {
     if (scene.sceneCameras) {
@@ -201,18 +164,17 @@ const SceneCanvas = ({
         onSceneZoom={setSceneZoom}
       />
 
-      {/* Canvas Area */}
+      {/* Canvas Area - Scrollable */}
       <div className="flex-1 overflow-auto bg-gradient-to-br from-gray-900 to-gray-800 p-8 relative">
         <div
           ref={canvasRef}
-          className="relative bg-white rounded-lg shadow-2xl mx-auto"
+          className="relative bg-white rounded-lg shadow-2xl"
           style={{
             width: `${sceneWidth * sceneZoom}px`,
             height: `${sceneHeight * sceneZoom}px`,
-            cursor: isPanning ? 'grabbing' : 'grab',
-            transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
+            minWidth: `${sceneWidth * sceneZoom}px`,
+            minHeight: `${sceneHeight * sceneZoom}px`,
           }}
-          onMouseDown={handleCanvasMouseDown}
         >
           {/* Konva Stage for layers */}
           <Stage
@@ -275,8 +237,9 @@ const SceneCanvas = ({
           <p className="text-xs text-gray-400">
             💡 <span className="font-semibold">Astuce:</span> Cliquez sur "Nouvelle Caméra" pour ajouter une caméra • 
             Glissez pour repositionner la caméra • 
-            Utilisez les contrôles de zoom pour ajuster le zoom de chaque caméra • 
-            Maintenez et glissez sur la scène pour déplacer la vue
+            Utilisez les poignées sur les bords pour redimensionner la caméra • 
+            Utilisez les ratios prédéfinis (0.7x, 0.8x, etc.) pour ajuster le zoom rapidement • 
+            La scène est scrollable pour naviguer dans l'espace de travail
           </p>
         </div>
       </div>
