@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import AnimationContainer from './components/AnimationContainer'
 import ScenePanel from './components/ScenePanel'
-import KonvaSceneEditor from './components/KonvaSceneEditor'
+import PropertiesPanel from './components/PropertiesPanel'
 import Toolbar from './components/Toolbar'
 import HandWritingTest from './pages/HandWritingTest'
 import sampleStory from './data/scenes'
@@ -13,10 +13,8 @@ function App() {
   })
   const [selectedSceneIndex, setSelectedSceneIndex] = useState(0)
   const [showHandWritingTest, setShowHandWritingTest] = useState(false)
-  
-  const handleOpenEditor = () => {
-    // Editor is handled by AnimationContainer
-  }
+  const [selectedLayerId, setSelectedLayerId] = useState(null)
+  const fileInputRef = useRef(null)
 
   // Save scenes to localStorage whenever they change
   useEffect(() => {
@@ -69,6 +67,99 @@ function App() {
     setScenes(newScenes)
   }
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0]
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const currentScene = scenes[selectedSceneIndex]
+        const newLayer = {
+          id: `layer-${Date.now()}`,
+          image_path: event.target.result,
+          name: file.name,
+          position: { x: 100, y: 100 },
+          z_index: (currentScene.layers?.length || 0) + 1,
+          skip_rate: 10,
+          scale: 1.0,
+          opacity: 1.0,
+          mode: 'draw',
+          type: 'image',
+        }
+        updateScene(selectedSceneIndex, {
+          ...currentScene,
+          layers: [...(currentScene.layers || []), newLayer]
+        })
+        setSelectedLayerId(newLayer.id)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleUpdateLayer = (updatedLayer) => {
+    const currentScene = scenes[selectedSceneIndex]
+    updateScene(selectedSceneIndex, {
+      ...currentScene,
+      layers: (currentScene.layers || []).map(layer =>
+        layer.id === updatedLayer.id ? updatedLayer : layer
+      )
+    })
+  }
+
+  const handleDeleteLayer = (layerId) => {
+    const currentScene = scenes[selectedSceneIndex]
+    updateScene(selectedSceneIndex, {
+      ...currentScene,
+      layers: (currentScene.layers || []).filter(layer => layer.id !== layerId)
+    })
+    setSelectedLayerId(null)
+  }
+
+  const handleDuplicateLayer = (layerId) => {
+    const currentScene = scenes[selectedSceneIndex]
+    const layerToDuplicate = currentScene.layers?.find(l => l.id === layerId)
+    if (layerToDuplicate) {
+      const duplicatedLayer = {
+        ...layerToDuplicate,
+        id: `layer-${Date.now()}`,
+        name: `${layerToDuplicate.name} (Copie)`,
+        position: {
+          x: (layerToDuplicate.position?.x || 0) + 20,
+          y: (layerToDuplicate.position?.y || 0) + 20,
+        }
+      }
+      updateScene(selectedSceneIndex, {
+        ...currentScene,
+        layers: [...(currentScene.layers || []), duplicatedLayer]
+      })
+    }
+  }
+
+  const handleMoveLayer = (layerId, direction) => {
+    const currentScene = scenes[selectedSceneIndex]
+    const layers = currentScene.layers || []
+    const currentIndex = layers.findIndex(l => l.id === layerId)
+    if (currentIndex === -1) return
+
+    const newLayers = [...layers]
+    if (direction === 'up' && currentIndex > 0) {
+      [newLayers[currentIndex], newLayers[currentIndex - 1]] = 
+        [newLayers[currentIndex - 1], newLayers[currentIndex]]
+    } else if (direction === 'down' && currentIndex < newLayers.length - 1) {
+      [newLayers[currentIndex], newLayers[currentIndex + 1]] = 
+        [newLayers[currentIndex + 1], newLayers[currentIndex]]
+    }
+
+    // Update z_index based on new order
+    newLayers.forEach((layer, index) => {
+      layer.z_index = index + 1
+    })
+
+    updateScene(selectedSceneIndex, {
+      ...currentScene,
+      layers: newLayers
+    })
+  }
+
   const moveScene = (index, direction) => {
     if (
       (direction === 'up' && index === 0) ||
@@ -102,9 +193,7 @@ function App() {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col">
-        
-
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Animation Container */}
         <AnimationContainer 
           scenes={scenes} 
@@ -113,6 +202,20 @@ function App() {
           updateScene={updateScene}
         />
       </div>
+
+      {/* Right Panel - Properties */}
+      <PropertiesPanel
+        scene={scenes[selectedSceneIndex]}
+        selectedLayerId={selectedLayerId}
+        onSelectLayer={setSelectedLayerId}
+        onUpdateScene={(updatedScene) => updateScene(selectedSceneIndex, updatedScene)}
+        onUpdateLayer={handleUpdateLayer}
+        onDeleteLayer={handleDeleteLayer}
+        onDuplicateLayer={handleDuplicateLayer}
+        onMoveLayer={handleMoveLayer}
+        onImageUpload={handleImageUpload}
+        fileInputRef={fileInputRef}
+      />
     </div>
   )
 }
