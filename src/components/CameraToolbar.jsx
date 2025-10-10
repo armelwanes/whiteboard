@@ -15,7 +15,9 @@ const CameraToolbar = ({
   sceneZoom = 1.0,
   onSceneZoom,
 }) => {
-  const selectedCamera = cameras.find(c => c.id === selectedCameraId);
+  // Select first camera by default if none is selected
+  const effectiveSelectedCameraId = selectedCameraId || (cameras.length > 0 ? cameras[0].id : null);
+  const selectedCamera = cameras.find(c => c.id === effectiveSelectedCameraId);
 
   return (
     <div className="bg-gray-800 border-b border-gray-700 px-4 py-2.5 flex items-center justify-between">
