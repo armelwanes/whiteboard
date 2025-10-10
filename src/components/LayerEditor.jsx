@@ -29,6 +29,7 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
       sceneCameras: scene.sceneCameras || []
     });
     setSelectedLayerId(null); // Reset selection when scene changes
+    setSelectedCamera(null); // Reset camera selection when scene changes
   }, [scene]);
 
   const handleChange = (field, value) => {
