@@ -15,7 +15,11 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
     sceneCameras: scene.sceneCameras || []
   });
   const [selectedLayerId, setSelectedLayerId] = useState(null);
+  const [selectedCamera, setSelectedCamera] = useState(null);
   const fileInputRef = useRef(null);
+
+  const sceneWidth = 1920 * 5;
+  const sceneHeight = 1080 * 5;
 
   // Update editedScene when scene prop changes (switching between scenes)
   React.useEffect(() => {
@@ -40,11 +44,21 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = (event) => {
+        // Calculate initial position based on selected camera
+        let initialX = 100;
+        let initialY = 100;
+        
+        if (selectedCamera && selectedCamera.position) {
+          // Position the new layer at the center of the selected camera viewport
+          initialX = selectedCamera.position.x * sceneWidth;
+          initialY = selectedCamera.position.y * sceneHeight;
+        }
+        
         const newLayer = {
           id: `layer-${Date.now()}`,
           image_path: event.target.result,
           name: file.name,
-          position: { x: 100, y: 100 },
+          position: { x: initialX, y: initialY },
           z_index: editedScene.layers.length + 1,
           skip_rate: 10,
           scale: 1.0,
@@ -144,6 +158,7 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
             onUpdateLayer={handleUpdateLayer}
             selectedLayerId={selectedLayerId}
             onSelectLayer={setSelectedLayerId}
+            onSelectCamera={setSelectedCamera}
           />
         </div>
 
