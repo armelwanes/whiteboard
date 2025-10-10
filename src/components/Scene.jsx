@@ -1,13 +1,11 @@
 import React from 'react';
-import SceneObject from './SceneObject';
-import KonvaSceneEditor from './KonvaSceneEditor';
+import LayerEditor from './LayerEditor';
 
 const Scene = ({ 
   isActive, 
   backgroundImage,
   scene,
   selectedSceneIndex,
-  onSelectObject,
   isEditing = false,
   updateScene,
 }) => {
@@ -21,17 +19,16 @@ const Scene = ({
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
-      onClick={() => isEditing && onSelectObject && onSelectObject(null)}
     >
-
-
-        <KonvaSceneEditor
+      {isEditing ? (
+        <LayerEditor
           scene={scene}
           onSave={(updatedScene) => {
-            updateScene(selectedSceneIndex, updatedScene)
-           
+            updateScene(selectedSceneIndex, updatedScene);
           }}
+          onClose={() => {}}
         />
+      ) : null}
     </div>
   );
 };

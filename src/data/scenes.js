@@ -7,7 +7,7 @@ export const sampleStory = [
     duration: 5,
     backgroundImage: null,
     animation: 'fade',
-    objects: []
+    layers: []
   },
   {
     id: 'scene-2',
@@ -16,7 +16,7 @@ export const sampleStory = [
     duration: 5,
     backgroundImage: null,
     animation: 'fade',
-    objects: []
+    layers: []
   },
   {
     id: 'scene-3',
@@ -25,7 +25,7 @@ export const sampleStory = [
     duration: 5,
     backgroundImage: null,
     animation: 'fade',
-    objects: []
+    layers: []
   },
   {
     id: 'scene-4',
@@ -34,7 +34,7 @@ export const sampleStory = [
     duration: 5,
     backgroundImage: null,
     animation: 'fade',
-    objects: []
+    layers: []
   },
   {
     id: 'scene-5',
@@ -43,7 +43,7 @@ export const sampleStory = [
     duration: 5,
     backgroundImage: null,
     animation: 'fade',
-    objects: []
+    layers: []
   }
 ];
 

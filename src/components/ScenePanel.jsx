@@ -77,9 +77,9 @@ const ScenePanel = ({
                     <span className="flex items-center gap-1">
                       ⏱ {scene.duration}s
                     </span>
-                    {scene.objects && scene.objects.length > 0 && (
+                    {scene.layers && scene.layers.length > 0 && (
                       <span className="flex items-center gap-1">
-                        🖼️ {scene.objects.length}
+                        🖼️ {scene.layers.length}
                       </span>
                     )}
                   </div>
