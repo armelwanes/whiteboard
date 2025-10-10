@@ -3,7 +3,7 @@
  * Handles camera sequences, transitions, and animations
  */
 
-import { interpolate, interpolatePosition } from './easingFunctions';
+import { interpolate, interpolatePosition } from './easingFunctions.js';
 
 /**
  * Default camera configuration
