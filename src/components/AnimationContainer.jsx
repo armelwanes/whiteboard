@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Scene from './Scene';
 import Timeline from './Timeline';
+import LayerEditor from './LayerEditor';
 
 const AnimationContainer = ({ scenes = [], updateScene }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
   const animationRef = useRef(null);
   const lastTimeRef = useRef(Date.now());
 
@@ -76,6 +78,7 @@ const AnimationContainer = ({ scenes = [], updateScene }) => {
       <div 
         className="animation-stage flex-1 relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 cursor-pointer"
         title="Cliquez pour éditer la scène"
+        onClick={() => !isPlaying && setIsEditorOpen(true)}
       >
         {scenes.map((scene, index) => (
           <Scene
@@ -109,6 +112,18 @@ const AnimationContainer = ({ scenes = [], updateScene }) => {
           currentSceneIndex={currentSceneIndex}
         />
       </div>
+
+      {/* Layer Editor Modal */}
+      {isEditorOpen && scenes[currentSceneIndex] && (
+        <LayerEditor
+          scene={scenes[currentSceneIndex]}
+          onSave={(updatedScene) => {
+            updateScene(currentSceneIndex, updatedScene);
+            setIsEditorOpen(false);
+          }}
+          onClose={() => setIsEditorOpen(false)}
+        />
+      )}
     </div>
   );
 };
