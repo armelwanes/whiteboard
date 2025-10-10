@@ -253,7 +253,7 @@ const SceneCanvas = ({
           </Stage>
 
           {/* Camera Viewports Overlay */}
-          <div className="absolute inset-0 pointer-events-auto">
+          <div className="absolute inset-0 pointer-events-none">
             {sceneCameras.map((camera) => (
               <CameraViewport
                 key={camera.id}
@@ -274,8 +274,8 @@ const SceneCanvas = ({
         <div className="mt-4 text-center">
           <p className="text-xs text-gray-400">
             💡 <span className="font-semibold">Astuce:</span> Cliquez sur "Nouvelle Caméra" pour ajouter une caméra • 
-            Glissez pour repositionner • Redimensionnez avec les poignées • 
-            Utilisez les contrôles de zoom pour chaque caméra • 
+            Glissez pour repositionner la caméra • 
+            Utilisez les contrôles de zoom pour ajuster le zoom de chaque caméra • 
             Maintenez et glissez sur la scène pour déplacer la vue
           </p>
         </div>
