@@ -41,9 +41,10 @@ export const applyEasing = (t, interpolation, bezierHandles = null) => {
     case InterpolationType.EASE_IN_CUBIC:
       return t * t * t;
     
-    case InterpolationType.EASE_OUT_CUBIC:
+    case InterpolationType.EASE_OUT_CUBIC: {
       const t1 = t - 1;
       return t1 * t1 * t1 + 1;
+    }
     
     case InterpolationType.STEP:
       return t < 1 ? 0 : 1;
@@ -51,7 +52,7 @@ export const applyEasing = (t, interpolation, bezierHandles = null) => {
     case InterpolationType.BEZIER:
       if (bezierHandles && bezierHandles.length === 4) {
         // Simplified cubic bezier approximation
-        const [x1, y1, x2, y2] = bezierHandles;
+        const [, y1, , y2] = bezierHandles;
         const t2 = t * t;
         const t3 = t2 * t;
         return 3 * (1 - t) * (1 - t) * t * y1 + 
