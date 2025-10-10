@@ -100,6 +100,7 @@ const SceneCanvas = ({
     return scene.sceneCameras;
   });
   const [selectedCameraId, setSelectedCameraId] = useState('default-camera');
+  const [hasInitialCentered, setHasInitialCentered] = useState(false);
   
   // Notify parent when camera selection changes
   React.useEffect(() => {
@@ -118,10 +119,14 @@ const SceneCanvas = ({
 
   // Create a new camera
   const handleAddCamera = useCallback(() => {
+    // Find default camera position to use as starting point for new cameras
+    const defaultCamera = sceneCameras.find(cam => cam.isDefault);
+    const defaultPosition = defaultCamera ? defaultCamera.position : { x: 0.5, y: 0.5 };
+    
     const newCamera = {
       id: `camera-${Date.now()}`,
       name: `Camera ${sceneCameras.length}`,
-      position: { x: 0.3 + (sceneCameras.length * 0.1), y: 0.3 },
+      position: { x: defaultPosition.x, y: defaultPosition.y }, // Start at default camera position
       width: 800,
       height: 450,
       zoom: 1.0,
@@ -201,9 +206,9 @@ const SceneCanvas = ({
     }
   }, [scene.sceneCameras]);
 
-  // Auto-scroll to selected camera
+  // Auto-scroll to selected camera - only on initial load
   React.useEffect(() => {
-    if (selectedCameraId && scrollContainerRef.current && canvasRef.current) {
+    if (!hasInitialCentered && selectedCameraId && scrollContainerRef.current && canvasRef.current) {
       const selectedCamera = sceneCameras.find(cam => cam.id === selectedCameraId);
       if (selectedCamera) {
         const container = scrollContainerRef.current;
@@ -223,9 +228,12 @@ const SceneCanvas = ({
           top: scrollY,
           behavior: 'smooth'
         });
+        
+        // Mark as centered so it doesn't happen again
+        setHasInitialCentered(true);
       }
     }
-  }, [selectedCameraId, sceneCameras, sceneWidth, sceneHeight, sceneZoom]);
+  }, [selectedCameraId, sceneCameras, sceneWidth, sceneHeight, sceneZoom, hasInitialCentered]);
 
   // No longer needed - canvas fills viewport
 

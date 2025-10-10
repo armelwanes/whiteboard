@@ -182,7 +182,7 @@ const CameraViewport = ({
   return (
     <div
       ref={viewportRef}
-      className={`camera-viewport absolute pointer-events-auto ${isSelected ? 'z-50' : 'z-40'}`}
+      className={`camera-viewport absolute ${isSelected ? 'z-50' : 'z-40'}`}
       style={{
         left: `${pixelPos.x}px`,
         top: `${pixelPos.y}px`,
@@ -190,6 +190,7 @@ const CameraViewport = ({
         height: `${pixelDims.height}px`,
         transform: `scale(${canvasZoom})`,
         transformOrigin: 'top left',
+        pointerEvents: 'none', // Allow clicks to pass through by default
       }}
       onMouseDown={handleMouseDown}
     >
@@ -209,7 +210,9 @@ const CameraViewport = ({
         style={{
           borderStyle: camera.locked ? 'solid' : 'dashed',
           borderWidth: '3px',
+          pointerEvents: 'auto', // Only the frame border is interactive
         }}
+        onMouseDown={handleMouseDown}
       >
         {/* Diagonal lines */}
         <svg
@@ -241,6 +244,8 @@ const CameraViewport = ({
           className={`camera-label absolute -top-8 left-0 text-white px-3 py-1 rounded-t-lg flex items-center gap-2 text-sm font-semibold shadow-lg ${
             camera.locked ? 'bg-blue-500 cursor-default' : 'bg-pink-500 cursor-move'
           }`}
+          style={{ pointerEvents: 'auto' }}
+          onMouseDown={handleMouseDown}
         >
           <Camera className="w-4 h-4" />
           {camera.locked && <Lock className="w-3 h-3" />}
@@ -271,36 +276,44 @@ const CameraViewport = ({
           <div
             className="resize-handle absolute -top-2 -left-2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-nwse-resize z-10"
             data-handle="nw"
+            style={{ pointerEvents: 'auto' }}
           />
           <div
             className="resize-handle absolute -top-2 -right-2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-nesw-resize z-10"
             data-handle="ne"
+            style={{ pointerEvents: 'auto' }}
           />
           <div
             className="resize-handle absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-nesw-resize z-10"
             data-handle="sw"
+            style={{ pointerEvents: 'auto' }}
           />
           <div
             className="resize-handle absolute -bottom-2 -right-2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-nwse-resize z-10"
             data-handle="se"
+            style={{ pointerEvents: 'auto' }}
           />
 
           {/* Edge Handles */}
           <div
             className="resize-handle absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-ns-resize z-10"
             data-handle="n"
+            style={{ pointerEvents: 'auto' }}
           />
           <div
             className="resize-handle absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-ns-resize z-10"
             data-handle="s"
+            style={{ pointerEvents: 'auto' }}
           />
           <div
             className="resize-handle absolute top-1/2 -translate-y-1/2 -left-2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-ew-resize z-10"
             data-handle="w"
+            style={{ pointerEvents: 'auto' }}
           />
           <div
             className="resize-handle absolute top-1/2 -translate-y-1/2 -right-2 w-4 h-4 bg-pink-500 border-2 border-white rounded-full cursor-ew-resize z-10"
             data-handle="e"
+            style={{ pointerEvents: 'auto' }}
           />
         </>
       )}
