@@ -143,8 +143,8 @@ const SceneCanvas = ({
     setSelectedCameraId(newCamera.id);
     
     // Persist to scene
-    onUpdateScene({ ...scene, sceneCameras: updatedCameras });
-  }, [sceneCameras, scene, onUpdateScene]);
+    onUpdateScene({ sceneCameras: updatedCameras });
+  }, [sceneCameras, onUpdateScene]);
 
   // Update camera properties
   const handleUpdateCamera = useCallback((cameraId, updates) => {
@@ -154,8 +154,8 @@ const SceneCanvas = ({
     setSceneCameras(updatedCameras);
     
     // Persist to scene
-    onUpdateScene({ ...scene, sceneCameras: updatedCameras });
-  }, [sceneCameras, scene, onUpdateScene]);
+    onUpdateScene({ sceneCameras: updatedCameras });
+  }, [sceneCameras, onUpdateScene]);
 
   // Delete camera
   const handleDeleteCamera = useCallback((cameraId) => {
@@ -173,8 +173,8 @@ const SceneCanvas = ({
     }
     
     // Persist to scene
-    onUpdateScene({ ...scene, sceneCameras: updatedCameras });
-  }, [sceneCameras, selectedCameraId, scene, onUpdateScene]);
+    onUpdateScene({ sceneCameras: updatedCameras });
+  }, [sceneCameras, selectedCameraId, onUpdateScene]);
 
   // Zoom specific camera
   const handleZoomCamera = useCallback((cameraId, newZoom) => {
@@ -205,6 +205,11 @@ const SceneCanvas = ({
       setSceneCameras([createDefaultCamera('16:9')]);
     }
   }, [scene.sceneCameras]);
+
+  // Reset centering flag when scene ID changes
+  React.useEffect(() => {
+    setHasInitialCentered(false);
+  }, [scene.id]);
 
   // Auto-scroll to selected camera - only on initial load
   React.useEffect(() => {
