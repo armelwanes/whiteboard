@@ -85,6 +85,7 @@ const SceneCanvas = ({
   onUpdateLayer,
   selectedLayerId,
   onSelectLayer,
+  onSelectCamera,
 }) => {
   const [sceneCameras, setSceneCameras] = useState(() => {
     // Initialize with default camera if scene has no cameras
@@ -99,6 +100,14 @@ const SceneCanvas = ({
     return scene.sceneCameras;
   });
   const [selectedCameraId, setSelectedCameraId] = useState('default-camera');
+  
+  // Notify parent when camera selection changes
+  React.useEffect(() => {
+    if (onSelectCamera) {
+      const selectedCamera = sceneCameras.find(cam => cam.id === selectedCameraId);
+      onSelectCamera(selectedCamera);
+    }
+  }, [selectedCameraId, sceneCameras, onSelectCamera]);
   const [sceneZoom, setSceneZoom] = useState(1.0);
   const canvasRef = useRef(null);
   const stageRef = useRef(null);
@@ -199,9 +208,10 @@ const SceneCanvas = ({
       if (selectedCamera) {
         const container = scrollContainerRef.current;
         
-  // Calculate camera position in pixels
-  const cameraX = selectedCamera.position.x * sceneWidth * sceneZoom;
-  const cameraY = selectedCamera.position.y * sceneHeight * sceneZoom;
+        // Calculate camera position in pixels (accounting for 500px padding)
+        const padding = 500;
+        const cameraX = (selectedCamera.position.x * sceneWidth * sceneZoom) + padding;
+        const cameraY = (selectedCamera.position.y * sceneHeight * sceneZoom) + padding;
 
         // Calculate scroll position to center the camera
         const scrollX = cameraX - (container.clientWidth / 2);
@@ -254,16 +264,18 @@ const SceneCanvas = ({
             backgroundPosition: '0 0'
           }}
         >
-          {/* Scene Canvas - The actual stage */}
-          <div
-            ref={canvasRef}
-            className="bg-white shadow-2xl"
-            style={{
-              width: `${scaledSceneWidth}px`,
-              height: `${scaledSceneHeight}px`,
-              position: 'relative'
-            }}
-          >
+          {/* Padding wrapper for infinite canvas effect */}
+          <div style={{ padding: '500px' }}>
+            {/* Scene Canvas - The actual stage */}
+            <div
+              ref={canvasRef}
+              className="bg-white shadow-2xl"
+              style={{
+                width: `${scaledSceneWidth}px`,
+                height: `${scaledSceneHeight}px`,
+                position: 'relative'
+              }}
+            >
             {/* Konva Stage for layers */}
             <Stage
               width={sceneWidth}
@@ -304,7 +316,7 @@ const SceneCanvas = ({
               </KonvaLayer>
             </Stage>
             {/* Camera Viewports Overlay */}
-            <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 9999 }}>
               {sceneCameras.map((camera) => (
                 <CameraViewport
                   key={camera.id}
@@ -319,6 +331,7 @@ const SceneCanvas = ({
                 />
               ))}
             </div>
+          </div>
           </div>
         </div>
         {/* Right Panel - Camera Settings */}
