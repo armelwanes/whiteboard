@@ -135,9 +135,9 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
 
   return (
     <div className="bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-900  shadow-2xl w-full max-h-[95vh] overflow-hidden  border border-gray-700">
+      <div className="bg-gray-900 shadow-2xl w-full h-[95vh] flex overflow-hidden border border-gray-700">
         {/* Left Side - Canvas Preview with Camera Viewports */}
-        <div className="bg-gray-950 flex flex-col">
+        <div className="bg-gray-950 flex flex-col flex-1 min-w-0">
           <SceneCanvas
             scene={editedScene}
             onUpdateScene={(updates) => setEditedScene({ ...editedScene, ...updates })}
