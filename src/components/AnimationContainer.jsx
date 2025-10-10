@@ -3,7 +3,7 @@ import Scene from './Scene';
 import Timeline from './Timeline';
 import LayerEditor from './LayerEditor';
 
-const AnimationContainer = ({ scenes = [], updateScene }) => {
+const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
@@ -114,11 +114,11 @@ const AnimationContainer = ({ scenes = [], updateScene }) => {
       </div>
 
       {/* Layer Editor Modal */}
-      {isEditorOpen && scenes[currentSceneIndex] && (
+      {isEditorOpen && scenes[selectedSceneIndex] && (
         <LayerEditor
-          scene={scenes[currentSceneIndex]}
+          scene={scenes[selectedSceneIndex]}
           onSave={(updatedScene) => {
-            updateScene(currentSceneIndex, updatedScene);
+            updateScene(selectedSceneIndex, updatedScene);
             setIsEditorOpen(false);
           }}
           onClose={() => setIsEditorOpen(false)}
