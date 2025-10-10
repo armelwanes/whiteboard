@@ -260,7 +260,7 @@ const SceneCanvas = ({
           style={{ height: '100%' }}
         >
           {/* Scroll Progress Indicators - Sticky */}
-          <div className="sticky top-0 z-50 bg-gray-800/90 backdrop-blur-sm border-b border-gray-700">
+          {/**<div className="sticky top-0 z-50 bg-gray-800/90 backdrop-blur-sm border-b border-gray-700">
             <div className="px-4 py-2 flex items-center justify-between text-xs text-gray-400">
               <div className="flex items-center gap-4">
                 <span>Position: X {scrollProgress.x.toFixed(0)}%, Y {scrollProgress.y.toFixed(0)}%</span>
@@ -277,7 +277,7 @@ const SceneCanvas = ({
                 </div>
               </div>
             </div>
-          </div>
+          </div>**/}
 
           {/* Infinite Workspace Container */}
           <div
@@ -360,12 +360,12 @@ const SceneCanvas = ({
         </div>
 
         {/* Right Panel - Camera Settings */}
-        <div className="w-80 bg-gray-900 border-l border-gray-700 overflow-y-auto p-4">
+        {/**<div className="w-80 bg-gray-900 border-l border-gray-700 overflow-y-auto p-4">
           <CameraSettingsPanel
             camera={sceneCameras.find(cam => cam.id === selectedCameraId)}
             onUpdate={handleUpdateCamera}
           />
-        </div>
+        </div>**/}
       </div>
     </div>
   );

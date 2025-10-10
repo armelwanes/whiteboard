@@ -204,7 +204,7 @@ function App() {
       </div>
 
       {/* Right Panel - Properties */}
-      <PropertiesPanel
+      {/**<PropertiesPanel
         scene={scenes[selectedSceneIndex]}
         selectedLayerId={selectedLayerId}
         onSelectLayer={setSelectedLayerId}
@@ -215,7 +215,7 @@ function App() {
         onMoveLayer={handleMoveLayer}
         onImageUpload={handleImageUpload}
         fileInputRef={fileInputRef}
-      />
+      />**/}
     </div>
   )
 }
