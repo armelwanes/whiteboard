@@ -2,11 +2,13 @@ import React, { useState, useRef } from 'react';
 import { 
   Upload, X, Save, Trash2, Eye, EyeOff, 
   MoveUp, MoveDown, Copy, Image as ImageIcon,
-  Layers as LayersIcon, Type as TextIcon
+  Layers as LayersIcon, Type as TextIcon, Square as ShapeIcon
 } from 'lucide-react';
 import CameraControls from './CameraControls';
 import LayerAnimationControls from './LayerAnimationControls';
 import SceneCanvas from './SceneCanvas';
+import ShapeToolbar from './ShapeToolbar';
+import { createShapeLayer } from '../utils/shapeUtils';
 
 const LayerEditor = ({ scene, onClose, onSave }) => {
   const [editedScene, setEditedScene] = useState({ 
@@ -16,6 +18,7 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   });
   const [selectedLayerId, setSelectedLayerId] = useState(null);
   const [selectedCamera, setSelectedCamera] = useState(null);
+  const [showShapeToolbar, setShowShapeToolbar] = useState(false);
   const fileInputRef = useRef(null);
 
   const sceneWidth = 1920;
@@ -128,6 +131,35 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
     setSelectedLayerId(newLayer.id);
   };
 
+  const handleAddShape = (shapeLayer) => {
+    // Calculate initial position based on selected camera
+    let initialX = sceneWidth / 2;
+    let initialY = sceneHeight / 2;
+    
+    if (selectedCamera && selectedCamera.position) {
+      initialX = selectedCamera.position.x * sceneWidth;
+      initialY = selectedCamera.position.y * sceneHeight;
+    }
+    
+    // Update shape position to camera center
+    const updatedShapeLayer = {
+      ...shapeLayer,
+      z_index: editedScene.layers.length + 1,
+      shape_config: {
+        ...shapeLayer.shape_config,
+        x: initialX,
+        y: initialY,
+      }
+    };
+    
+    setEditedScene({
+      ...editedScene,
+      layers: [...editedScene.layers, updatedShapeLayer]
+    });
+    setSelectedLayerId(updatedShapeLayer.id);
+    setShowShapeToolbar(false);
+  };
+
   const handleUpdateLayer = (updatedLayer) => {
     setEditedScene({
       ...editedScene,
@@ -201,6 +233,14 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
 
   return (
     <div className="flex items-center justify-center w-full">
+      {/* Shape Toolbar Modal */}
+      {showShapeToolbar && (
+        <ShapeToolbar
+          onAddShape={handleAddShape}
+          onClose={() => setShowShapeToolbar(false)}
+        />
+      )}
+      
       <div className="bg-gray-900 shadow-2xl w-full max-w-full max-h-[70vh] flex overflow-hidden border border-gray-700">
         {/* Left Side - Canvas Preview with Camera Viewports */}
         <div className="bg-red-950 flex flex-col flex-1 min-w-0">
@@ -233,6 +273,13 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                 title="Ajouter un texte"
               >
                 <TextIcon className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setShowShapeToolbar(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm"
+                title="Ajouter une forme"
+              >
+                <ShapeIcon className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={onClose}
@@ -612,6 +659,7 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                     >
                       <option value="image">Image</option>
                       <option value="text">Texte</option>
+                      <option value="shape">Forme</option>
                     </select>
                   </div>
                 </div>
@@ -793,6 +841,205 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                       </select>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* Shape Configuration (only for shape layers) */}
+              {selectedLayer && selectedLayer.type === 'shape' && selectedLayer.shape_config && (
+                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                  <h3 className="text-white font-semibold mb-3 text-sm">
+                    Configuration de la Forme
+                  </h3>
+
+                  {/* Shape Type Display */}
+                  <div className="mb-3">
+                    <label className="block text-gray-300 text-xs mb-1.5">
+                      Type de forme
+                    </label>
+                    <div className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm">
+                      {selectedLayer.shape_config.shape}
+                    </div>
+                  </div>
+
+                  {/* Fill Color */}
+                  {selectedLayer.shape_config.fill !== undefined && (
+                    <div className="mb-3">
+                      <label className="block text-gray-300 text-xs mb-1.5">
+                        Couleur de remplissage
+                      </label>
+                      <div className="flex gap-2 items-center">
+                        <input
+                          type="color"
+                          value={selectedLayer.shape_config.fill || '#3B82F6'}
+                          onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'shape_config', {
+                            ...(selectedLayer.shape_config || {}),
+                            fill: e.target.value
+                          })}
+                          className="w-12 h-10 rounded border border-gray-600 cursor-pointer"
+                        />
+                        <input
+                          type="text"
+                          value={selectedLayer.shape_config.fill || '#3B82F6'}
+                          onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'shape_config', {
+                            ...(selectedLayer.shape_config || {}),
+                            fill: e.target.value
+                          })}
+                          placeholder="#3B82F6"
+                          className="flex-1 bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Stroke Color */}
+                  <div className="mb-3">
+                    <label className="block text-gray-300 text-xs mb-1.5">
+                      Couleur de contour
+                    </label>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="color"
+                        value={selectedLayer.shape_config.stroke || '#1E40AF'}
+                        onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'shape_config', {
+                          ...(selectedLayer.shape_config || {}),
+                          stroke: e.target.value
+                        })}
+                        className="w-12 h-10 rounded border border-gray-600 cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        value={selectedLayer.shape_config.stroke || '#1E40AF'}
+                        onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'shape_config', {
+                          ...(selectedLayer.shape_config || {}),
+                          stroke: e.target.value
+                        })}
+                        placeholder="#1E40AF"
+                        className="flex-1 bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Stroke Width */}
+                  <div className="mb-3">
+                    <label className="block text-gray-300 text-xs mb-1.5">
+                      Épaisseur du contour: {selectedLayer.shape_config.strokeWidth || 2}px
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="20"
+                      step="1"
+                      value={selectedLayer.shape_config.strokeWidth || 2}
+                      onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'shape_config', {
+                        ...(selectedLayer.shape_config || {}),
+                        strokeWidth: parseInt(e.target.value) || 2
+                      })}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Corner Radius (for rectangles) */}
+                  {selectedLayer.shape_config.shape === 'rectangle' && (
+                    <div className="mb-3">
+                      <label className="block text-gray-300 text-xs mb-1.5">
+                        Rayon des coins: {selectedLayer.shape_config.cornerRadius || 0}px
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="50"
+                        step="1"
+                        value={selectedLayer.shape_config.cornerRadius || 0}
+                        onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'shape_config', {
+                          ...(selectedLayer.shape_config || {}),
+                          cornerRadius: parseInt(e.target.value) || 0
+                        })}
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+
+                  {/* Sides (for polygons) */}
+                  {selectedLayer.shape_config.shape === 'polygon' && (
+                    <div className="mb-3">
+                      <label className="block text-gray-300 text-xs mb-1.5">
+                        Nombre de côtés
+                      </label>
+                      <input
+                        type="number"
+                        min="3"
+                        max="12"
+                        value={selectedLayer.shape_config.sides || 6}
+                        onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'shape_config', {
+                          ...(selectedLayer.shape_config || {}),
+                          sides: parseInt(e.target.value) || 6
+                        })}
+                        className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  )}
+
+                  {/* Text for text_box */}
+                  {selectedLayer.shape_config.shape === 'text_box' && (
+                    <>
+                      <div className="mb-3">
+                        <label className="block text-gray-300 text-xs mb-1.5">
+                          Texte
+                        </label>
+                        <textarea
+                          value={selectedLayer.shape_config.text || 'Text Box'}
+                          onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'shape_config', {
+                            ...(selectedLayer.shape_config || {}),
+                            text: e.target.value
+                          })}
+                          className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          rows="3"
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="block text-gray-300 text-xs mb-1.5">
+                          Taille de police
+                        </label>
+                        <input
+                          type="number"
+                          min="8"
+                          max="72"
+                          value={selectedLayer.shape_config.fontSize || 24}
+                          onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'shape_config', {
+                            ...(selectedLayer.shape_config || {}),
+                            fontSize: parseInt(e.target.value) || 24
+                          })}
+                          className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="block text-gray-300 text-xs mb-1.5">
+                          Couleur de fond
+                        </label>
+                        <div className="flex gap-2 items-center">
+                          <input
+                            type="color"
+                            value={selectedLayer.shape_config.backgroundColor || '#F3F4F6'}
+                            onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'shape_config', {
+                              ...(selectedLayer.shape_config || {}),
+                              backgroundColor: e.target.value
+                            })}
+                            className="w-12 h-10 rounded border border-gray-600 cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={selectedLayer.shape_config.backgroundColor || '#F3F4F6'}
+                            onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'shape_config', {
+                              ...(selectedLayer.shape_config || {}),
+                              backgroundColor: e.target.value
+                            })}
+                            placeholder="#F3F4F6"
+                            className="flex-1 bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 

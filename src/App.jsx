@@ -4,6 +4,7 @@ import ScenePanel from './components/ScenePanel'
 import PropertiesPanel from './components/PropertiesPanel'
 import Toolbar from './components/Toolbar'
 import HandWritingTest from './pages/HandWritingTest'
+import ShapeToolbar from './components/ShapeToolbar'
 import sampleStory from './data/scenes'
 import { createMultiTimeline } from './utils/multiTimelineSystem'
 import { createSceneAudioConfig } from './utils/audioManager'
@@ -15,6 +16,7 @@ function App() {
   })
   const [selectedSceneIndex, setSelectedSceneIndex] = useState(0)
   const [showHandWritingTest, setShowHandWritingTest] = useState(false)
+  const [showShapeToolbar, setShowShapeToolbar] = useState(false)
   const [selectedLayerId, setSelectedLayerId] = useState(null)
   const fileInputRef = useRef(null)
 
@@ -119,6 +121,16 @@ function App() {
     setSelectedLayerId(null)
   }
 
+  const handleAddShape = (shapeLayer) => {
+    const currentScene = scenes[selectedSceneIndex]
+    updateScene(selectedSceneIndex, {
+      ...currentScene,
+      layers: [...(currentScene.layers || []), shapeLayer]
+    })
+    setSelectedLayerId(shapeLayer.id)
+    setShowShapeToolbar(false)
+  }
+
   const handleDuplicateLayer = (layerId) => {
     const currentScene = scenes[selectedSceneIndex]
     const layerToDuplicate = currentScene.layers?.find(l => l.id === layerId)
@@ -186,6 +198,14 @@ function App() {
 
   return (
     <div className="app flex h-screen overflow-hidden dark">
+      {/* Shape Toolbar Modal */}
+      {showShapeToolbar && (
+        <ShapeToolbar
+          onAddShape={handleAddShape}
+          onClose={() => setShowShapeToolbar(false)}
+        />
+      )}
+
       {/* Left Panel - Scenes List */}
       <ScenePanel
         scenes={scenes}
@@ -205,6 +225,7 @@ function App() {
           selectedSceneIndex={selectedSceneIndex}
           onSelectScene={setSelectedSceneIndex}
           updateScene={updateScene}
+          onOpenShapeToolbar={() => setShowShapeToolbar(true)}
         />
       </div>
 
