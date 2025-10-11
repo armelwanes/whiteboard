@@ -1,5 +1,8 @@
 # Multi-Timeline System
 
+> **⚠️ NOTE: This feature is currently not in use.**  
+> The multi-timeline system has been removed from the active codebase. This documentation is kept for reference purposes only. The application now uses a simple timeline with audio configuration at the scene level (background music) and layer level (narration, sound effects, etc.).
+
 ## Overview
 
 The Multi-Timeline System provides parallel synchronized timelines for each scene, enabling professional-grade animation editing similar to VideoScribe or After Effects.

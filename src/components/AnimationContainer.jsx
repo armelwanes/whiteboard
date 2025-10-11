@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Scene from './Scene';
 import Timeline from './Timeline';
-import MultiTimeline from './MultiTimeline';
 import LayerEditor from './LayerEditor';
 import { createTimeline } from '../utils/timelineSystem';
 
@@ -90,24 +89,6 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
     setGlobalTimeline(updatedTimeline);
   };
 
-  const handleUpdateSceneMultiTimeline = (updatedMultiTimeline) => {
-    if (scenes[currentSceneIndex]) {
-      updateScene(currentSceneIndex, {
-        ...scenes[currentSceneIndex],
-        multiTimeline: updatedMultiTimeline,
-      });
-    }
-  };
-
-  // Get current scene's local time
-  const getSceneLocalTime = () => {
-    let accumulatedTime = 0;
-    for (let i = 0; i < currentSceneIndex; i++) {
-      accumulatedTime += scenes[i].duration;
-    }
-    return currentTime - accumulatedTime;
-  };
-
   return (
     <div className="animation-container w-full h-full flex flex-col bg-gray-950">
       {/* Main animation area */}
@@ -146,8 +127,7 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
       )}
 
       {/* Timeline controls always visible at the bottom */}
-      <div className="timeline-container p-4 space-y-4">
-        {/* Global Timeline */}
+      <div className="timeline-container p-4">
         <Timeline
           currentTime={currentTime}
           totalDuration={totalDuration}
@@ -159,23 +139,6 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
           timeline={globalTimeline}
           onUpdateTimeline={handleUpdateTimeline}
         />
-
-        {/* Multi-Timeline for current scene */}
-        {scenes[currentSceneIndex] && scenes[currentSceneIndex].multiTimeline && (
-          <div className="border-t border-gray-700 pt-4">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-gray-300">
-                Scène {currentSceneIndex + 1}: {scenes[currentSceneIndex].title}
-              </h3>
-            </div>
-            <MultiTimeline
-              multiTimeline={scenes[currentSceneIndex].multiTimeline}
-              currentTime={getSceneLocalTime()}
-              onUpdateMultiTimeline={handleUpdateSceneMultiTimeline}
-              isPlaying={isPlaying}
-            />
-          </div>
-        )}
       </div>
     </div>
   );

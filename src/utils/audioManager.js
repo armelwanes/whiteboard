@@ -339,13 +339,25 @@ export class AudioManager {
 
 /**
  * Create audio configuration for a scene
+ * Background music only - other audio (narration, sound effects) should be at layer level
  * @param {Object} options - Audio options
  * @returns {Object} Audio configuration
  */
 export const createSceneAudioConfig = (options = {}) => {
   return {
     backgroundMusic: options.backgroundMusic || null,
-    narration: options.narration || [],
+  };
+};
+
+/**
+ * Create audio configuration for a layer
+ * Layers can have narration, sound effects, typewriter sounds, etc.
+ * @param {Object} options - Audio options
+ * @returns {Object} Audio configuration
+ */
+export const createLayerAudioConfig = (options = {}) => {
+  return {
+    narration: options.narration || null,
     soundEffects: options.soundEffects || [],
     typewriter: options.typewriter || null,
     drawing: options.drawing || null,
@@ -416,5 +428,6 @@ export default {
   createAudioTrack,
   AudioManager,
   createSceneAudioConfig,
+  createLayerAudioConfig,
   parseAudioConfig,
 };

@@ -67,6 +67,12 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
           opacity: 1.0,
           mode: 'draw',
           type: 'image',
+          audio: {
+            narration: null,
+            soundEffects: [],
+            typewriter: null,
+            drawing: null,
+          }
         };
         setEditedScene({
           ...editedScene,
@@ -273,6 +279,23 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                     <option value="slide">Slide</option>
                     <option value="scale">Scale</option>
                   </select>
+                </div>
+
+                {/* Background Music */}
+                <div className="mt-3">
+                  <label className="block text-gray-300 text-xs mb-1.5">
+                    Musique de fond (URL)
+                  </label>
+                  <input
+                    type="text"
+                    value={editedScene.backgroundMusic || ''}
+                    onChange={(e) => handleChange('backgroundMusic', e.target.value || null)}
+                    className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="https://example.com/music.mp3"
+                  />
+                  <p className="text-gray-500 text-xs mt-1">
+                    La musique de fond est pour toute la scène
+                  </p>
                 </div>
               </div>
 
@@ -540,6 +563,70 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                     handleLayerPropertyChange(selectedLayer.id, 'animation', animation)
                   }
                 />
+              )}
+
+              {/* Layer Audio Configuration */}
+              {selectedLayer && (
+                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                  <h3 className="text-white font-semibold mb-3 text-sm">
+                    Audio de la Couche
+                  </h3>
+                  
+                  <p className="text-gray-400 text-xs mb-3">
+                    L'audio pour voix-off, effets sonores, etc. est configuré par couche
+                  </p>
+
+                  {/* Narration */}
+                  <div className="mb-3">
+                    <label className="block text-gray-300 text-xs mb-1.5">
+                      Narration / Voix-off (URL)
+                    </label>
+                    <input
+                      type="text"
+                      value={selectedLayer.audio?.narration || ''}
+                      onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'audio', {
+                        ...(selectedLayer.audio || {}),
+                        narration: e.target.value || null
+                      })}
+                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="https://example.com/narration.mp3"
+                    />
+                  </div>
+
+                  {/* Typewriter Sound */}
+                  <div className="mb-3">
+                    <label className="block text-gray-300 text-xs mb-1.5">
+                      Son de machine à écrire (URL)
+                    </label>
+                    <input
+                      type="text"
+                      value={selectedLayer.audio?.typewriter || ''}
+                      onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'audio', {
+                        ...(selectedLayer.audio || {}),
+                        typewriter: e.target.value || null
+                      })}
+                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="https://example.com/typewriter.mp3"
+                    />
+                  </div>
+
+                  {/* Drawing Sound */}
+                  <div>
+                    <label className="block text-gray-300 text-xs mb-1.5">
+                      Son de dessin (URL)
+                    </label>
+                    <input
+                      type="text"
+                      value={selectedLayer.audio?.drawing || ''}
+                      onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'audio', {
+                        ...(selectedLayer.audio || {}),
+                        drawing: e.target.value || null
+                      })}
+                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="https://example.com/drawing.mp3"
+                    />
+                  </div>
+                </div>
               )}
             </div>
           </div>
