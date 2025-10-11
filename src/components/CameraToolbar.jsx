@@ -109,49 +109,6 @@ const CameraToolbar = ({
                 <div className="w-px h-5 bg-gray-600" />
               </>
             )}
-            
-            <div className="flex items-center gap-2">
-              <span className="text-gray-400 text-xs">Zoom cam:</span>
-              <button
-                onClick={() => onZoomCamera(selectedCameraId, Math.max(0.1, selectedCamera.zoom - 0.1))}
-                className="bg-pink-700 hover:bg-pink-600 text-white p-1 rounded transition-colors"
-                title="Dézoom caméra"
-              >
-                <ZoomOut className="w-3.5 h-3.5" />
-              </button>
-              <span className="text-white font-mono text-xs min-w-[2.5rem] text-center">
-                {selectedCamera.zoom.toFixed(1)}x
-              </span>
-              <button
-                onClick={() => onZoomCamera(selectedCameraId, Math.min(5.0, selectedCamera.zoom + 0.1))}
-                className="bg-pink-700 hover:bg-pink-600 text-white p-1 rounded transition-colors"
-                title="Zoom caméra"
-              >
-                <ZoomIn className="w-3.5 h-3.5" />
-              </button>
-            </div>
-            
-            {/* Scale Ratio Presets */}
-            <div className="w-px h-5 bg-gray-600" />
-            <div className="flex items-center gap-1">
-              <span className="text-gray-400 text-xs">Ratio:</span>
-              <div className="flex gap-1">
-                {[0.5, 0.7, 1.0, 1.5, 2.0].map((ratio) => (
-                  <button
-                    key={ratio}
-                    onClick={() => onZoomCamera(selectedCameraId, ratio)}
-                    className={`px-1.5 py-0.5 text-xs rounded transition-colors ${
-                      Math.abs(selectedCamera.zoom - ratio) < 0.05
-                        ? 'bg-pink-600 text-white font-semibold'
-                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-                    }`}
-                    title={`Régler le zoom à ${ratio}x`}
-                  >
-                    {ratio}x
-                  </button>
-                ))}
-              </div>
-            </div>
           </>
         )}
       </div>
