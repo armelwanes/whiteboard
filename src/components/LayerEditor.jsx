@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { 
   Upload, X, Save, Trash2, Eye, EyeOff, 
   MoveUp, MoveDown, Copy, Image as ImageIcon,
-  Layers as LayersIcon
+  Layers as LayersIcon, Type as TextIcon
 } from 'lucide-react';
 import CameraControls from './CameraControls';
 import LayerAnimationControls from './LayerAnimationControls';
@@ -82,6 +82,50 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleAddTextLayer = () => {
+    // Calculate initial position based on selected camera
+    let initialX = sceneWidth / 2;
+    let initialY = sceneHeight / 2;
+    
+    if (selectedCamera && selectedCamera.position) {
+      initialX = selectedCamera.position.x * sceneWidth;
+      initialY = selectedCamera.position.y * sceneHeight;
+    }
+    
+    const newLayer = {
+      id: `layer-${Date.now()}`,
+      name: 'Texte',
+      position: { x: initialX, y: initialY },
+      z_index: editedScene.layers.length + 1,
+      skip_rate: 12,
+      scale: 1.0,
+      opacity: 1.0,
+      mode: 'draw',
+      type: 'text',
+      text_config: {
+        text: 'Votre texte ici',
+        font: 'Arial',
+        size: 48,
+        color: [0, 0, 0],
+        style: 'normal',
+        line_height: 1.2,
+        align: 'left'
+      },
+      audio: {
+        narration: null,
+        soundEffects: [],
+        typewriter: null,
+        drawing: null,
+      }
+    };
+    
+    setEditedScene({
+      ...editedScene,
+      layers: [...editedScene.layers, newLayer]
+    });
+    setSelectedLayerId(newLayer.id);
   };
 
   const handleUpdateLayer = (updatedLayer) => {
@@ -179,9 +223,16 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm"
-                title="Ajouter une couche"
+                title="Ajouter une image"
               >
                 <Upload className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={handleAddTextLayer}
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm"
+                title="Ajouter un texte"
+              >
+                <TextIcon className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={onClose}
@@ -533,12 +584,214 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                     </label>
                     <select
                       value={selectedLayer.type || 'image'}
-                      onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'type', e.target.value)}
+                      onChange={(e) => {
+                        const newType = e.target.value;
+                        const updates = { type: newType };
+                        
+                        // Initialize text_config when changing to text type
+                        if (newType === 'text' && !selectedLayer.text_config) {
+                          updates.text_config = {
+                            text: 'Votre texte ici',
+                            font: 'Arial',
+                            size: 48,
+                            color: [0, 0, 0],
+                            style: 'normal',
+                            line_height: 1.2,
+                            align: 'left'
+                          };
+                        }
+                        
+                        setEditedScene({
+                          ...editedScene,
+                          layers: editedScene.layers.map(layer =>
+                            layer.id === selectedLayer.id ? { ...layer, ...updates } : layer
+                          )
+                        });
+                      }}
                       className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="image">Image</option>
                       <option value="text">Texte</option>
                     </select>
+                  </div>
+                </div>
+              )}
+
+              {/* Text Configuration (only for text layers) */}
+              {selectedLayer && selectedLayer.type === 'text' && (
+                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                  <h3 className="text-white font-semibold mb-3 text-sm">
+                    Configuration du Texte
+                  </h3>
+
+                  {/* Text Content */}
+                  <div className="mb-3">
+                    <label className="block text-gray-300 text-xs mb-1.5">
+                      Contenu du texte
+                    </label>
+                    <textarea
+                      value={selectedLayer.text_config?.text || ''}
+                      onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'text_config', {
+                        ...(selectedLayer.text_config || {}),
+                        text: e.target.value
+                      })}
+                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Votre texte ici&#10;Utilisez Entrée pour les sauts de ligne"
+                      rows="4"
+                    />
+                    <p className="text-gray-500 text-xs mt-1">
+                      Utilisez Entrée pour créer plusieurs lignes
+                    </p>
+                  </div>
+
+                  {/* Font and Size */}
+                  <div className="mb-3 grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-gray-300 text-xs mb-1.5">
+                        Police
+                      </label>
+                      <select
+                        value={selectedLayer.text_config?.font || 'Arial'}
+                        onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'text_config', {
+                          ...(selectedLayer.text_config || {}),
+                          font: e.target.value
+                        })}
+                        className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="Arial">Arial</option>
+                        <option value="DejaVuSans">DejaVu Sans</option>
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Comic Sans MS">Comic Sans MS</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 text-xs mb-1.5">
+                        Taille
+                      </label>
+                      <input
+                        type="number"
+                        min="8"
+                        max="200"
+                        value={selectedLayer.text_config?.size || 48}
+                        onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'text_config', {
+                          ...(selectedLayer.text_config || {}),
+                          size: parseInt(e.target.value) || 48
+                        })}
+                        className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Color */}
+                  <div className="mb-3">
+                    <label className="block text-gray-300 text-xs mb-1.5">
+                      Couleur
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        value={
+                          Array.isArray(selectedLayer.text_config?.color)
+                            ? `#${selectedLayer.text_config.color.map(c => c.toString(16).padStart(2, '0')).join('')}`
+                            : (selectedLayer.text_config?.color || '#000000')
+                        }
+                        onChange={(e) => {
+                          const hex = e.target.value;
+                          const r = parseInt(hex.slice(1, 3), 16);
+                          const g = parseInt(hex.slice(3, 5), 16);
+                          const b = parseInt(hex.slice(5, 7), 16);
+                          handleLayerPropertyChange(selectedLayer.id, 'text_config', {
+                            ...(selectedLayer.text_config || {}),
+                            color: [r, g, b]
+                          });
+                        }}
+                        className="h-10 w-16 bg-gray-700 border border-gray-600 rounded cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        value={
+                          Array.isArray(selectedLayer.text_config?.color)
+                            ? `#${selectedLayer.text_config.color.map(c => c.toString(16).padStart(2, '0')).join('')}`
+                            : (selectedLayer.text_config?.color || '#000000')
+                        }
+                        onChange={(e) => {
+                          const hex = e.target.value;
+                          if (/^#[0-9A-F]{6}$/i.test(hex)) {
+                            const r = parseInt(hex.slice(1, 3), 16);
+                            const g = parseInt(hex.slice(3, 5), 16);
+                            const b = parseInt(hex.slice(5, 7), 16);
+                            handleLayerPropertyChange(selectedLayer.id, 'text_config', {
+                              ...(selectedLayer.text_config || {}),
+                              color: [r, g, b]
+                            });
+                          }
+                        }}
+                        placeholder="#000000"
+                        className="flex-1 bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Style */}
+                  <div className="mb-3">
+                    <label className="block text-gray-300 text-xs mb-1.5">
+                      Style
+                    </label>
+                    <select
+                      value={selectedLayer.text_config?.style || 'normal'}
+                      onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'text_config', {
+                        ...(selectedLayer.text_config || {}),
+                        style: e.target.value
+                      })}
+                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="normal">Normal</option>
+                      <option value="bold">Gras</option>
+                      <option value="italic">Italique</option>
+                      <option value="bold_italic">Gras Italique</option>
+                    </select>
+                  </div>
+
+                  {/* Line Height and Alignment */}
+                  <div className="mb-3 grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-gray-300 text-xs mb-1.5">
+                        Hauteur ligne
+                      </label>
+                      <input
+                        type="number"
+                        min="0.5"
+                        max="3"
+                        step="0.1"
+                        value={selectedLayer.text_config?.line_height || 1.2}
+                        onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'text_config', {
+                          ...(selectedLayer.text_config || {}),
+                          line_height: parseFloat(e.target.value) || 1.2
+                        })}
+                        className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 text-xs mb-1.5">
+                        Alignement
+                      </label>
+                      <select
+                        value={selectedLayer.text_config?.align || 'left'}
+                        onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'text_config', {
+                          ...(selectedLayer.text_config || {}),
+                          align: e.target.value
+                        })}
+                        className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="left">Gauche</option>
+                        <option value="center">Centre</option>
+                        <option value="right">Droite</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               )}
