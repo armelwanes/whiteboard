@@ -3,7 +3,8 @@ import {
   X, Square, Circle, Triangle, Minus, ArrowRight, Hexagon, FileText,
   ArrowLeftRight, MoveUpRight, CornerDownRight, Star, Cloud, 
   MessageCircle, MessageSquare, Highlighter, Ribbon, 
-  Target, Clock, Box, Lightbulb, Frame, Underline, Heart
+  Target, Clock, Box, Lightbulb, Frame, Underline, Heart,
+  Sparkles, Zap, Hash, Type, PenTool
 } from 'lucide-react';
 import { ShapeType, createShapeLayer, getShapeDisplayName } from '../utils/shapeUtils';
 
@@ -50,14 +51,80 @@ const ShapeToolbar = ({ onAddShape, onClose }) => {
         { type: ShapeType.ORG_NODE, icon: Box },
       ],
     },
+    doodle: {
+      label: 'Doodle',
+      shapes: [
+        { type: ShapeType.FRAME_DOODLE, icon: Frame },
+        { type: ShapeType.FRAME_RECT_DOODLE, icon: Square },
+        { type: ShapeType.FRAME_CIRCLE_DOODLE, icon: Circle },
+        { type: ShapeType.FRAME_CLOUD_DOODLE, icon: Cloud },
+        { type: ShapeType.ARROW_DOODLE, icon: ArrowRight },
+        { type: ShapeType.LINE_WAVE_DOODLE, icon: Minus },
+        { type: ShapeType.STAR_SHOOTING, icon: Sparkles },
+        { type: ShapeType.EXPLOSION_SHAPE, icon: Zap },
+        { type: ShapeType.CIRCLE_SKETCH, icon: Circle },
+        { type: ShapeType.TRIANGLE_DOODLE, icon: Triangle },
+        { type: ShapeType.RECTANGLE_DOODLE, icon: Square },
+        { type: ShapeType.ARROW_CURVE_DOODLE, icon: MoveUpRight },
+        { type: ShapeType.HIGHLIGHT_DOODLE, icon: Highlighter },
+        { type: ShapeType.BUBBLE_DOODLE, icon: MessageCircle },
+        { type: ShapeType.CLOUD_DOODLE, icon: Cloud },
+      ],
+    },
     decorative: {
       label: 'Decorative',
       shapes: [
         { type: ShapeType.HIGHLIGHT, icon: Highlighter },
         { type: ShapeType.ICON, icon: Lightbulb },
-        { type: ShapeType.FRAME_DOODLE, icon: Frame },
         { type: ShapeType.UNDERLINE_ANIMATED, icon: Underline },
         { type: ShapeType.DECORATIVE_SHAPE, icon: Heart },
+      ],
+    },
+    numbers: {
+      label: 'Numbers',
+      shapes: [
+        { type: ShapeType.NUMBER_0, icon: Hash },
+        { type: ShapeType.NUMBER_1, icon: Hash },
+        { type: ShapeType.NUMBER_2, icon: Hash },
+        { type: ShapeType.NUMBER_3, icon: Hash },
+        { type: ShapeType.NUMBER_4, icon: Hash },
+        { type: ShapeType.NUMBER_5, icon: Hash },
+        { type: ShapeType.NUMBER_6, icon: Hash },
+        { type: ShapeType.NUMBER_7, icon: Hash },
+        { type: ShapeType.NUMBER_8, icon: Hash },
+        { type: ShapeType.NUMBER_9, icon: Hash },
+        { type: ShapeType.NUMBER_10, icon: Hash },
+      ],
+    },
+    letters: {
+      label: 'Letters',
+      shapes: [
+        { type: ShapeType.LETTER_A, icon: Type },
+        { type: ShapeType.LETTER_B, icon: Type },
+        { type: ShapeType.LETTER_C, icon: Type },
+        { type: ShapeType.LETTER_D, icon: Type },
+        { type: ShapeType.LETTER_E, icon: Type },
+        { type: ShapeType.LETTER_F, icon: Type },
+        { type: ShapeType.LETTER_G, icon: Type },
+        { type: ShapeType.LETTER_H, icon: Type },
+        { type: ShapeType.LETTER_I, icon: Type },
+        { type: ShapeType.LETTER_J, icon: Type },
+        { type: ShapeType.LETTER_K, icon: Type },
+        { type: ShapeType.LETTER_L, icon: Type },
+        { type: ShapeType.LETTER_M, icon: Type },
+        { type: ShapeType.LETTER_N, icon: Type },
+        { type: ShapeType.LETTER_O, icon: Type },
+        { type: ShapeType.LETTER_P, icon: Type },
+        { type: ShapeType.LETTER_Q, icon: Type },
+        { type: ShapeType.LETTER_R, icon: Type },
+        { type: ShapeType.LETTER_S, icon: Type },
+        { type: ShapeType.LETTER_T, icon: Type },
+        { type: ShapeType.LETTER_U, icon: Type },
+        { type: ShapeType.LETTER_V, icon: Type },
+        { type: ShapeType.LETTER_W, icon: Type },
+        { type: ShapeType.LETTER_X, icon: Type },
+        { type: ShapeType.LETTER_Y, icon: Type },
+        { type: ShapeType.LETTER_Z, icon: Type },
       ],
     },
     text: {
@@ -89,12 +156,12 @@ const ShapeToolbar = ({ onAddShape, onClose }) => {
         </div>
 
         {/* Category Tabs */}
-        <div className="bg-gray-900 px-6 border-b border-gray-700 flex gap-2">
+        <div className="bg-gray-900 px-6 border-b border-gray-700 flex gap-2 overflow-x-auto">
           {Object.entries(shapeCategories).map(([key, category]) => (
             <button
               key={key}
               onClick={() => setSelectedCategory(key)}
-              className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
+              className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
                 selectedCategory === key
                   ? 'text-blue-400 border-blue-400'
                   : 'text-gray-400 border-transparent hover:text-white'
@@ -107,7 +174,11 @@ const ShapeToolbar = ({ onAddShape, onClose }) => {
 
         {/* Shape Grid */}
         <div className="p-6 overflow-y-auto max-h-[60vh]">
-          <div className="grid grid-cols-4 gap-4">
+          <div className={`grid gap-4 ${
+            selectedCategory === 'numbers' || selectedCategory === 'letters' 
+              ? 'grid-cols-6' 
+              : 'grid-cols-4'
+          }`}>
             {shapeCategories[selectedCategory].shapes.map(({ type, icon: Icon }) => (
               <button
                 key={type}
