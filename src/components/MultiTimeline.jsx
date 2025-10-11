@@ -416,7 +416,7 @@ const MultiTimeline = ({
         </div>
 
         {/* Tracks */}
-        {!isCollapsed && tracksOfType.map((track, idx) => {
+        {!isCollapsed && tracksOfType.map((track) => {
           const trackIndex = multiTimeline.tracks.indexOf(track);
           return renderTrack(track, trackIndex);
         })}
