@@ -109,9 +109,7 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
             currentTime={currentTime}
             timeline={globalTimeline}
           />
-          
         ))}
-        
         {/* Loading state */}
         {scenes.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -120,11 +118,8 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
         )}
       </div>
 
-      {/* Timeline controls */}
-     
-
-      {/* Layer Editor Modal */}
-      {isEditorOpen && scenes[selectedSceneIndex] && (
+      {/* Layer Editor Block above timeline */}
+      {scenes[selectedSceneIndex] && (
         <LayerEditor
           scene={scenes[selectedSceneIndex]}
           onSave={(updatedScene) => {
@@ -135,7 +130,8 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
         />
       )}
 
-       <div className="timeline-container p-4 flex-shrink-0">
+      {/* Timeline controls always visible at the bottom */}
+      <div className="timeline-container p-4">
         <Timeline
           currentTime={currentTime}
           totalDuration={totalDuration}

@@ -1,10 +1,195 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Stage, Layer as KonvaLayer, Image as KonvaImage, Transformer } from 'react-konva';
+import { Stage, Layer as KonvaLayer, Image as KonvaImage, Transformer, Rect, Group, Line, Text } from 'react-konva';
 import useImage from 'use-image';
-import CameraViewport from './CameraViewport';
 import CameraToolbar from './CameraToolbar';
-import CameraSettingsPanel from './CameraSettingsPanel';
 import { createDefaultCamera } from '../utils/cameraAnimator';
+
+// Konva Camera Component
+const KonvaCamera = ({ camera, isSelected, onSelect, onUpdate, sceneWidth, sceneHeight }) => {
+  const groupRef = useRef();
+  const transformerRef = useRef();
+
+  React.useEffect(() => {
+    if (isSelected && transformerRef.current && groupRef.current) {
+      transformerRef.current.nodes([groupRef.current]);
+      transformerRef.current.getLayer().batchDraw();
+    }
+  }, [isSelected]);
+
+  // Calculate pixel position and dimensions
+  const pixelDims = {
+    width: camera.width || 800,
+    height: camera.height || 450,
+  };
+  
+  const pixelPos = {
+    x: (camera.position.x * sceneWidth) - (pixelDims.width / 2),
+    y: (camera.position.y * sceneHeight) - (pixelDims.height / 2),
+  };
+
+  const handleDragEnd = (e) => {
+    if (camera.locked) return;
+    
+    const node = groupRef.current;
+    const newX = node.x();
+    const newY = node.y();
+    
+    // Convert top-left corner to center position
+    const centerX = newX + (pixelDims.width / 2);
+    const centerY = newY + (pixelDims.height / 2);
+    
+    // Convert to normalized coordinates
+    onUpdate(camera.id, {
+      position: {
+        x: Math.max(0, Math.min(1, centerX / sceneWidth)),
+        y: Math.max(0, Math.min(1, centerY / sceneHeight)),
+      },
+    });
+  };
+
+  const handleTransformEnd = () => {
+    if (camera.locked) return;
+    const node = groupRef.current;
+    const scaleX = node.scaleX();
+    const scaleY = node.scaleY();
+    // Calculate new dimensions
+    const newWidth = Math.max(100, pixelDims.width * scaleX);
+    const newHeight = Math.max(100, pixelDims.height * scaleY);
+    // Calculate zoom based on width ratio (inverse)
+    const newZoom = Math.max(0.1, Math.min(5.0, pixelDims.width / newWidth * (camera.zoom || 1.0)));
+    // Get new position
+    const newX = node.x();
+    const newY = node.y();
+    const centerX = newX + (newWidth / 2);
+    const centerY = newY + (newHeight / 2);
+    onUpdate(camera.id, {
+      position: {
+        x: Math.max(0, Math.min(1, centerX / sceneWidth)),
+        y: Math.max(0, Math.min(1, centerY / sceneHeight)),
+      },
+      width: newWidth,
+      height: newHeight,
+      zoom: newZoom,
+    });
+    // Always reset scale after transform
+    node.scaleX(1);
+    node.scaleY(1);
+  };
+
+  const handleTransform = () => {
+    if (camera.locked) return;
+    const node = groupRef.current;
+    const scaleX = node.scaleX();
+    const scaleY = node.scaleY();
+    // Calculate new dimensions in real-time
+    const newWidth = Math.max(100, pixelDims.width * scaleX);
+    const newHeight = Math.max(100, pixelDims.height * scaleY);
+    // Calculate zoom based on width ratio (inverse)
+    const newZoom = Math.max(0.1, Math.min(5.0, pixelDims.width / newWidth * (camera.zoom || 1.0)));
+    // Get new position
+    const newX = node.x();
+    const newY = node.y();
+    const centerX = newX + (newWidth / 2);
+    const centerY = newY + (newHeight / 2);
+    onUpdate(camera.id, {
+      position: {
+        x: Math.max(0, Math.min(1, centerX / sceneWidth)),
+        y: Math.max(0, Math.min(1, centerY / sceneHeight)),
+      },
+      width: newWidth,
+      height: newHeight,
+      zoom: newZoom,
+    });
+    // Always reset scale for smooth updates
+    node.scaleX(1);
+    node.scaleY(1);
+  };
+
+  return (
+    <>
+      <Group
+        x={pixelPos.x}
+        y={pixelPos.y}
+        ref={groupRef}
+        draggable={!camera.locked}
+        onClick={() => onSelect(camera.id)}
+        onTap={() => onSelect(camera.id)}
+        onDragEnd={handleDragEnd}
+        onTransformEnd={handleTransformEnd}
+      >
+        {/* Camera Frame Border */}
+        <Rect
+          width={pixelDims.width}
+          height={pixelDims.height}
+          stroke={isSelected ? '#ec4899' : '#f9a8d4'}
+          strokeWidth={3}
+          dash={camera.locked ? [] : [10, 5]}
+          fill={isSelected ? 'rgba(236, 72, 153, 0.1)' : 'rgba(249, 168, 212, 0.05)'}
+        />
+        
+        {/* Diagonal Lines */}
+        <Line
+          points={[0, 0, pixelDims.width, pixelDims.height]}
+          stroke={isSelected ? '#ec4899' : '#f9a8d4'}
+          strokeWidth={2}
+          dash={[5, 5]}
+          opacity={isSelected ? 0.6 : 0.3}
+        />
+        <Line
+          points={[pixelDims.width, 0, 0, pixelDims.height]}
+          stroke={isSelected ? '#ec4899' : '#f9a8d4'}
+          strokeWidth={2}
+          dash={[5, 5]}
+          opacity={isSelected ? 0.6 : 0.3}
+        />
+      </Group>
+      
+      {/* Camera Label - Séparé du groupe principal */}
+      <Group
+        x={pixelPos.x}
+        y={pixelPos.y - 30}
+        listening={false}
+      >
+        <Rect
+          width={150}
+          height={25}
+          fill={camera.locked ? '#3b82f6' : '#ec4899'}
+          cornerRadius={[5, 5, 0, 0]}
+        />
+        <Text
+          text={`${camera.name || camera.id} (${camera.zoom.toFixed(1)}x)`}
+          fill="white"
+          fontSize={12}
+          fontStyle="bold"
+          padding={5}
+          width={150}
+          align="center"
+        />
+      </Group>
+      
+      {/* Transformer for resize handles */}
+      {isSelected && !camera.locked && (
+        <Transformer
+          ref={transformerRef}
+          boundBoxFunc={(oldBox, newBox) => {
+            if (newBox.width < 100 || newBox.height < 100) {
+              return oldBox;
+            }
+            return newBox;
+          }}
+          enabledAnchors={[
+            'top-left',
+            'top-right',
+            'bottom-left',
+            'bottom-right'
+          ]}
+          keepRatio={true}
+          rotateEnabled={false}
+        />
+      )}
+    </>
+  );
+};
 
 // Konva Layer Image Component
 const LayerImage = ({ layer, isSelected, onSelect, onChange }) => {
@@ -114,8 +299,8 @@ const SceneCanvas = ({
   const stageRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
-  const sceneWidth = 1920 * 5;
-  const sceneHeight = 1080 * 5;
+  const sceneWidth = 1920;
+  const sceneHeight = 1080;
 
   // Create a new camera
   const handleAddCamera = useCallback(() => {
@@ -240,8 +425,6 @@ const SceneCanvas = ({
     }
   }, [selectedCameraId, sceneCameras, sceneWidth, sceneHeight, sceneZoom, hasInitialCentered]);
 
-  // No longer needed - canvas fills viewport
-
   // Sort layers by z_index for rendering
   const sortedLayers = [...(scene.layers || [])].sort((a, b) => 
     (a.z_index || 0) - (b.z_index || 0)
@@ -249,7 +432,7 @@ const SceneCanvas = ({
 
   const scaledSceneWidth = sceneWidth * sceneZoom;
   const scaledSceneHeight = sceneHeight * sceneZoom;
-  console.log('sceneCameras',sceneCameras);
+  
   return (
     <div className="flex flex-col h-full bg-gray-950">
       {/* Camera Toolbar */}
@@ -289,13 +472,14 @@ const SceneCanvas = ({
                 position: 'relative'
               }}
             >
-            {/* Konva Stage for layers */}
-            <div style={{ position: 'relative', zIndex: 10 }}>
+            {/* Konva Stage for layers and cameras */}
+            <div style={{ position: 'relative', zIndex: 2 }}>
               <Stage
                 width={sceneWidth}
                 height={sceneHeight}
                 scaleX={sceneZoom}
                 scaleY={sceneZoom}
+                
                 style={{
                   width: `${scaledSceneWidth}px`,
                   height: `${scaledSceneHeight}px`,
@@ -314,6 +498,22 @@ const SceneCanvas = ({
                   }
                 }}
               >
+                {/* Cameras Layer - En dessous */}
+                <KonvaLayer>
+                  {sceneCameras.map((camera) => (
+                    <KonvaCamera
+                      key={camera.id}
+                      camera={camera}
+                      isSelected={selectedCameraId === camera.id}
+                      onSelect={setSelectedCameraId}
+                      onUpdate={handleUpdateCamera}
+                      sceneWidth={sceneWidth}
+                      sceneHeight={sceneHeight}
+                    />
+                  ))}
+                </KonvaLayer>
+                
+                {/* Layers - Au dessus */}
                 <KonvaLayer>
                   {sortedLayers.map((layer) => (
                     <LayerImage
@@ -330,32 +530,9 @@ const SceneCanvas = ({
                 </KonvaLayer>
               </Stage>
             </div>
-            {/* Camera Viewports Overlay */}
-            <div className="pointer-events-none" style={{ zIndex: 1 }}>
-              {sceneCameras.map((camera) => (
-                <CameraViewport
-                  key={camera.id}
-                  camera={camera}
-                  isSelected={selectedCameraId === camera.id}
-                  onSelect={setSelectedCameraId}
-                  onUpdate={handleUpdateCamera}
-                  onDelete={handleDeleteCamera}
-                  sceneWidth={sceneWidth}
-                  sceneHeight={sceneHeight}
-                  canvasZoom={sceneZoom}
-                />
-              ))}
-            </div>
           </div>
           </div>
         </div>
-        {/* Right Panel - Camera Settings */}
-        {/**<div className="w-80 bg-gray-900 border-l border-gray-700 overflow-y-auto p-4">
-          <CameraSettingsPanel
-            camera={sceneCameras.find(cam => cam.id === selectedCameraId)}
-            onUpdate={handleUpdateCamera}
-          />
-        </div>**/}
       </div>
     </div>
   );

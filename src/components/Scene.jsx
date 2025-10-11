@@ -68,16 +68,6 @@ const Scene = ({
           </div>
         )}
       </div>
-
-      {isEditing ? (
-        <LayerEditor
-          scene={scene}
-          onSave={(updatedScene) => {
-            updateScene(selectedSceneIndex, updatedScene);
-          }}
-          onClose={() => {}}
-        />
-      ) : null}
     </div>
   );
 };

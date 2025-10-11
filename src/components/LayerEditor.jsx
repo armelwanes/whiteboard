@@ -18,8 +18,8 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   const [selectedCamera, setSelectedCamera] = useState(null);
   const fileInputRef = useRef(null);
 
-  const sceneWidth = 1920 * 5;
-  const sceneHeight = 1080 * 5;
+  const sceneWidth = 1920;
+  const sceneHeight = 1080;
 
   // Update editedScene when scene prop changes (switching between scenes)
   React.useEffect(() => {
@@ -150,10 +150,10 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   const selectedLayer = editedScene.layers.find(layer => layer.id === selectedLayerId);
 
   return (
-    <div className="bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-900 shadow-2xl w-full h-[95vh] flex overflow-hidden border border-gray-700">
+    <div className="flex items-center justify-center w-full">
+      <div className="bg-gray-900 shadow-2xl w-full max-w-full max-h-[70vh] flex overflow-hidden border border-gray-700">
         {/* Left Side - Canvas Preview with Camera Viewports */}
-        <div className="bg-gray-950 flex flex-col flex-1 min-w-0">
+        <div className="bg-red-950 flex flex-col flex-1 min-w-0">
           <SceneCanvas
             scene={editedScene}
             onUpdateScene={(updates) => setEditedScene({ ...editedScene, ...updates })}
