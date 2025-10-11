@@ -6,6 +6,7 @@ import Toolbar from './components/Toolbar'
 import HandWritingTest from './pages/HandWritingTest'
 import sampleStory from './data/scenes'
 import { createMultiTimeline } from './utils/multiTimelineSystem'
+import { createSceneAudioConfig } from './utils/audioManager'
 
 function App() {
   const [scenes, setScenes] = useState(() => {
@@ -33,7 +34,8 @@ function App() {
       layers: [],
       cameras: [],
       sceneCameras: [],
-      multiTimeline: createMultiTimeline(5)
+      multiTimeline: createMultiTimeline(5),
+      audio: createSceneAudioConfig()
     }
     setScenes([...scenes, newScene])
     setSelectedSceneIndex(scenes.length)

@@ -1,4 +1,5 @@
 import { createMultiTimeline } from '../utils/multiTimelineSystem';
+import { createSceneAudioConfig } from '../utils/audioManager';
 
 // Sample story: "The Journey of Learning"
 export const sampleStory = [
@@ -11,7 +12,8 @@ export const sampleStory = [
     animation: 'fade',
     layers: [],
     cameras: [],
-    multiTimeline: createMultiTimeline(5)
+    multiTimeline: createMultiTimeline(5),
+    audio: createSceneAudioConfig()
   },
   {
     id: 'scene-2',
@@ -22,7 +24,8 @@ export const sampleStory = [
     animation: 'fade',
     layers: [],
     cameras: [],
-    multiTimeline: createMultiTimeline(5)
+    multiTimeline: createMultiTimeline(5),
+    audio: createSceneAudioConfig()
   },
   {
     id: 'scene-3',
@@ -33,7 +36,8 @@ export const sampleStory = [
     animation: 'fade',
     layers: [],
     cameras: [],
-    multiTimeline: createMultiTimeline(5)
+    multiTimeline: createMultiTimeline(5),
+    audio: createSceneAudioConfig()
   },
   {
     id: 'scene-4',
@@ -44,7 +48,8 @@ export const sampleStory = [
     animation: 'fade',
     layers: [],
     cameras: [],
-    multiTimeline: createMultiTimeline(5)
+    multiTimeline: createMultiTimeline(5),
+    audio: createSceneAudioConfig()
   },
   {
     id: 'scene-5',
@@ -55,7 +60,8 @@ export const sampleStory = [
     animation: 'fade',
     layers: [],
     cameras: [],
-    multiTimeline: createMultiTimeline(5)
+    multiTimeline: createMultiTimeline(5),
+    audio: createSceneAudioConfig()
   }
 ];
 

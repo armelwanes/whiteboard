@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import Scene from './Scene';
+import AudioManager from './audio/AudioManager';
 
 const SceneEditor = ({ scene, onClose, onSave }) => {
   const [editedScene, setEditedScene] = useState({ 
@@ -258,6 +259,16 @@ const SceneEditor = ({ scene, onClose, onSave }) => {
                     ))
                   )}
                 </div>
+              </div>
+
+              {/* Audio Manager */}
+              <div>
+                <AudioManager 
+                  scene={editedScene}
+                  onSceneUpdate={setEditedScene}
+                  currentTime={0}
+                  isPlaying={false}
+                />
               </div>
             </div>
           </div>
