@@ -5,6 +5,7 @@ import {
   Image as ImageIcon,
   Layers as LayersIcon
 } from 'lucide-react';
+import AudioManager from './audio/AudioManager';
 
 const PropertiesPanel = ({ 
   scene, 
@@ -357,6 +358,14 @@ const PropertiesPanel = ({
               </div>
             </div>
           )}
+
+          {/* Audio Manager */}
+          <AudioManager 
+            scene={scene}
+            onSceneUpdate={onUpdateScene}
+            currentTime={0}
+            isPlaying={false}
+          />
         </div>
       </div>
     </div>

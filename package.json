@@ -13,6 +13,7 @@
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "howler": "^2.2.4",
     "konva": "^10.0.2",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
