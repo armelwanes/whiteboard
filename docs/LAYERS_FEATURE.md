@@ -12,10 +12,17 @@ La fonctionnalité de couches (layers) permet de superposer plusieurs images sur
 
 ## Ajouter une couche
 
-1. Cliquez sur le bouton **"Ajouter une couche"** en haut du canvas
+### Ajouter une couche image
+1. Cliquez sur le bouton bleu **"📤"** (Upload) en haut du panneau de propriétés
 2. Sélectionnez une image depuis votre ordinateur
 3. L'image apparaîtra sur le canvas et sera automatiquement sélectionnée
 4. La couche sera ajoutée à la liste dans le panneau de droite
+
+### Ajouter une couche texte
+1. Cliquez sur le bouton vert **"T"** (Texte) en haut du panneau de propriétés
+2. Une nouvelle couche texte sera créée au centre de la scène
+3. Configurez le texte et ses propriétés dans le panneau de configuration
+4. Le texte apparaîtra sur le canvas avec les styles appliqués
 
 ## Manipuler les couches sur le canvas
 
@@ -72,8 +79,54 @@ Trois modes disponibles :
 3. **Static (Statique)** : La couche apparaît instantanément sans animation
 
 ### Type
-- **Image** : Pour les images importées
-- **Texte** : Pour les couches de texte (fonctionnalité future)
+Deux types de couches disponibles :
+
+1. **Image** : Pour les images importées depuis votre ordinateur
+2. **Texte** : Pour les couches de texte avec animation handwriting
+
+#### Configuration des couches texte
+
+Lorsque vous sélectionnez le type "Texte", une section de configuration apparaît avec les options suivantes :
+
+**Contenu du texte**
+- Zone de texte multi-lignes
+- Appuyez sur Entrée pour créer des sauts de ligne
+- Supporte les caractères spéciaux et unicode
+
+**Police**
+- Arial (par défaut)
+- DejaVu Sans
+- Helvetica
+- Times New Roman
+- Courier New
+- Verdana
+- Georgia
+- Comic Sans MS
+
+**Taille**
+- Valeur de 8 à 200 pixels
+- Par défaut : 48px
+
+**Couleur**
+- Sélecteur de couleur visuel
+- Champ de saisie hexadécimal (#000000 format)
+- Supporte les couleurs RGB
+
+**Style**
+- Normal : texte standard
+- Gras : texte en gras
+- Italique : texte en italique
+- Gras Italique : combinaison des deux
+
+**Hauteur de ligne**
+- Contrôle l'espacement entre les lignes
+- Valeur de 0.5 à 3.0
+- Par défaut : 1.2
+
+**Alignement**
+- Gauche : texte aligné à gauche
+- Centre : texte centré
+- Droite : texte aligné à droite
 
 ## Gestion des couches
 
@@ -107,6 +160,47 @@ Dans le panneau de droite, vous verrez la liste de toutes les couches de la scè
 
 Les couches sont stockées dans le format suivant :
 
+### Couche Image
+```json
+{
+  "id": "layer-1234567890",
+  "image_path": "data:image/png;base64,...",
+  "name": "mon-image.png",
+  "position": { "x": 100, "y": 100 },
+  "z_index": 1,
+  "skip_rate": 10,
+  "scale": 1.0,
+  "opacity": 1.0,
+  "mode": "draw",
+  "type": "image"
+}
+```
+
+### Couche Texte
+```json
+{
+  "id": "layer-1234567890",
+  "name": "Mon Texte",
+  "position": { "x": 960, "y": 540 },
+  "z_index": 2,
+  "skip_rate": 12,
+  "scale": 1.0,
+  "opacity": 1.0,
+  "mode": "draw",
+  "type": "text",
+  "text_config": {
+    "text": "Votre texte ici\nAvec des sauts de ligne",
+    "font": "Arial",
+    "size": 48,
+    "color": [0, 102, 204],
+    "style": "bold",
+    "line_height": 1.2,
+    "align": "center"
+  }
+}
+```
+
+### Structure complète d'une scène
 ```json
 {
   "id": "scene-1",
@@ -115,16 +209,14 @@ Les couches sont stockées dans le format suivant :
   "duration": 5,
   "layers": [
     {
-      "id": "layer-1234567890",
-      "image_path": "data:image/png;base64,...",
-      "name": "mon-image.png",
-      "position": { "x": 100, "y": 100 },
-      "z_index": 1,
-      "skip_rate": 10,
-      "scale": 1.0,
-      "opacity": 1.0,
-      "mode": "draw",
-      "type": "image"
+      "id": "layer-1",
+      "type": "image",
+      ...
+    },
+    {
+      "id": "layer-2",
+      "type": "text",
+      ...
     }
   ]
 }
