@@ -260,6 +260,100 @@ const LayerImage = ({ layer, isSelected, onSelect, onChange }) => {
   );
 };
 
+// Konva Layer Text Component
+const LayerText = ({ layer, isSelected, onSelect, onChange }) => {
+  const textRef = useRef();
+  const transformerRef = useRef();
+
+  React.useEffect(() => {
+    if (isSelected && transformerRef.current && textRef.current) {
+      transformerRef.current.nodes([textRef.current]);
+      transformerRef.current.getLayer().batchDraw();
+    }
+  }, [isSelected]);
+
+  const textConfig = layer.text_config || {};
+  const text = textConfig.text || 'Texte';
+  const fontSize = textConfig.size || 48;
+  const fontFamily = textConfig.font || 'Arial';
+  
+  // Convert style to Konva format
+  let fontStyle = 'normal';
+  if (textConfig.style === 'bold') fontStyle = 'bold';
+  else if (textConfig.style === 'italic') fontStyle = 'italic';
+  else if (textConfig.style === 'bold_italic') fontStyle = 'bold italic';
+  
+  // Convert color (RGB array or hex string) to hex string
+  let fill = '#000000';
+  if (Array.isArray(textConfig.color)) {
+    fill = `#${textConfig.color.map(c => c.toString(16).padStart(2, '0')).join('')}`;
+  } else if (typeof textConfig.color === 'string') {
+    fill = textConfig.color;
+  }
+
+  const align = textConfig.align || 'left';
+  const lineHeight = textConfig.line_height || 1.2;
+
+  return (
+    <>
+      <Text
+        text={text}
+        x={layer.position?.x || 0}
+        y={layer.position?.y || 0}
+        fontSize={fontSize}
+        fontFamily={fontFamily}
+        fontStyle={fontStyle}
+        fill={fill}
+        align={align}
+        lineHeight={lineHeight}
+        scaleX={layer.scale || 1.0}
+        scaleY={layer.scale || 1.0}
+        opacity={layer.opacity || 1.0}
+        draggable
+        onClick={onSelect}
+        onTap={onSelect}
+        ref={textRef}
+        onDragEnd={(e) => {
+          onChange({
+            ...layer,
+            position: {
+              x: e.target.x(),
+              y: e.target.y(),
+            }
+          });
+        }}
+        onTransformEnd={() => {
+          const node = textRef.current;
+          const scaleX = node.scaleX();
+
+          onChange({
+            ...layer,
+            position: {
+              x: node.x(),
+              y: node.y(),
+            },
+            scale: scaleX,
+          });
+          
+          node.scaleX(1);
+          node.scaleY(1);
+        }}
+      />
+      {isSelected && (
+        <Transformer
+          ref={transformerRef}
+          boundBoxFunc={(oldBox, newBox) => {
+            if (newBox.width < 5 || newBox.height < 5) {
+              return oldBox;
+            }
+            return newBox;
+          }}
+        />
+      )}
+    </>
+  );
+};
+
 /**
  * SceneCanvas Component
  * Main canvas for scene editing with camera viewport management
@@ -515,18 +609,36 @@ const SceneCanvas = ({
                 
                 {/* Layers - Au dessus */}
                 <KonvaLayer>
-                  {sortedLayers.map((layer) => (
-                    <LayerImage
-                      key={layer.id}
-                      layer={layer}
-                      isSelected={layer.id === selectedLayerId}
-                      onSelect={() => {
-                        onSelectLayer(layer.id);
-                        setSelectedCameraId(null);
-                      }}
-                      onChange={onUpdateLayer}
-                    />
-                  ))}
+                  {sortedLayers.map((layer) => {
+                    // Render text or image layer based on type
+                    if (layer.type === 'text') {
+                      return (
+                        <LayerText
+                          key={layer.id}
+                          layer={layer}
+                          isSelected={layer.id === selectedLayerId}
+                          onSelect={() => {
+                            onSelectLayer(layer.id);
+                            setSelectedCameraId(null);
+                          }}
+                          onChange={onUpdateLayer}
+                        />
+                      );
+                    } else {
+                      return (
+                        <LayerImage
+                          key={layer.id}
+                          layer={layer}
+                          isSelected={layer.id === selectedLayerId}
+                          onSelect={() => {
+                            onSelectLayer(layer.id);
+                            setSelectedCameraId(null);
+                          }}
+                          onChange={onUpdateLayer}
+                        />
+                      );
+                    }
+                  })}
                 </KonvaLayer>
               </Stage>
             </div>
