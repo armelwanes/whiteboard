@@ -1,3 +1,5 @@
+import { createMultiTimeline } from '../utils/multiTimelineSystem';
+
 // Sample story: "The Journey of Learning"
 export const sampleStory = [
   {
@@ -8,7 +10,8 @@ export const sampleStory = [
     backgroundImage: null,
     animation: 'fade',
     layers: [],
-    cameras: []
+    cameras: [],
+    multiTimeline: createMultiTimeline(5)
   },
   {
     id: 'scene-2',
@@ -18,7 +21,8 @@ export const sampleStory = [
     backgroundImage: null,
     animation: 'fade',
     layers: [],
-    cameras: []
+    cameras: [],
+    multiTimeline: createMultiTimeline(5)
   },
   {
     id: 'scene-3',
@@ -28,7 +32,8 @@ export const sampleStory = [
     backgroundImage: null,
     animation: 'fade',
     layers: [],
-    cameras: []
+    cameras: [],
+    multiTimeline: createMultiTimeline(5)
   },
   {
     id: 'scene-4',
@@ -38,7 +43,8 @@ export const sampleStory = [
     backgroundImage: null,
     animation: 'fade',
     layers: [],
-    cameras: []
+    cameras: [],
+    multiTimeline: createMultiTimeline(5)
   },
   {
     id: 'scene-5',
@@ -48,7 +54,8 @@ export const sampleStory = [
     backgroundImage: null,
     animation: 'fade',
     layers: [],
-    cameras: []
+    cameras: [],
+    multiTimeline: createMultiTimeline(5)
   }
 ];
 
