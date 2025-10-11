@@ -938,6 +938,28 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                     />
                   </div>
 
+                  {/* Fill Mode */}
+                  <div className="mb-3">
+                    <label className="block text-gray-300 text-xs mb-1.5">
+                      Mode de remplissage
+                    </label>
+                    <select
+                      value={selectedLayer.shape_config.fillMode || 'both'}
+                      onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'shape_config', {
+                        ...(selectedLayer.shape_config || {}),
+                        fillMode: e.target.value
+                      })}
+                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="both">Rempli et Contour</option>
+                      <option value="fill">Rempli uniquement</option>
+                      <option value="stroke">Contour uniquement</option>
+                    </select>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Contrôle si la forme est remplie, contournée, ou les deux
+                    </p>
+                  </div>
+
                   {/* Corner Radius (for rectangles) */}
                   {selectedLayer.shape_config.shape === 'rectangle' && (
                     <div className="mb-3">
