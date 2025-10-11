@@ -60,13 +60,96 @@ export const createTrack = (trackType, name = '', elements = []) => {
 export const createMultiTimeline = (duration) => {
   return {
     duration,
-    tracks: {
-      [TrackType.VISUAL]: createTrack(TrackType.VISUAL, 'Visuel'),
-      [TrackType.AUDIO]: createTrack(TrackType.AUDIO, 'Audio'),
-      [TrackType.CAMERA]: createTrack(TrackType.CAMERA, 'Caméra'),
-      [TrackType.FX]: createTrack(TrackType.FX, 'Effets'),
+    tracks: [], // Array of tracks with dynamic addition/removal
+    trackGroups: {
+      [TrackType.VISUAL]: [],
+      [TrackType.AUDIO]: [],
+      [TrackType.CAMERA]: [],
+      [TrackType.FX]: [],
     },
     syncMarkers: [], // Synchronization markers across tracks
+  };
+};
+
+/**
+ * Add a new track to multi-timeline
+ * @param {Object} multiTimeline - Multi-timeline object
+ * @param {string} trackType - Type of track to add
+ * @param {string} name - Track name (optional)
+ * @returns {Object} Updated multi-timeline
+ */
+export const addTrackToTimeline = (multiTimeline, trackType, name = '') => {
+  const trackNumber = multiTimeline.trackGroups[trackType].length + 1;
+  const defaultName = name || `${trackType.charAt(0).toUpperCase() + trackType.slice(1)} #${trackNumber}`;
+  const newTrack = createTrack(trackType, defaultName);
+  
+  return {
+    ...multiTimeline,
+    tracks: [...multiTimeline.tracks, newTrack],
+    trackGroups: {
+      ...multiTimeline.trackGroups,
+      [trackType]: [...multiTimeline.trackGroups[trackType], newTrack.id],
+    },
+  };
+};
+
+/**
+ * Remove a track from multi-timeline
+ * @param {Object} multiTimeline - Multi-timeline object
+ * @param {string} trackId - ID of track to remove
+ * @returns {Object} Updated multi-timeline
+ */
+export const removeTrackFromTimeline = (multiTimeline, trackId) => {
+  const trackToRemove = multiTimeline.tracks.find(t => t.id === trackId);
+  if (!trackToRemove) return multiTimeline;
+  
+  return {
+    ...multiTimeline,
+    tracks: multiTimeline.tracks.filter(t => t.id !== trackId),
+    trackGroups: {
+      ...multiTimeline.trackGroups,
+      [trackToRemove.type]: multiTimeline.trackGroups[trackToRemove.type].filter(id => id !== trackId),
+    },
+  };
+};
+
+/**
+ * Update track properties
+ * @param {Object} multiTimeline - Multi-timeline object
+ * @param {string} trackId - ID of track to update
+ * @param {Object} updates - Updates to apply
+ * @returns {Object} Updated multi-timeline
+ */
+export const updateTrackInTimeline = (multiTimeline, trackId, updates) => {
+  return {
+    ...multiTimeline,
+    tracks: multiTimeline.tracks.map(track =>
+      track.id === trackId ? { ...track, ...updates } : track
+    ),
+  };
+};
+
+/**
+ * Reorder tracks within the timeline
+ * @param {Object} multiTimeline - Multi-timeline object
+ * @param {string} trackId - ID of track to move
+ * @param {number} direction - Direction to move (-1 for up, 1 for down)
+ * @returns {Object} Updated multi-timeline
+ */
+export const reorderTrack = (multiTimeline, trackId, direction) => {
+  const trackIndex = multiTimeline.tracks.findIndex(t => t.id === trackId);
+  if (trackIndex === -1) return multiTimeline;
+  
+  const newIndex = trackIndex + direction;
+  if (newIndex < 0 || newIndex >= multiTimeline.tracks.length) return multiTimeline;
+  
+  const newTracks = [...multiTimeline.tracks];
+  const [movedTrack] = newTracks.splice(trackIndex, 1);
+  newTracks.splice(newIndex, 0, movedTrack);
+  
+  return {
+    ...multiTimeline,
+    tracks: newTracks,
   };
 };
 
@@ -117,20 +200,26 @@ export const deleteElementFromTrack = (track, elementId) => {
  * Get all active elements at time across all tracks
  * @param {Object} multiTimeline - Multi-timeline object
  * @param {number} time - Current time in seconds
- * @returns {Object} Active elements by track type
+ * @returns {Array} Active elements with track info
  */
 export const getActiveElements = (multiTimeline, time) => {
-  const activeElements = {};
+  const activeElements = [];
   
-  Object.entries(multiTimeline.tracks).forEach(([trackType, track]) => {
-    if (!track.enabled) {
-      activeElements[trackType] = [];
-      return;
-    }
+  multiTimeline.tracks.forEach(track => {
+    if (!track.enabled) return;
     
-    activeElements[trackType] = track.elements.filter(element => {
+    const trackActiveElements = track.elements.filter(element => {
       const endTime = element.startTime + element.duration;
       return time >= element.startTime && time <= endTime;
+    });
+    
+    trackActiveElements.forEach(element => {
+      activeElements.push({
+        ...element,
+        trackId: track.id,
+        trackType: track.type,
+        trackName: track.name,
+      });
     });
   });
   
@@ -208,6 +297,10 @@ export default {
   createTimelineElement,
   createTrack,
   createMultiTimeline,
+  addTrackToTimeline,
+  removeTrackFromTimeline,
+  updateTrackInTimeline,
+  reorderTrack,
   addElementToTrack,
   updateElementInTrack,
   deleteElementFromTrack,

@@ -1,6 +1,17 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Music, Eye, Camera, Sparkles, Lock, Unlock, Plus, Trash2, GripVertical } from 'lucide-react';
-import { TrackType, createTimelineElement, addElementToTrack, updateElementInTrack, deleteElementFromTrack, snapToGrid } from '../utils/multiTimelineSystem';
+import { Music, Eye, Camera, Sparkles, Lock, Unlock, Plus, Trash2, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+import { 
+  TrackType, 
+  createTimelineElement, 
+  addElementToTrack, 
+  updateElementInTrack, 
+  deleteElementFromTrack, 
+  snapToGrid,
+  addTrackToTimeline,
+  removeTrackFromTimeline,
+  updateTrackInTimeline,
+  reorderTrack
+} from '../utils/multiTimelineSystem';
 
 const TRACK_ICONS = {
   [TrackType.VISUAL]: Eye,
@@ -23,10 +34,12 @@ const MultiTimeline = ({
   isPlaying = false,
 }) => {
   const [selectedElement, setSelectedElement] = useState(null);
+  const [selectedTrack, setSelectedTrack] = useState(null);
   const [dragState, setDragState] = useState(null);
   const [resizeState, setResizeState] = useState(null);
   const timelineRef = useRef(null);
   const [showAddMenu, setShowAddMenu] = useState(null);
+  const [collapsedGroups, setCollapsedGroups] = useState({});
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -39,17 +52,20 @@ const MultiTimeline = ({
     return (pixels / width) * multiTimeline.duration;
   }, [multiTimeline.duration]);
 
-  const handleTrackClick = useCallback((e, trackType) => {
+  const handleTrackClick = useCallback((e, trackId) => {
     if (isPlaying || dragState || resizeState) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const time = snapToGrid(pixelsToTime(x, rect.width));
 
-    setShowAddMenu({ trackType, time, x: e.clientX, y: e.clientY });
+    setShowAddMenu({ trackId, time, x: e.clientX, y: e.clientY });
   }, [isPlaying, dragState, resizeState, pixelsToTime]);
 
-  const handleAddElement = useCallback((trackType, time, elementType) => {
+  const handleAddElement = useCallback((trackId, time, elementType) => {
+    const track = multiTimeline.tracks.find(t => t.id === trackId);
+    if (!track) return;
+
     const newElement = createTimelineElement(
       time,
       1.0, // Default 1 second duration
@@ -58,26 +74,23 @@ const MultiTimeline = ({
       `${elementType} ${time.toFixed(1)}s`
     );
 
-    const track = multiTimeline.tracks[trackType];
     const updatedTrack = addElementToTrack(track, newElement);
-
-    onUpdateMultiTimeline({
+    const updatedMultiTimeline = {
       ...multiTimeline,
-      tracks: {
-        ...multiTimeline.tracks,
-        [trackType]: updatedTrack,
-      },
-    });
+      tracks: multiTimeline.tracks.map(t => t.id === trackId ? updatedTrack : t),
+    };
+
+    onUpdateMultiTimeline(updatedMultiTimeline);
 
     setShowAddMenu(null);
-    setSelectedElement({ trackType, elementId: newElement.id });
+    setSelectedElement({ trackId, elementId: newElement.id });
   }, [multiTimeline, onUpdateMultiTimeline]);
 
-  const handleElementMouseDown = useCallback((e, trackType, element) => {
+  const handleElementMouseDown = useCallback((e, trackId, element) => {
     if (isPlaying) return;
     
     e.stopPropagation();
-    setSelectedElement({ trackType, elementId: element.id });
+    setSelectedElement({ trackId, elementId: element.id });
 
     const rect = e.currentTarget.getBoundingClientRect();
     const isResizeRight = e.clientX > rect.right - 10;
@@ -85,7 +98,7 @@ const MultiTimeline = ({
 
     if (isResizeRight || isResizeLeft) {
       setResizeState({
-        trackType,
+        trackId,
         element,
         side: isResizeRight ? 'right' : 'left',
         startX: e.clientX,
@@ -94,7 +107,7 @@ const MultiTimeline = ({
       });
     } else {
       setDragState({
-        trackType,
+        trackId,
         element,
         startX: e.clientX,
         originalStartTime: element.startTime,
@@ -115,17 +128,16 @@ const MultiTimeline = ({
         snapToGrid(dragState.originalStartTime + deltaTime)
       ));
 
-      const track = multiTimeline.tracks[dragState.trackType];
+      const track = multiTimeline.tracks.find(t => t.id === dragState.trackId);
+      if (!track) return;
+
       const updatedTrack = updateElementInTrack(track, dragState.element.id, {
         startTime: newStartTime,
       });
 
       onUpdateMultiTimeline({
         ...multiTimeline,
-        tracks: {
-          ...multiTimeline.tracks,
-          [dragState.trackType]: updatedTrack,
-        },
+        tracks: multiTimeline.tracks.map(t => t.id === dragState.trackId ? updatedTrack : t),
       });
     } else if (resizeState) {
       const { side, element, originalStartTime, originalDuration } = resizeState;
@@ -142,7 +154,9 @@ const MultiTimeline = ({
         newDuration = originalDuration - move;
       }
 
-      const track = multiTimeline.tracks[resizeState.trackType];
+      const track = multiTimeline.tracks.find(t => t.id === resizeState.trackId);
+      if (!track) return;
+
       const updatedTrack = updateElementInTrack(track, element.id, {
         startTime: newStartTime,
         duration: newDuration,
@@ -150,10 +164,7 @@ const MultiTimeline = ({
 
       onUpdateMultiTimeline({
         ...multiTimeline,
-        tracks: {
-          ...multiTimeline.tracks,
-          [resizeState.trackType]: updatedTrack,
-        },
+        tracks: multiTimeline.tracks.map(t => t.id === resizeState.trackId ? updatedTrack : t),
       });
     }
   }, [dragState, resizeState, multiTimeline, onUpdateMultiTimeline, pixelsToTime]);
@@ -177,47 +188,57 @@ const MultiTimeline = ({
   const handleDeleteElement = useCallback(() => {
     if (!selectedElement) return;
 
-    const track = multiTimeline.tracks[selectedElement.trackType];
+    const track = multiTimeline.tracks.find(t => t.id === selectedElement.trackId);
+    if (!track) return;
+
     const updatedTrack = deleteElementFromTrack(track, selectedElement.elementId);
 
     onUpdateMultiTimeline({
       ...multiTimeline,
-      tracks: {
-        ...multiTimeline.tracks,
-        [selectedElement.trackType]: updatedTrack,
-      },
+      tracks: multiTimeline.tracks.map(t => t.id === selectedElement.trackId ? updatedTrack : t),
     });
 
     setSelectedElement(null);
   }, [selectedElement, multiTimeline, onUpdateMultiTimeline]);
 
-  const toggleTrackEnabled = useCallback((trackType) => {
-    const track = multiTimeline.tracks[trackType];
-    onUpdateMultiTimeline({
-      ...multiTimeline,
-      tracks: {
-        ...multiTimeline.tracks,
-        [trackType]: {
-          ...track,
-          enabled: !track.enabled,
-        },
-      },
-    });
+  const toggleTrackEnabled = useCallback((trackId) => {
+    const track = multiTimeline.tracks.find(t => t.id === trackId);
+    if (!track) return;
+
+    onUpdateMultiTimeline(updateTrackInTimeline(multiTimeline, trackId, {
+      enabled: !track.enabled,
+    }));
   }, [multiTimeline, onUpdateMultiTimeline]);
 
-  const toggleTrackLocked = useCallback((trackType) => {
-    const track = multiTimeline.tracks[trackType];
-    onUpdateMultiTimeline({
-      ...multiTimeline,
-      tracks: {
-        ...multiTimeline.tracks,
-        [trackType]: {
-          ...track,
-          locked: !track.locked,
-        },
-      },
-    });
+  const toggleTrackLocked = useCallback((trackId) => {
+    const track = multiTimeline.tracks.find(t => t.id === trackId);
+    if (!track) return;
+
+    onUpdateMultiTimeline(updateTrackInTimeline(multiTimeline, trackId, {
+      locked: !track.locked,
+    }));
   }, [multiTimeline, onUpdateMultiTimeline]);
+
+  const handleAddTrack = useCallback((trackType) => {
+    onUpdateMultiTimeline(addTrackToTimeline(multiTimeline, trackType));
+  }, [multiTimeline, onUpdateMultiTimeline]);
+
+  const handleDeleteTrack = useCallback((trackId) => {
+    if (selectedTrack === trackId) setSelectedTrack(null);
+    if (selectedElement?.trackId === trackId) setSelectedElement(null);
+    onUpdateMultiTimeline(removeTrackFromTimeline(multiTimeline, trackId));
+  }, [multiTimeline, onUpdateMultiTimeline, selectedTrack, selectedElement]);
+
+  const handleMoveTrack = useCallback((trackId, direction) => {
+    onUpdateMultiTimeline(reorderTrack(multiTimeline, trackId, direction));
+  }, [multiTimeline, onUpdateMultiTimeline]);
+
+  const toggleGroupCollapse = useCallback((trackType) => {
+    setCollapsedGroups(prev => ({
+      ...prev,
+      [trackType]: !prev[trackType],
+    }));
+  }, []);
 
   const renderTimeScale = () => {
     const steps = 10;
@@ -249,31 +270,63 @@ const MultiTimeline = ({
     );
   };
 
-  const renderTrack = (trackType, track) => {
-    const Icon = TRACK_ICONS[trackType];
-    const color = TRACK_COLORS[trackType];
+  const renderTrack = (track, trackIndex) => {
+    const Icon = TRACK_ICONS[track.type];
+    const color = TRACK_COLORS[track.type];
+    const isFirst = trackIndex === 0;
+    const isLast = trackIndex === multiTimeline.tracks.length - 1;
 
     return (
-      <div key={trackType} className="track-container border-b border-gray-800">
+      <div key={track.id} className="track-container border-b border-gray-800">
         <div className="flex">
           {/* Track Header */}
           <div className="track-header w-48 bg-gray-900 p-3 flex items-center gap-2 border-r border-gray-800">
             <Icon className="w-4 h-4 text-gray-400" />
-            <span className="text-sm font-medium text-gray-200 flex-1">{track.name}</span>
-            <button
-              onClick={() => toggleTrackEnabled(trackType)}
-              className={`p-1 rounded ${track.enabled ? 'text-blue-400' : 'text-gray-600'}`}
-              title={track.enabled ? 'Désactiver' : 'Activer'}
-            >
-              <Eye className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => toggleTrackLocked(trackType)}
-              className={`p-1 rounded ${track.locked ? 'text-red-400' : 'text-gray-600'}`}
-              title={track.locked ? 'Déverrouiller' : 'Verrouiller'}
-            >
-              {track.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
-            </button>
+            <span className="text-sm font-medium text-gray-200 flex-1 truncate" title={track.name}>
+              {track.name}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => handleMoveTrack(track.id, -1)}
+                disabled={isFirst}
+                className={`p-1 rounded ${isFirst ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-800'}`}
+                title="Déplacer vers le haut"
+              >
+                <ChevronUp className="w-3 h-3" />
+              </button>
+              <button
+                onClick={() => handleMoveTrack(track.id, 1)}
+                disabled={isLast}
+                className={`p-1 rounded ${isLast ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-800'}`}
+                title="Déplacer vers le bas"
+              >
+                <ChevronDown className="w-3 h-3" />
+              </button>
+              <button
+                onClick={() => toggleTrackEnabled(track.id)}
+                className={`p-1 rounded ${track.enabled ? 'text-blue-400' : 'text-gray-600'}`}
+                title={track.enabled ? 'Désactiver' : 'Activer'}
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => toggleTrackLocked(track.id)}
+                className={`p-1 rounded ${track.locked ? 'text-red-400' : 'text-gray-600'}`}
+                title={track.locked ? 'Déverrouiller' : 'Verrouiller'}
+              >
+                {track.locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedTrack(track.id);
+                  handleDeleteTrack(track.id);
+                }}
+                className="p-1 rounded hover:bg-red-600 text-gray-400 hover:text-white"
+                title="Supprimer la piste"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+            </div>
           </div>
 
           {/* Track Timeline */}
@@ -282,7 +335,7 @@ const MultiTimeline = ({
               track.enabled ? 'bg-gray-800' : 'bg-gray-850'
             }`}
             style={{ minHeight: `${track.height}px` }}
-            onClick={(e) => !track.locked && handleTrackClick(e, trackType)}
+            onClick={(e) => !track.locked && handleTrackClick(e, track.id)}
           >
             {/* Grid lines */}
             {[...Array(11)].map((_, i) => (
@@ -297,7 +350,7 @@ const MultiTimeline = ({
             {track.elements.map((element) => {
               const startPos = (element.startTime / multiTimeline.duration) * 100;
               const width = (element.duration / multiTimeline.duration) * 100;
-              const isSelected = selectedElement?.trackType === trackType && 
+              const isSelected = selectedElement?.trackId === track.id && 
                                 selectedElement?.elementId === element.id;
 
               return (
@@ -310,7 +363,7 @@ const MultiTimeline = ({
                     left: `${startPos}%`,
                     width: `${width}%`,
                   }}
-                  onMouseDown={(e) => !track.locked && handleElementMouseDown(e, trackType, element)}
+                  onMouseDown={(e) => !track.locked && handleElementMouseDown(e, track.id, element)}
                   title={element.label}
                 >
                   <div className="px-2 py-1 text-xs text-white truncate select-none">
@@ -333,10 +386,48 @@ const MultiTimeline = ({
     );
   };
 
+  const renderTrackGroup = (trackType) => {
+    const Icon = TRACK_ICONS[trackType];
+    const tracksOfType = multiTimeline.tracks.filter(t => t.type === trackType);
+    const isCollapsed = collapsedGroups[trackType];
+    const typeName = trackType.charAt(0).toUpperCase() + trackType.slice(1);
+
+    return (
+      <div key={trackType} className="track-group">
+        {/* Group Header */}
+        <div className="flex items-center bg-gray-800 border-b border-gray-700 px-3 py-2">
+          <button
+            onClick={() => toggleGroupCollapse(trackType)}
+            className="flex items-center gap-2 flex-1 text-left hover:bg-gray-700 rounded px-2 py-1"
+          >
+            <Icon className="w-4 h-4 text-gray-300" />
+            <span className="text-sm font-semibold text-gray-200">
+              {typeName} ({tracksOfType.length})
+            </span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
+          </button>
+          <button
+            onClick={() => handleAddTrack(trackType)}
+            className="p-1 rounded hover:bg-gray-700 text-gray-300"
+            title={`Ajouter une piste ${typeName}`}
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Tracks */}
+        {!isCollapsed && tracksOfType.map((track) => {
+          const trackIndex = multiTimeline.tracks.indexOf(track);
+          return renderTrack(track, trackIndex);
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="multi-timeline bg-gray-900 text-white rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">Multi-Timelines</h3>
+        <h3 className="text-lg font-semibold">Multi-Level Timeline</h3>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-400">
             {formatTime(currentTime)} / {formatTime(multiTimeline.duration)}
@@ -358,9 +449,7 @@ const MultiTimeline = ({
       <div className="tracks-container relative" ref={timelineRef}>
         {renderPlayhead()}
         
-        {Object.entries(multiTimeline.tracks).map(([trackType, track]) => 
-          renderTrack(trackType, track)
-        )}
+        {Object.values(TrackType).map(trackType => renderTrackGroup(trackType))}
       </div>
 
       {/* Add Element Menu */}
@@ -378,94 +467,105 @@ const MultiTimeline = ({
               Ajouter à {formatTime(showAddMenu.time)}
             </div>
             <div className="space-y-1">
-              {showAddMenu.trackType === TrackType.VISUAL && (
-                <>
-                  <button
-                    onClick={() => handleAddElement(showAddMenu.trackType, showAddMenu.time, 'image')}
-                    className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
-                  >
-                    Image
-                  </button>
-                  <button
-                    onClick={() => handleAddElement(showAddMenu.trackType, showAddMenu.time, 'text')}
-                    className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
-                  >
-                    Texte
-                  </button>
-                  <button
-                    onClick={() => handleAddElement(showAddMenu.trackType, showAddMenu.time, 'svg')}
-                    className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
-                  >
-                    SVG
-                  </button>
-                </>
-              )}
-              {showAddMenu.trackType === TrackType.AUDIO && (
-                <>
-                  <button
-                    onClick={() => handleAddElement(showAddMenu.trackType, showAddMenu.time, 'music')}
-                    className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
-                  >
-                    Musique
-                  </button>
-                  <button
-                    onClick={() => handleAddElement(showAddMenu.trackType, showAddMenu.time, 'narration')}
-                    className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
-                  >
-                    Narration
-                  </button>
-                  <button
-                    onClick={() => handleAddElement(showAddMenu.trackType, showAddMenu.time, 'sfx')}
-                    className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
-                  >
-                    Effet sonore
-                  </button>
-                </>
-              )}
-              {showAddMenu.trackType === TrackType.CAMERA && (
-                <>
-                  <button
-                    onClick={() => handleAddElement(showAddMenu.trackType, showAddMenu.time, 'pan')}
-                    className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
-                  >
-                    Pan
-                  </button>
-                  <button
-                    onClick={() => handleAddElement(showAddMenu.trackType, showAddMenu.time, 'zoom')}
-                    className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
-                  >
-                    Zoom
-                  </button>
-                  <button
-                    onClick={() => handleAddElement(showAddMenu.trackType, showAddMenu.time, 'rotate')}
-                    className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
-                  >
-                    Rotation
-                  </button>
-                </>
-              )}
-              {showAddMenu.trackType === TrackType.FX && (
-                <>
-                  <button
-                    onClick={() => handleAddElement(showAddMenu.trackType, showAddMenu.time, 'fade')}
-                    className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
-                  >
-                    Fade
-                  </button>
-                  <button
-                    onClick={() => handleAddElement(showAddMenu.trackType, showAddMenu.time, 'blur')}
-                    className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
-                  >
-                    Blur
-                  </button>
-                  <button
-                    onClick={() => handleAddElement(showAddMenu.trackType, showAddMenu.time, 'transition')}
-                    className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
-                  >
-                    Transition
-                  </button>
-                </>
-              )}
+              {(() => {
+                const track = multiTimeline.tracks.find(t => t.id === showAddMenu.trackId);
+                if (!track) return null;
+                
+                if (track.type === TrackType.VISUAL) {
+                  return (
+                    <>
+                      <button
+                        onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'image')}
+                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                      >
+                        Image
+                      </button>
+                      <button
+                        onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'text')}
+                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                      >
+                        Texte
+                      </button>
+                      <button
+                        onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'svg')}
+                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                      >
+                        SVG
+                      </button>
+                    </>
+                  );
+                } else if (track.type === TrackType.AUDIO) {
+                  return (
+                    <>
+                      <button
+                        onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'music')}
+                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                      >
+                        Musique
+                      </button>
+                      <button
+                        onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'narration')}
+                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                      >
+                        Narration
+                      </button>
+                      <button
+                        onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'sfx')}
+                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                      >
+                        Effet sonore
+                      </button>
+                    </>
+                  );
+                } else if (track.type === TrackType.CAMERA) {
+                  return (
+                    <>
+                      <button
+                        onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'pan')}
+                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                      >
+                        Pan
+                      </button>
+                      <button
+                        onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'zoom')}
+                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                      >
+                        Zoom
+                      </button>
+                      <button
+                        onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'rotate')}
+                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                      >
+                        Rotation
+                      </button>
+                    </>
+                  );
+                } else if (track.type === TrackType.FX) {
+                  return (
+                    <>
+                      <button
+                        onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'fade')}
+                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                      >
+                        Fade
+                      </button>
+                      <button
+                        onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'blur')}
+                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                      >
+                        Blur
+                      </button>
+                      <button
+                        onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'transition')}
+                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                      >
+                        Transition
+                      </button>
+                    </>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
         </>
