@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
-import { X, Square, Circle, Triangle, Minus, ArrowRight, Hexagon, FileText } from 'lucide-react';
-import { ShapeType, createShapeLayer, getShapeDisplayName, getShapeIcon } from '../utils/shapeUtils';
+import { 
+  X, Square, Circle, Triangle, Minus, ArrowRight, Hexagon, FileText,
+  ArrowLeftRight, MoveUpRight, CornerDownRight, Star, Cloud, 
+  MessageCircle, MessageSquare, Highlighter, Ribbon, 
+  Target, Clock, Box, Lightbulb, Frame, Underline, Heart
+} from 'lucide-react';
+import { ShapeType, createShapeLayer, getShapeDisplayName } from '../utils/shapeUtils';
 
 /**
  * ShapeToolbar Component
@@ -14,9 +19,12 @@ const ShapeToolbar = ({ onAddShape, onClose }) => {
       label: 'Basic Shapes',
       shapes: [
         { type: ShapeType.RECTANGLE, icon: Square },
+        { type: ShapeType.SQUARE, icon: Square },
         { type: ShapeType.CIRCLE, icon: Circle },
         { type: ShapeType.ELLIPSE, icon: Circle },
         { type: ShapeType.TRIANGLE, icon: Triangle },
+        { type: ShapeType.HEXAGON, icon: Hexagon },
+        { type: ShapeType.POLYGON, icon: Hexagon },
       ],
     },
     lines: {
@@ -24,12 +32,37 @@ const ShapeToolbar = ({ onAddShape, onClose }) => {
       shapes: [
         { type: ShapeType.LINE, icon: Minus },
         { type: ShapeType.ARROW, icon: ArrowRight },
+        { type: ShapeType.ARROW_DOUBLE, icon: ArrowLeftRight },
+        { type: ShapeType.ARROW_CURVE, icon: MoveUpRight },
+        { type: ShapeType.CONNECTOR, icon: CornerDownRight },
       ],
     },
     advanced: {
       label: 'Advanced',
       shapes: [
-        { type: ShapeType.POLYGON, icon: Hexagon },
+        { type: ShapeType.STAR, icon: Star },
+        { type: ShapeType.CLOUD, icon: Cloud },
+        { type: ShapeType.BUBBLE, icon: MessageCircle },
+        { type: ShapeType.THOUGHT_BUBBLE, icon: MessageSquare },
+        { type: ShapeType.BANNER, icon: Ribbon },
+        { type: ShapeType.CIRCLE_CONCENTRIC, icon: Target },
+        { type: ShapeType.TIMELINE, icon: Clock },
+        { type: ShapeType.ORG_NODE, icon: Box },
+      ],
+    },
+    decorative: {
+      label: 'Decorative',
+      shapes: [
+        { type: ShapeType.HIGHLIGHT, icon: Highlighter },
+        { type: ShapeType.ICON, icon: Lightbulb },
+        { type: ShapeType.FRAME_DOODLE, icon: Frame },
+        { type: ShapeType.UNDERLINE_ANIMATED, icon: Underline },
+        { type: ShapeType.DECORATIVE_SHAPE, icon: Heart },
+      ],
+    },
+    text: {
+      label: 'Text',
+      shapes: [
         { type: ShapeType.TEXT_BOX, icon: FileText },
       ],
     },
