@@ -9,7 +9,6 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
-  const [showMultiTimeline, setShowMultiTimeline] = useState(true);
   const [globalTimeline, setGlobalTimeline] = useState(() => {
     // Initialize with empty timeline
     const totalDuration = scenes.reduce((sum, scene) => sum + scene.duration, 0);
@@ -162,18 +161,12 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
         />
 
         {/* Multi-Timeline for current scene */}
-        {showMultiTimeline && scenes[currentSceneIndex] && scenes[currentSceneIndex].multiTimeline && (
+        {scenes[currentSceneIndex] && scenes[currentSceneIndex].multiTimeline && (
           <div className="border-t border-gray-700 pt-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-semibold text-gray-300">
                 Scène {currentSceneIndex + 1}: {scenes[currentSceneIndex].title}
               </h3>
-              <button
-                onClick={() => setShowMultiTimeline(false)}
-                className="text-xs text-gray-400 hover:text-gray-200"
-              >
-                Masquer
-              </button>
             </div>
             <MultiTimeline
               multiTimeline={scenes[currentSceneIndex].multiTimeline}
@@ -182,15 +175,6 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
               isPlaying={isPlaying}
             />
           </div>
-        )}
-
-        {!showMultiTimeline && (
-          <button
-            onClick={() => setShowMultiTimeline(true)}
-            className="text-sm text-blue-400 hover:text-blue-300"
-          >
-            Afficher Multi-Timeline
-          </button>
         )}
       </div>
     </div>
