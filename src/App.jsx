@@ -5,6 +5,7 @@ import PropertiesPanel from './components/PropertiesPanel'
 import Toolbar from './components/Toolbar'
 import HandWritingTest from './pages/HandWritingTest'
 import sampleStory from './data/scenes'
+import { createMultiTimeline } from './utils/multiTimelineSystem'
 
 function App() {
   const [scenes, setScenes] = useState(() => {
@@ -31,7 +32,8 @@ function App() {
       animation: 'fade',
       layers: [],
       cameras: [],
-      sceneCameras: []
+      sceneCameras: [],
+      multiTimeline: createMultiTimeline(5)
     }
     setScenes([...scenes, newScene])
     setSelectedSceneIndex(scenes.length)
@@ -54,7 +56,8 @@ function App() {
     const duplicatedScene = {
       ...sceneToDuplicate,
       id: `scene-${Date.now()}`,
-      title: `${sceneToDuplicate.title} (Copie)`
+      title: `${sceneToDuplicate.title} (Copie)`,
+      multiTimeline: sceneToDuplicate.multiTimeline || createMultiTimeline(sceneToDuplicate.duration)
     }
     const newScenes = [...scenes]
     newScenes.splice(index + 1, 0, duplicatedScene)
