@@ -188,9 +188,7 @@ const LayerShape = ({ layer, isSelected, onSelect, onChange }) => {
             y={shapeConfig.y}
             radiusX={shapeConfig.radiusX}
             radiusY={shapeConfig.radiusY}
-            fill={shapeConfig.fill}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
+            {...getFillStrokeProps(shapeConfig)}
             rotation={shapeConfig.rotation || 0}
           />
         );
@@ -217,9 +215,7 @@ const LayerShape = ({ layer, isSelected, onSelect, onChange }) => {
             x={shapeConfig.x || 0}
             y={shapeConfig.y || 0}
             points={shapeConfig.points}
-            stroke={shapeConfig.stroke}
-            fill={shapeConfig.fill}
-            strokeWidth={shapeConfig.strokeWidth}
+            {...getFillStrokeProps(shapeConfig)}
             pointerLength={shapeConfig.pointerLength || 20}
             pointerWidth={shapeConfig.pointerWidth || 20}
             lineCap={shapeConfig.lineCap || 'round'}
@@ -236,9 +232,7 @@ const LayerShape = ({ layer, isSelected, onSelect, onChange }) => {
             y={shapeConfig.y}
             sides={3}
             radius={shapeConfig.radius}
-            fill={shapeConfig.fill}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
+            {...getFillStrokeProps(shapeConfig)}
             rotation={shapeConfig.rotation || 0}
           />
         );
@@ -251,9 +245,7 @@ const LayerShape = ({ layer, isSelected, onSelect, onChange }) => {
             y={shapeConfig.y}
             sides={shapeConfig.sides || 6}
             radius={shapeConfig.radius}
-            fill={shapeConfig.fill}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
+            {...getFillStrokeProps(shapeConfig)}
             rotation={shapeConfig.rotation || 0}
           />
         );
@@ -393,9 +385,7 @@ const LayerShape = ({ layer, isSelected, onSelect, onChange }) => {
             numPoints={shapeConfig.numPoints || 5}
             innerRadius={shapeConfig.innerRadius || 40}
             outerRadius={shapeConfig.outerRadius || 100}
-            fill={shapeConfig.fill}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
+            {...getFillStrokeProps(shapeConfig)}
             rotation={shapeConfig.rotation || 0}
           />
         );
@@ -419,9 +409,7 @@ const LayerShape = ({ layer, isSelected, onSelect, onChange }) => {
               context.closePath();
               context.fillStrokeShape(shape);
             }}
-            fill={shapeConfig.fill}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
+            {...getFillStrokeProps(shapeConfig)}
           />
         );
 
@@ -438,9 +426,7 @@ const LayerShape = ({ layer, isSelected, onSelect, onChange }) => {
               y={-shapeConfig.height / 2}
               width={shapeConfig.width}
               height={shapeConfig.height}
-              fill={shapeConfig.fill}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth}
+              {...getFillStrokeProps(shapeConfig)}
               cornerRadius={shapeConfig.cornerRadius || 10}
             />
             {/* Tail */}
@@ -469,26 +455,20 @@ const LayerShape = ({ layer, isSelected, onSelect, onChange }) => {
             <Ellipse
               radiusX={shapeConfig.width / 2}
               radiusY={shapeConfig.height / 2}
-              fill={shapeConfig.fill}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth}
+              {...getFillStrokeProps(shapeConfig)}
             />
             {/* Small thought circles */}
             <Circle
               x={-shapeConfig.width / 3}
               y={shapeConfig.height / 2 + 15}
               radius={8}
-              fill={shapeConfig.fill}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth}
+              {...getFillStrokeProps(shapeConfig)}
             />
             <Circle
               x={-shapeConfig.width / 2 - 10}
               y={shapeConfig.height / 2 + 30}
               radius={5}
-              fill={shapeConfig.fill}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth}
+              {...getFillStrokeProps(shapeConfig)}
             />
           </Group>
         );

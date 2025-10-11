@@ -131,6 +131,7 @@ export const DEFAULT_SHAPE_CONFIGS = {
     strokeWidth: 2,
     opacity: 1,
     rotation: 0,
+    fillMode: 'both',
   },
   [ShapeType.LINE]: {
     shape: ShapeType.LINE,
@@ -140,6 +141,7 @@ export const DEFAULT_SHAPE_CONFIGS = {
     opacity: 1,
     lineCap: 'round',
     lineJoin: 'round',
+    fillMode: 'stroke',
   },
   [ShapeType.ARROW]: {
     shape: ShapeType.ARROW,
@@ -152,6 +154,7 @@ export const DEFAULT_SHAPE_CONFIGS = {
     pointerWidth: 20,
     lineCap: 'round',
     lineJoin: 'round',
+    fillMode: 'both',
   },
   [ShapeType.TRIANGLE]: {
     shape: ShapeType.TRIANGLE,
@@ -164,6 +167,7 @@ export const DEFAULT_SHAPE_CONFIGS = {
     strokeWidth: 2,
     opacity: 1,
     rotation: 0,
+    fillMode: 'both',
   },
   [ShapeType.POLYGON]: {
     shape: ShapeType.POLYGON,
@@ -252,6 +256,7 @@ export const DEFAULT_SHAPE_CONFIGS = {
     strokeWidth: 2,
     opacity: 1,
     rotation: 0,
+    fillMode: 'both',
   },
   [ShapeType.CLOUD]: {
     shape: ShapeType.CLOUD,
@@ -263,6 +268,7 @@ export const DEFAULT_SHAPE_CONFIGS = {
     stroke: '#38BDF8',
     strokeWidth: 2,
     opacity: 1,
+    fillMode: 'both',
   },
   [ShapeType.BUBBLE]: {
     shape: ShapeType.BUBBLE,
@@ -276,6 +282,7 @@ export const DEFAULT_SHAPE_CONFIGS = {
     opacity: 1,
     cornerRadius: 10,
     tailDirection: 'bottom-left',
+    fillMode: 'both',
   },
   [ShapeType.THOUGHT_BUBBLE]: {
     shape: ShapeType.THOUGHT_BUBBLE,
@@ -287,6 +294,7 @@ export const DEFAULT_SHAPE_CONFIGS = {
     stroke: '#374151',
     strokeWidth: 2,
     opacity: 1,
+    fillMode: 'both',
   },
   [ShapeType.HIGHLIGHT]: {
     shape: ShapeType.HIGHLIGHT,
