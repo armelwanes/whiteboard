@@ -2,31 +2,29 @@
 
 ## Overview
 
-The whiteboard-anim application now includes comprehensive audio support for creating professional multimedia presentations. This system allows you to add background music, narration, sound effects, and synchronized audio to your scenes.
+The whiteboard-anim application now includes comprehensive audio support for creating professional multimedia presentations. This system allows you to add:
+- **Background music** at the scene level (for ambient music throughout the entire scene)
+- **Layer-specific audio** including narration, sound effects, and drawing sounds (synchronized with specific layers)
 
 ## Features
 
 ### Supported Audio Features
 
-1. **Background Music**
+1. **Background Music (Scene Level)**
    - Loop playback
    - Volume control (0-100%)
    - Fade in/out effects
    - Single track per scene
+   - Configured in scene properties
 
-2. **Voice-Over / Narration**
-   - Multiple narration tracks per scene
-   - Precise timing control (start time)
-   - Volume adjustment
-   - Sequential or overlapping narration
+2. **Layer-Specific Audio**
+   - **Voice-Over / Narration** - Per-layer narration track
+   - **Typewriter Sound** - Audio for text animations
+   - **Drawing Sound** - Audio for drawing animations
+   - **Sound Effects** - Per-layer sound effects
+   - Synchronized with layer animations
 
-3. **Sound Effects**
-   - Multiple sound effects per scene
-   - Synchronized with animations
-   - Precise timing (start time and duration)
-   - Volume control
-
-4. **Multi-Track Audio Mixing**
+3. **Audio Mixing**
    - Master volume control
    - Individual track volume adjustment
    - Automatic mixing of all audio tracks
@@ -35,13 +33,19 @@ The whiteboard-anim application now includes comprehensive audio support for cre
 
 ### Adding Audio to a Scene
 
+**Scene-Level Audio (Background Music):**
 1. Open a scene in the Scene Editor
-2. Scroll down to the "Audio Manager" section
-3. Click the expand button to open the audio panel
-4. Choose the type of audio to add:
-   - **Background Music** - For ambient music that loops throughout the scene
-   - **Narration** - For voice-over or spoken content
-   - **Sound Effect** - For short audio clips synchronized with events
+2. In the "Propriétés de la Scène" section, find "Musique de fond (URL)"
+3. Enter the URL or path to your background music file
+4. The music will play throughout the entire scene duration
+
+**Layer-Level Audio:**
+1. Select a layer from the "Couches" list
+2. Scroll down to the "Audio de la Couche" section
+3. Add audio URLs for:
+   - **Narration / Voix-off** - Voice-over for this specific layer
+   - **Son de machine à écrire** - Typewriter sound for text animations
+   - **Son de dessin** - Drawing sound for sketch animations
 
 ### Audio Track Controls
 
@@ -68,54 +72,37 @@ The audio system uses Howler.js and supports the following formats:
 - **M4A/AAC** - Good for voice recordings
 - **WEBM** - Modern format with good compression
 
-## Scene Audio Configuration
+## Audio Configuration
 
 ### Data Structure
 
-Each scene can have an `audio` configuration object:
+**Scene Level (Background Music Only):**
 
 ```javascript
 {
   id: 'scene-1',
   title: 'My Scene',
   duration: 10,
+  backgroundMusic: 'audio/background.mp3', // URL or path to background music
+  layers: [
+    // layers with their own audio...
+  ]
+}
+```
+
+**Layer Level (Narration, Sound Effects, etc.):**
+
+```javascript
+{
+  id: 'layer-1',
+  name: 'My Layer',
+  type: 'image',
+  image_path: 'images/layer.png',
   audio: {
-    backgroundMusic: {
-      id: 'audio-12345',
-      type: 'background_music',
-      path: 'data:audio/mp3;base64,...', // or URL
-      volume: 0.5,
-      loop: true,
-      startTime: 0.0,
-      fadeIn: 2.0,
-      fadeOut: 2.0,
-    },
-    narration: [
-      {
-        id: 'audio-12346',
-        type: 'narration',
-        path: 'data:audio/mp3;base64,...',
-        volume: 1.0,
-        startTime: 0.0,
-      },
-      {
-        id: 'audio-12347',
-        type: 'narration',
-        path: 'data:audio/mp3;base64,...',
-        volume: 1.0,
-        startTime: 5.0,
-      }
-    ],
-    soundEffects: [
-      {
-        id: 'audio-12348',
-        type: 'sound_effect',
-        path: 'data:audio/wav;base64,...',
-        volume: 0.8,
-        startTime: 2.5,
-        duration: 0.5,
-      }
-    ]
+    narration: 'audio/narration.mp3',        // Voice-over for this layer
+    soundEffects: [],                         // Sound effects for this layer
+    typewriter: 'audio/typewriter.mp3',       // Typewriter sound for text
+    drawing: 'audio/drawing.mp3',             // Drawing sound for animations
   }
 }
 ```
@@ -236,9 +223,10 @@ Parse audio configuration from JSON format (issue spec).
 
 ## Integration with Timeline
 
-The audio system is designed to work seamlessly with the MultiTimeline system:
+The audio system is designed to work seamlessly with the timeline:
 
-- Audio tracks can be added to the Audio track in the MultiTimeline
+- Background music plays for the entire scene duration
+- Layer audio is synchronized with layer animations
 - Timeline synchronization keeps audio in sync with visual elements
 - Playback controls affect both visual and audio elements
 

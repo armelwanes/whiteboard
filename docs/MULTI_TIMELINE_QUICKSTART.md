@@ -1,5 +1,8 @@
 # Multi-Timeline System - Quick Start Guide
 
+> **⚠️ NOTE: This feature is currently not in use.**  
+> The multi-timeline system has been removed from the active codebase. This documentation is kept for reference purposes only. The application now uses a simple timeline with audio configuration at the scene level (background music) and layer level (narration, sound effects, etc.).
+
 ## 🚀 Getting Started
 
 The multi-timeline system allows you to create complex animations with synchronized parallel tracks for visual elements, audio, camera movements, and effects.
