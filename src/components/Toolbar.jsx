@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from './ui/button';
 import { Edit, Type, Square, Image, Camera, Circle, PenTool } from 'lucide-react';
 
-const Toolbar = ({ onOpenEditor, onShowHandWritingTest }) => {
+const Toolbar = ({ onOpenEditor, onShowHandWritingTest, onOpenShapeToolbar }) => {
   return (
     <div className="toolbar bg-gradient-to-r from-gray-900 via-gray-900 to-gray-800 border-b border-gray-700 px-6 py-3 flex items-center gap-3 shadow-lg">
       {/* Main Actions */}
@@ -29,6 +29,7 @@ const Toolbar = ({ onOpenEditor, onShowHandWritingTest }) => {
       </Button>
       
       <Button
+        onClick={onOpenShapeToolbar}
         variant="secondary"
         size="default"
         className="gap-2"

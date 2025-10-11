@@ -3,6 +3,7 @@ import { Stage, Layer as KonvaLayer, Image as KonvaImage, Transformer, Rect, Gro
 import useImage from 'use-image';
 import CameraToolbar from './CameraToolbar';
 import { createDefaultCamera } from '../utils/cameraAnimator';
+import LayerShape from './LayerShape';
 
 // Konva Camera Component
 const KonvaCamera = ({ camera, isSelected, onSelect, onUpdate, sceneWidth, sceneHeight }) => {
@@ -610,10 +611,23 @@ const SceneCanvas = ({
                 {/* Layers - Au dessus */}
                 <KonvaLayer>
                   {sortedLayers.map((layer) => {
-                    // Render text or image layer based on type
+                    // Render text, image, or shape layer based on type
                     if (layer.type === 'text') {
                       return (
                         <LayerText
+                          key={layer.id}
+                          layer={layer}
+                          isSelected={layer.id === selectedLayerId}
+                          onSelect={() => {
+                            onSelectLayer(layer.id);
+                            setSelectedCameraId(null);
+                          }}
+                          onChange={onUpdateLayer}
+                        />
+                      );
+                    } else if (layer.type === 'shape') {
+                      return (
+                        <LayerShape
                           key={layer.id}
                           layer={layer}
                           isSelected={layer.id === selectedLayerId}
