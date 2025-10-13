@@ -199,11 +199,11 @@ const LayerImage = ({ layer, isSelected, onSelect, onChange }) => {
   const transformerRef = useRef();
 
   React.useEffect(() => {
-    if (isSelected && transformerRef.current && imageRef.current) {
+    if (isSelected && transformerRef.current && imageRef.current && img) {
       transformerRef.current.nodes([imageRef.current]);
       transformerRef.current.getLayer().batchDraw();
     }
-  }, [isSelected]);
+  }, [isSelected, img]);
 
   if (!img) return null;
 
