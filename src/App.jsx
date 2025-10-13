@@ -239,7 +239,7 @@ function App() {
   }
 
   return (
-    <div className="app flex h-screen overflow-hidden dark">
+    <div className="app flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
       {/* Shape Toolbar Modal */}
       {showShapeToolbar && (
         <ShapeToolbar

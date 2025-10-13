@@ -23,6 +23,8 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   const [showCropModal, setShowCropModal] = useState(false);
   const [pendingImageData, setPendingImageData] = useState(null);
   const fileInputRef = useRef(null);
+  const backgroundImageInputRef = useRef(null);
+  const backgroundMusicInputRef = useRef(null);
 
   const sceneWidth = 1920;
   const sceneHeight = 1080;
@@ -107,6 +109,30 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   const handleCropCancel = () => {
     setShowCropModal(false);
     setPendingImageData(null);
+  };
+
+  const handleBackgroundImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        handleChange('backgroundImage', event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+    e.target.value = '';
+  };
+
+  const handleBackgroundMusicUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('audio/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        handleChange('backgroundMusic', event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+    e.target.value = '';
   };
 
   const handleAddTextLayer = () => {
@@ -272,9 +298,9 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
         />
       )}
       
-      <div className="bg-gray-900 shadow-2xl w-full max-w-full max-h-[70vh] flex overflow-hidden border border-gray-700">
+      <div className="bg-white dark:bg-gray-900 shadow-2xl w-full max-w-full max-h-[70vh] flex overflow-hidden border border-gray-200 dark:border-gray-700 rounded-lg">
         {/* Left Side - Canvas Preview with Camera Viewports */}
-        <div className="bg-red-950 flex flex-col flex-1 min-w-0">
+        <div className="bg-gray-100 dark:bg-gray-950 flex flex-col flex-1 min-w-0">
           <SceneCanvas
             scene={editedScene}
             onUpdateScene={(updates) => setEditedScene({ ...editedScene, ...updates })}
@@ -286,35 +312,35 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
         </div>
 
         {/* Right Side - Properties Panel */}
-        <div className="w-80 bg-gray-900 flex flex-col border-l border-gray-700 overflow-hidden">
+        <div className="w-80 bg-white dark:bg-gray-900 flex flex-col border-l border-gray-200 dark:border-gray-700 overflow-hidden">
           {/* Header */}
-          <div className="bg-gray-800 px-5 py-3 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
-            <h2 className="text-lg font-bold text-white">Propriétés</h2>
+          <div className="bg-gray-50 dark:bg-gray-800 px-5 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Properties</h2>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm"
-                title="Ajouter une image"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm shadow-sm"
+                title="Add Image"
               >
                 <Upload className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={handleAddTextLayer}
-                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm"
-                title="Ajouter un texte"
+                className="bg-green-600 hover:bg-green-700 text-white font-medium py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm shadow-sm"
+                title="Add Text"
               >
                 <TextIcon className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => setShowShapeToolbar(true)}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm"
-                title="Ajouter une forme"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm shadow-sm"
+                title="Add Shape"
               >
                 <ShapeIcon className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-white text-2xl leading-none"
+                className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-2xl leading-none"
               >
                 ×
               </button>
@@ -332,43 +358,43 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
           <div className="flex-1 overflow-y-auto p-4">
             <div className="space-y-4">
               {/* Scene Properties */}
-              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                <h3 className="text-white font-semibold mb-3 text-sm flex items-center gap-2">
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-gray-900 dark:text-white font-semibold mb-3 text-sm flex items-center gap-2">
                   <ImageIcon className="w-4 h-4" />
-                  Propriétés de la Scène
+                  Scene Properties
                 </h3>
                 
                 {/* Title */}
                 <div className="mb-3">
-                  <label className="block text-gray-300 text-xs mb-1.5">
-                    Titre de la scène
+                  <label className="block text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
+                    Scene Title
                   </label>
                   <input
                     type="text"
                     value={editedScene.title}
                     onChange={(e) => handleChange('title', e.target.value)}
-                    className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Entrez le titre..."
+                    className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter title..."
                   />
                 </div>
 
                 {/* Content */}
                 <div className="mb-3">
-                  <label className="block text-gray-300 text-xs mb-1.5">
-                    Contenu
+                  <label className="block text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
+                    Content
                   </label>
                   <textarea
                     value={editedScene.content}
                     onChange={(e) => handleChange('content', e.target.value)}
-                    className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm h-20 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Entrez le contenu..."
+                    className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm h-20 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 whiteboard-text"
+                    placeholder="Enter content..."
                   />
                 </div>
 
                 {/* Duration */}
                 <div className="mb-3">
-                  <label className="block text-gray-300 text-xs mb-1.5">
-                    Durée (secondes)
+                  <label className="block text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
+                    Duration (seconds)
                   </label>
                   <input
                     type="number"
@@ -376,33 +402,50 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                     max="60"
                     value={editedScene.duration}
                     onChange={(e) => handleChange('duration', parseInt(e.target.value) || 5)}
-                    className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 {/* Background Image */}
                 <div>
-                  <label className="block text-gray-300 text-xs mb-1.5">
-                    Image de fond (URL)
+                  <label className="block text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
+                    Background Image
                   </label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => backgroundImageInputRef.current?.click()}
+                      className="flex-1 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
+                    >
+                      {editedScene.backgroundImage ? 'Change Background' : 'Upload Background'}
+                    </button>
+                    {editedScene.backgroundImage && (
+                      <button
+                        onClick={() => handleChange('backgroundImage', null)}
+                        className="bg-red-600 hover:bg-red-700 text-white rounded px-3 py-2 text-sm transition-colors"
+                        title="Remove background"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                   <input
-                    type="text"
-                    value={editedScene.backgroundImage || ''}
-                    onChange={(e) => handleChange('backgroundImage', e.target.value || null)}
-                    className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="https://example.com/image.jpg"
+                    ref={backgroundImageInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleBackgroundImageUpload}
+                    className="hidden"
                   />
                 </div>
 
                 {/* Animation Type */}
                 <div className="mt-3">
-                  <label className="block text-gray-300 text-xs mb-1.5">
-                    Type d'animation
+                  <label className="block text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
+                    Animation Type
                   </label>
                   <select
                     value={editedScene.animation}
                     onChange={(e) => handleChange('animation', e.target.value)}
-                    className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="fade">Fade</option>
                     <option value="slide">Slide</option>
@@ -412,18 +455,35 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
 
                 {/* Background Music */}
                 <div className="mt-3">
-                  <label className="block text-gray-300 text-xs mb-1.5">
-                    Musique de fond (URL)
+                  <label className="block text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
+                    Background Music
                   </label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => backgroundMusicInputRef.current?.click()}
+                      className="flex-1 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
+                    >
+                      {editedScene.backgroundMusic ? 'Change Music' : 'Upload Music'}
+                    </button>
+                    {editedScene.backgroundMusic && (
+                      <button
+                        onClick={() => handleChange('backgroundMusic', null)}
+                        className="bg-red-600 hover:bg-red-700 text-white rounded px-3 py-2 text-sm transition-colors"
+                        title="Remove music"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                   <input
-                    type="text"
-                    value={editedScene.backgroundMusic || ''}
-                    onChange={(e) => handleChange('backgroundMusic', e.target.value || null)}
-                    className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="https://example.com/music.mp3"
+                    ref={backgroundMusicInputRef}
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleBackgroundMusicUpload}
+                    className="hidden"
                   />
                   <p className="text-gray-500 text-xs mt-1">
-                    La musique de fond est pour toute la scène
+                    Background music plays for the entire scene
                   </p>
                 </div>
               </div>
