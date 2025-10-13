@@ -67,16 +67,34 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
     e.target.value = '';
   };
 
-  const handleCropComplete = (croppedImageUrl) => {
+  const handleCropComplete = (croppedImageUrl, imageDimensions) => {
     if (!pendingImageData) return;
 
     // Calculate initial position based on selected camera
     let initialX = sceneWidth / 2;
     let initialY = sceneHeight / 2;
+    let cameraWidth = 800; // Default camera width
+    let cameraHeight = 450; // Default camera height
     
     if (selectedCamera && selectedCamera.position) {
       initialX = selectedCamera.position.x * sceneWidth;
       initialY = selectedCamera.position.y * sceneHeight;
+      cameraWidth = selectedCamera.width || 800;
+      cameraHeight = selectedCamera.height || 450;
+    }
+    
+    // Calculate scale to fit image within camera viewport
+    // The image should fit within 80% of the camera dimensions to leave some margin
+    let calculatedScale = 1.0;
+    if (imageDimensions) {
+      const maxWidth = cameraWidth * 0.8;
+      const maxHeight = cameraHeight * 0.8;
+      
+      const scaleX = maxWidth / imageDimensions.width;
+      const scaleY = maxHeight / imageDimensions.height;
+      
+      // Use the smaller scale to ensure the image fits within both dimensions
+      calculatedScale = Math.min(scaleX, scaleY, 1.0); // Don't scale up, only down
     }
     
     const newLayer = {
@@ -86,7 +104,7 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
       position: { x: initialX, y: initialY },
       z_index: editedScene.layers.length + 1,
       skip_rate: 10,
-      scale: 1.0,
+      scale: calculatedScale,
       opacity: 1.0,
       mode: 'draw',
       type: 'image',
