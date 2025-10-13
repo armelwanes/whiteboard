@@ -1,0 +1,189 @@
+{
+  "scenes": [
+    {
+      "id": "scene-export-demo",
+      "title": "Layer Export Demonstration",
+      "content": "Example scene with various layer types for export testing",
+      "duration": 10,
+      "backgroundImage": null,
+      "animation": "fade",
+      "layers": [
+        {
+          "id": "layer-image-1",
+          "name": "Background Image",
+          "type": "image",
+          "image_path": "/test_star.png",
+          "position": { "x": 960, "y": 540 },
+          "z_index": 1,
+          "scale": 1.0,
+          "opacity": 1.0,
+          "rotation": 0
+        },
+        {
+          "id": "layer-text-1",
+          "name": "Title Text",
+          "type": "text",
+          "position": { "x": 960, "y": 200 },
+          "z_index": 2,
+          "scale": 1.0,
+          "opacity": 1.0,
+          "rotation": 0,
+          "text_config": {
+            "text": "Exportable Text Layer",
+            "font": "Arial",
+            "size": 64,
+            "color": [0, 102, 204],
+            "style": "bold",
+            "line_height": 1.2,
+            "align": "center"
+          }
+        },
+        {
+          "id": "layer-shape-1",
+          "name": "Rectangle Shape",
+          "type": "shape",
+          "position": { "x": 960, "y": 800 },
+          "z_index": 3,
+          "scale": 1.0,
+          "opacity": 0.8,
+          "rotation": 0,
+          "shape_config": {
+            "shape_type": "rectangle",
+            "width": 200,
+            "height": 100,
+            "fill_color": [255, 87, 34],
+            "stroke_color": [33, 33, 33],
+            "stroke_width": 3,
+            "fill_mode": "both"
+          }
+        },
+        {
+          "id": "layer-whiteboard-1",
+          "name": "Whiteboard Strokes",
+          "type": "whiteboard",
+          "position": { "x": 400, "y": 400 },
+          "z_index": 4,
+          "scale": 1.0,
+          "opacity": 1.0,
+          "rotation": 0,
+          "strokes": [
+            {
+              "points": [
+                { "x": 0, "y": 0 },
+                { "x": 20, "y": 20 },
+                { "x": 40, "y": 10 },
+                { "x": 60, "y": 30 },
+                { "x": 80, "y": 20 }
+              ],
+              "strokeWidth": 3,
+              "strokeColor": "#FF0000",
+              "lineJoin": "round",
+              "lineCap": "round"
+            },
+            {
+              "points": [
+                { "x": 0, "y": 50 },
+                { "x": 30, "y": 80 },
+                { "x": 60, "y": 50 },
+                { "x": 90, "y": 80 }
+              ],
+              "strokeWidth": 4,
+              "strokeColor": "#00FF00",
+              "lineJoin": "round",
+              "lineCap": "round"
+            }
+          ]
+        }
+      ],
+      "sceneCameras": [
+        {
+          "id": "default-camera",
+          "name": "Default Camera",
+          "position": { "x": 0.5, "y": 0.5 },
+          "width": 1920,
+          "height": 1080,
+          "zoom": 1.0,
+          "isDefault": true
+        }
+      ]
+    },
+    {
+      "id": "scene-whiteboard-demo",
+      "title": "Whiteboard Layer Demo",
+      "content": "Demonstration of complex whiteboard strokes",
+      "duration": 10,
+      "backgroundImage": null,
+      "animation": "fade",
+      "layers": [
+        {
+          "id": "layer-whiteboard-complex",
+          "name": "Complex Drawing",
+          "type": "whiteboard",
+          "position": { "x": 960, "y": 540 },
+          "z_index": 1,
+          "scale": 1.5,
+          "opacity": 1.0,
+          "rotation": 15,
+          "strokes": [
+            {
+              "points": [
+                { "x": -100, "y": -100 },
+                { "x": -80, "y": -90 },
+                { "x": -60, "y": -95 },
+                { "x": -40, "y": -85 },
+                { "x": -20, "y": -90 },
+                { "x": 0, "y": -100 },
+                { "x": 20, "y": -90 },
+                { "x": 40, "y": -95 },
+                { "x": 60, "y": -85 },
+                { "x": 80, "y": -90 },
+                { "x": 100, "y": -100 }
+              ],
+              "strokeWidth": 5,
+              "strokeColor": "#2196F3",
+              "lineJoin": "round",
+              "lineCap": "round"
+            },
+            {
+              "points": [
+                { "x": -100, "y": 0 },
+                { "x": -50, "y": 50 },
+                { "x": 0, "y": 0 },
+                { "x": 50, "y": 50 },
+                { "x": 100, "y": 0 }
+              ],
+              "strokeWidth": 4,
+              "strokeColor": "#FF9800",
+              "lineJoin": "round",
+              "lineCap": "round"
+            },
+            {
+              "points": [
+                { "x": -80, "y": 80 },
+                { "x": -40, "y": 100 },
+                { "x": 0, "y": 80 },
+                { "x": 40, "y": 100 },
+                { "x": 80, "y": 80 }
+              ],
+              "strokeWidth": 6,
+              "strokeColor": "#4CAF50",
+              "lineJoin": "round",
+              "lineCap": "round"
+            }
+          ]
+        }
+      ],
+      "sceneCameras": [
+        {
+          "id": "default-camera",
+          "name": "Default Camera",
+          "position": { "x": 0.5, "y": 0.5 },
+          "width": 1920,
+          "height": 1080,
+          "zoom": 1.0,
+          "isDefault": true
+        }
+      ]
+    }
+  ]
+}
