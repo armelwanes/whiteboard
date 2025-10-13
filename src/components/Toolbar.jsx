@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button } from './ui/button';
-import { Edit, Type, Square, Image, Camera, Circle, PenTool } from 'lucide-react';
+import { Edit, Type, Square, Image, Camera, Circle, PenTool, Undo, Redo } from 'lucide-react';
 
-const Toolbar = ({ onOpenEditor, onShowHandWritingTest, onOpenShapeToolbar }) => {
+const Toolbar = ({ onOpenEditor, onShowHandWritingTest, onOpenShapeToolbar, onUndo, onRedo, canUndo, canRedo }) => {
   return (
     <div className="toolbar bg-gradient-to-r from-gray-900 via-gray-900 to-gray-800 border-b border-gray-700 px-6 py-3 flex items-center gap-3 shadow-lg">
       {/* Main Actions */}
@@ -13,6 +13,29 @@ const Toolbar = ({ onOpenEditor, onShowHandWritingTest, onOpenShapeToolbar }) =>
       >
         <Edit className="w-4 h-4" />
         <span>Éditer</span>
+      </Button>
+
+      <div className="h-8 w-px bg-border mx-1"></div>
+
+      {/* Undo/Redo */}
+      <Button
+        onClick={onUndo}
+        variant="secondary"
+        size="default"
+        disabled={!canUndo}
+        title="Annuler (Ctrl+Z)"
+      >
+        <Undo className="w-4 h-4" />
+      </Button>
+      
+      <Button
+        onClick={onRedo}
+        variant="secondary"
+        size="default"
+        disabled={!canRedo}
+        title="Refaire (Ctrl+Y)"
+      >
+        <Redo className="w-4 h-4" />
       </Button>
 
       <div className="h-8 w-px bg-border mx-1"></div>

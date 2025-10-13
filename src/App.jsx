@@ -20,10 +20,68 @@ function App() {
   const [selectedLayerId, setSelectedLayerId] = useState(null)
   const fileInputRef = useRef(null)
 
+  // Undo/Redo state management
+  const [history, setHistory] = useState([])
+  const [historyIndex, setHistoryIndex] = useState(-1)
+  const isUndoRedoAction = useRef(false)
+
   // Save scenes to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('whiteboard-scenes', JSON.stringify(scenes))
+    
+    // Add to history stack (but not for undo/redo actions themselves)
+    if (!isUndoRedoAction.current) {
+      const newHistory = history.slice(0, historyIndex + 1)
+      newHistory.push(JSON.parse(JSON.stringify(scenes)))
+      // Keep only last 50 states to prevent memory issues
+      if (newHistory.length > 50) {
+        newHistory.shift()
+      } else {
+        setHistoryIndex(historyIndex + 1)
+      }
+      setHistory(newHistory)
+    }
+    isUndoRedoAction.current = false
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scenes])
+
+  // Undo function
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      isUndoRedoAction.current = true
+      setHistoryIndex(historyIndex - 1)
+      setScenes(JSON.parse(JSON.stringify(history[historyIndex - 1])))
+    }
+  }
+
+  // Redo function
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      isUndoRedoAction.current = true
+      setHistoryIndex(historyIndex + 1)
+      setScenes(JSON.parse(JSON.stringify(history[historyIndex + 1])))
+    }
+  }
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ctrl+Z or Cmd+Z for undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        handleUndo()
+      }
+      // Ctrl+Y or Cmd+Y or Ctrl+Shift+Z for redo
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault()
+        handleRedo()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historyIndex, history])
 
   const addScene = () => {
     const newScene = {
@@ -191,23 +249,67 @@ function App() {
     setSelectedSceneIndex(targetIndex)
   }
 
-  // Export scenes configuration to JSON
-  const handleExportConfig = () => {
-    const config = {
-      version: '1.0.0',
-      exportDate: new Date().toISOString(),
-      scenes: scenes
+  // Export scenes configuration to JSON with camera images
+  const handleExportConfig = async () => {
+    try {
+      // Import camera exporter dynamically
+      const { exportAllCameras } = await import('./utils/cameraExporter')
+      
+      // Enhanced scenes with camera images
+      const enhancedScenes = await Promise.all(scenes.map(async (scene) => {
+        // Export all cameras for this scene if they exist
+        if (scene.sceneCameras && scene.sceneCameras.length > 0) {
+          try {
+            const cameraExports = await exportAllCameras(scene, 9600, 5400)
+            
+            // Add image data URLs to each camera
+            const sceneCamerasWithImages = scene.sceneCameras.map(camera => {
+              const cameraExport = cameraExports.find(exp => exp.camera.id === camera.id)
+              return {
+                ...camera,
+                exportedImageDataUrl: cameraExport ? cameraExport.imageDataUrl : null
+              }
+            })
+            
+            return {
+              ...scene,
+              sceneCameras: sceneCamerasWithImages
+            }
+          } catch (err) {
+            console.error('Error exporting cameras for scene:', scene.id, err)
+            return scene
+          }
+        }
+        return scene
+      }))
+
+      const config = {
+        version: '1.0.0',
+        exportDate: new Date().toISOString(),
+        scenes: enhancedScenes,
+        metadata: {
+          sceneCount: scenes.length,
+          totalDuration: scenes.reduce((sum, s) => sum + s.duration, 0),
+          includesCameraImages: true
+        }
+      }
+      
+      const jsonString = JSON.stringify(config, null, 2)
+      const blob = new Blob([jsonString], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `whiteboard-config-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      
+      alert('Configuration exportée avec succès avec les images des caméras!')
+    } catch (error) {
+      console.error('Error exporting config:', error)
+      alert('Erreur lors de l\'export: ' + error.message)
     }
-    const jsonString = JSON.stringify(config, null, 2)
-    const blob = new Blob([jsonString], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `whiteboard-config-${new Date().toISOString().split('T')[0]}.json`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
   }
 
   // Import scenes configuration from JSON
@@ -263,6 +365,17 @@ function App() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
+        {/* Toolbar */}
+        <Toolbar
+          onOpenEditor={() => {}}
+          onShowHandWritingTest={() => setShowHandWritingTest(true)}
+          onOpenShapeToolbar={() => setShowShapeToolbar(true)}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          canUndo={historyIndex > 0}
+          canRedo={historyIndex < history.length - 1}
+        />
+        
         {/* Animation Container */}
         <AnimationContainer 
           scenes={scenes} 
