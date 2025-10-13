@@ -11,6 +11,7 @@ import ShapeToolbar from './ShapeToolbar';
 import ImageCropModal from './ImageCropModal';
 import { createShapeLayer } from '../utils/shapeUtils';
 import { exportDefaultCameraView, exportAllCameras, downloadImage } from '../utils/cameraExporter';
+import { exportLayerFromJSON, downloadDataUrl, validateLayerJSON } from '../utils/layerExporter';
 
 const LayerEditor = ({ scene, onClose, onSave }) => {
   const [editedScene, setEditedScene] = useState({ 
@@ -332,6 +333,83 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
     }
   };
 
+  // Export a single layer from JSON
+  const handleExportLayer = async (layerId) => {
+    const layer = editedScene.layers.find(l => l.id === layerId);
+    if (!layer) {
+      alert('Couche non trouvée');
+      return;
+    }
+
+    // Validate layer first
+    const validation = validateLayerJSON(layer);
+    if (!validation.valid) {
+      alert(`Couche invalide: ${validation.errors.join(', ')}`);
+      return;
+    }
+
+    try {
+      const timestamp = new Date().toISOString().split('T')[0];
+      const dataUrl = await exportLayerFromJSON(layer, {
+        width: 1920,
+        height: 1080,
+        background: '#FFFFFF',
+        pixelRatio: 1,
+      });
+      
+      const filename = `scene-${editedScene.id}-layer-${layer.name || layer.id}-${timestamp}.png`;
+      downloadDataUrl(dataUrl, filename);
+      alert(`Couche "${layer.name || layer.id}" exportée avec succès!`);
+    } catch (error) {
+      console.error('Error exporting layer:', error);
+      alert(`Erreur lors de l'export de la couche: ${error.message}`);
+    }
+  };
+
+  // Export all layers from the scene
+  const handleExportAllLayers = async () => {
+    if (editedScene.layers.length === 0) {
+      alert('Aucune couche à exporter');
+      return;
+    }
+
+    try {
+      const timestamp = new Date().toISOString().split('T')[0];
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const layer of editedScene.layers) {
+        try {
+          const validation = validateLayerJSON(layer);
+          if (!validation.valid) {
+            console.warn(`Skipping invalid layer ${layer.id}:`, validation.errors);
+            errorCount++;
+            continue;
+          }
+
+          const dataUrl = await exportLayerFromJSON(layer, {
+            width: 1920,
+            height: 1080,
+            background: '#FFFFFF',
+            pixelRatio: 1,
+          });
+          
+          const filename = `scene-${editedScene.id}-layer-${layer.name || layer.id}-${timestamp}.png`;
+          downloadDataUrl(dataUrl, filename);
+          successCount++;
+        } catch (error) {
+          console.error(`Error exporting layer ${layer.id}:`, error);
+          errorCount++;
+        }
+      }
+
+      alert(`Export terminé: ${successCount} couche(s) exportée(s), ${errorCount} erreur(s)`);
+    } catch (error) {
+      console.error('Error during batch export:', error);
+      alert(`Erreur lors de l'export: ${error.message}`);
+    }
+  };
+
   const handleMoveLayer = (layerId, direction) => {
     const currentIndex = editedScene.layers.findIndex(l => l.id === layerId);
     if (currentIndex === -1) return;
@@ -613,6 +691,29 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                 </p>
               </div>
 
+              {/* Layer Export Section */}
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-gray-900 dark:text-white font-semibold mb-3 text-sm flex items-center gap-2">
+                  <LayersIcon className="w-4 h-4" />
+                  Export Couches (JSON)
+                </h3>
+                
+                <div className="space-y-2">
+                  <button
+                    onClick={handleExportAllLayers}
+                    disabled={editedScene.layers.length === 0}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-3 rounded flex items-center justify-center gap-2 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Download className="w-4 h-4" />
+                    Export Toutes Les Couches
+                  </button>
+                </div>
+                
+                <p className="text-gray-500 dark:text-gray-400 text-xs mt-2">
+                  Export depuis JSON (pas de screenshot). Fond blanc, haute qualité. Supporte: images, texte, formes, whiteboard.
+                </p>
+              </div>
+
               {/* Layers List */}
               <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
                 <h3 className="text-white font-semibold mb-3 text-sm flex items-center gap-2">
@@ -681,6 +782,16 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                               title="Dupliquer"
                             >
                               <Copy className="w-3 h-3 text-gray-300" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleExportLayer(layer.id);
+                              }}
+                              className="p-1 hover:bg-purple-600 rounded"
+                              title="Exporter couche (JSON)"
+                            >
+                              <Download className="w-3 h-3 text-purple-400" />
                             </button>
                             <button
                               onClick={(e) => {
