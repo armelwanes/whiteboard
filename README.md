@@ -10,9 +10,15 @@ Une application web interactive pour créer des vidéos d'animation structurées
   - Panneau latéral avec aperçu de toutes les scènes
   - Ajout, suppression, duplication et réorganisation des scènes
   - Éditeur modal pour modifier les propriétés des scènes
+- **Export de couches depuis JSON** ⭐ NOUVEAU : Export haute qualité sans screenshot
+  - Export individuel ou en masse de toutes les couches
+  - Fond blanc ou transparent configurable
+  - Support haute résolution (pixelRatio)
+  - Types supportés : images, texte, formes, whiteboard/strokes
+  - Génération reproductible depuis les données JSON (pas de capture d'écran)
 - **Animation Handwriting** : Deux modes de génération d'animations
   - **Mode Image** : Génération automatique d'animation à partir d'une image
-  - **Mode JSON** ⭐ NOUVEAU : Replay d'animations exportées depuis Python
+  - **Mode JSON** : Replay d'animations exportées depuis Python
 - **Scènes multiples** : Divisez votre narration en plusieurs scènes distinctes
 - **Timeline avancée** : Contrôlez précisément la synchronisation des éléments visuels
 - **Animations fluides** : Transitions élégantes entre les scènes
@@ -144,6 +150,91 @@ export const sampleStory = [
 
 Vos scènes sont automatiquement sauvegardées dans le navigateur (localStorage). 
 Pour réinitialiser et revenir à l'histoire d'exemple, effacez les données du site dans les paramètres de votre navigateur.
+
+### Export de couches depuis JSON
+
+L'application permet maintenant d'exporter des couches individuelles en PNG de haute qualité **sans utiliser de capture d'écran**. L'export reconstruit les couches depuis leurs données JSON.
+
+#### Utilisation
+
+Dans l'éditeur de scène (LayerEditor) :
+1. **Export individuel** : Cliquez sur l'icône 💾 (Download) à côté de chaque couche
+2. **Export en masse** : Utilisez le bouton "Export Toutes Les Couches" pour exporter toutes les couches d'une scène
+
+#### Fonctionnalités
+
+- ✅ Export depuis JSON (pas de screenshot/DOM)
+- ✅ Fond blanc par défaut (configurable)
+- ✅ Support de tous les types de couches :
+  - **Images** : avec positionnement, rotation, échelle
+  - **Texte** : avec styles (gras, italique), polices, couleurs
+  - **Formes** : rectangle, cercle, ligne, triangle, étoile
+  - **Whiteboard** : strokes avec courbes lissées
+- ✅ Gestion CORS pour les images externes
+- ✅ Résolution configurable (pixelRatio 1x, 2x, 3x)
+
+#### API Documentation
+
+Pour plus de détails sur l'API d'export, consultez [LAYER_EXPORT_API.md](./LAYER_EXPORT_API.md)
+
+#### Exemples JSON
+
+Voir les fichiers d'exemple dans le dossier `examples/` :
+- `layer-export-example.json` : Exemples de scènes avec différents types de couches
+- `text-layer-example.json` : Exemples de couches texte
+
+#### Schéma JSON des couches
+
+**Couche Image :**
+```json
+{
+  "id": "img-1",
+  "type": "image",
+  "image_path": "/path/to/image.png",
+  "position": { "x": 960, "y": 540 },
+  "scale": 1.0,
+  "opacity": 1.0,
+  "rotation": 0
+}
+```
+
+**Couche Texte :**
+```json
+{
+  "id": "text-1",
+  "type": "text",
+  "position": { "x": 960, "y": 540 },
+  "text_config": {
+    "text": "Hello World",
+    "font": "Arial",
+    "size": 48,
+    "color": [0, 0, 0],
+    "style": "bold",
+    "align": "center"
+  }
+}
+```
+
+**Couche Whiteboard :**
+```json
+{
+  "id": "whiteboard-1",
+  "type": "whiteboard",
+  "position": { "x": 960, "y": 540 },
+  "strokes": [
+    {
+      "points": [
+        { "x": 0, "y": 0 },
+        { "x": 100, "y": 100 }
+      ],
+      "strokeWidth": 3,
+      "strokeColor": "#FF0000",
+      "lineJoin": "round",
+      "lineCap": "round"
+    }
+  ]
+}
+```
 
 ## 🎨 Personnalisation
 
