@@ -8,6 +8,7 @@ import CameraControls from './CameraControls';
 import LayerAnimationControls from './LayerAnimationControls';
 import SceneCanvas from './SceneCanvas';
 import ShapeToolbar from './ShapeToolbar';
+import ImageCropModal from './ImageCropModal';
 import { createShapeLayer } from '../utils/shapeUtils';
 
 const LayerEditor = ({ scene, onClose, onSave }) => {
@@ -19,6 +20,8 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   const [selectedLayerId, setSelectedLayerId] = useState(null);
   const [selectedCamera, setSelectedCamera] = useState(null);
   const [showShapeToolbar, setShowShapeToolbar] = useState(false);
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [pendingImageData, setPendingImageData] = useState(null);
   const fileInputRef = useRef(null);
 
   const sceneWidth = 1920;
@@ -48,43 +51,62 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        // Calculate initial position based on selected camera
-        // Default to center of scene if no camera is selected
-        let initialX = sceneWidth / 2;
-        let initialY = sceneHeight / 2;
-        
-        if (selectedCamera && selectedCamera.position) {
-          // Position the new layer at the center of the selected camera viewport
-          initialX = selectedCamera.position.x * sceneWidth;
-          initialY = selectedCamera.position.y * sceneHeight;
-        }
-        
-        const newLayer = {
-          id: `layer-${Date.now()}`,
-          image_path: event.target.result,
-          name: file.name,
-          position: { x: initialX, y: initialY },
-          z_index: editedScene.layers.length + 1,
-          skip_rate: 10,
-          scale: 1.0,
-          opacity: 1.0,
-          mode: 'draw',
-          type: 'image',
-          audio: {
-            narration: null,
-            soundEffects: [],
-            typewriter: null,
-            drawing: null,
-          }
-        };
-        setEditedScene({
-          ...editedScene,
-          layers: [...editedScene.layers, newLayer]
+        // Store pending image data with file name
+        setPendingImageData({
+          imageUrl: event.target.result,
+          fileName: file.name
         });
-        setSelectedLayerId(newLayer.id);
+        setShowCropModal(true);
       };
       reader.readAsDataURL(file);
     }
+    // Reset file input
+    e.target.value = '';
+  };
+
+  const handleCropComplete = (croppedImageUrl) => {
+    if (!pendingImageData) return;
+
+    // Calculate initial position based on selected camera
+    let initialX = sceneWidth / 2;
+    let initialY = sceneHeight / 2;
+    
+    if (selectedCamera && selectedCamera.position) {
+      initialX = selectedCamera.position.x * sceneWidth;
+      initialY = selectedCamera.position.y * sceneHeight;
+    }
+    
+    const newLayer = {
+      id: `layer-${Date.now()}`,
+      image_path: croppedImageUrl,
+      name: pendingImageData.fileName,
+      position: { x: initialX, y: initialY },
+      z_index: editedScene.layers.length + 1,
+      skip_rate: 10,
+      scale: 1.0,
+      opacity: 1.0,
+      mode: 'draw',
+      type: 'image',
+      audio: {
+        narration: null,
+        soundEffects: [],
+        typewriter: null,
+        drawing: null,
+      }
+    };
+    
+    setEditedScene({
+      ...editedScene,
+      layers: [...editedScene.layers, newLayer]
+    });
+    setSelectedLayerId(newLayer.id);
+    setShowCropModal(false);
+    setPendingImageData(null);
+  };
+
+  const handleCropCancel = () => {
+    setShowCropModal(false);
+    setPendingImageData(null);
   };
 
   const handleAddTextLayer = () => {
@@ -238,6 +260,15 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
         <ShapeToolbar
           onAddShape={handleAddShape}
           onClose={() => setShowShapeToolbar(false)}
+        />
+      )}
+      
+      {/* Image Crop Modal */}
+      {showCropModal && pendingImageData && (
+        <ImageCropModal
+          imageUrl={pendingImageData.imageUrl}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
         />
       )}
       

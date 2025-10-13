@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
-import { Plus, ArrowUp, ArrowDown, Copy, Trash2 } from 'lucide-react';
+import { Plus, ArrowUp, ArrowDown, Copy, Trash2, Download, Upload } from 'lucide-react';
 
 const ScenePanel = ({
   scenes,
@@ -11,7 +11,10 @@ const ScenePanel = ({
   onDeleteScene,
   onDuplicateScene,
   onMoveScene,
+  onExportConfig,
+  onImportConfig,
 }) => {
+  const importInputRef = useRef(null);
   return (
     <div className="scene-panel w-60 bg-gradient-to-b from-gray-900 to-gray-950 border-r border-gray-700 flex flex-col shadow-2xl">
       {/* Header */}
@@ -27,12 +30,41 @@ const ScenePanel = ({
         </div>
         <Button
           onClick={onAddScene}
-          className="w-full gap-2"
+          className="w-full gap-2 mb-2"
           size="sm"
         >
           <Plus className="w-4 h-4" />
           Ajouter
         </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={onExportConfig}
+            variant="outline"
+            className="flex-1 gap-2"
+            size="sm"
+            title="Exporter la configuration"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export
+          </Button>
+          <Button
+            onClick={() => importInputRef.current?.click()}
+            variant="outline"
+            className="flex-1 gap-2"
+            size="sm"
+            title="Importer une configuration"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            Import
+          </Button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json,.json"
+            onChange={onImportConfig}
+            className="hidden"
+          />
+        </div>
       </div>
 
       {/* Scenes List */}
