@@ -394,8 +394,8 @@ const SceneCanvas = ({
   const stageRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
-  const sceneWidth = 1920;
-  const sceneHeight = 1080;
+  const sceneWidth = 9600;
+  const sceneHeight = 5400;
 
   // Create a new camera
   const handleAddCamera = useCallback(() => {

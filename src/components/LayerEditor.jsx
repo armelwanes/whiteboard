@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { 
   Upload, X, Save, Trash2, Eye, EyeOff, 
   MoveUp, MoveDown, Copy, Image as ImageIcon,
-  Layers as LayersIcon, Type as TextIcon, Square as ShapeIcon
+  Layers as LayersIcon, Type as TextIcon, Square as ShapeIcon, Download
 } from 'lucide-react';
 import CameraControls from './CameraControls';
 import LayerAnimationControls from './LayerAnimationControls';
@@ -10,6 +10,7 @@ import SceneCanvas from './SceneCanvas';
 import ShapeToolbar from './ShapeToolbar';
 import ImageCropModal from './ImageCropModal';
 import { createShapeLayer } from '../utils/shapeUtils';
+import { exportDefaultCameraView, exportAllCameras, downloadImage } from '../utils/cameraExporter';
 
 const LayerEditor = ({ scene, onClose, onSave }) => {
   const [editedScene, setEditedScene] = useState({ 
@@ -26,8 +27,8 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   const backgroundImageInputRef = useRef(null);
   const backgroundMusicInputRef = useRef(null);
 
-  const sceneWidth = 1920;
-  const sceneHeight = 1080;
+  const sceneWidth = 9600;
+  const sceneHeight = 5400;
 
   // Update editedScene when scene prop changes (switching between scenes)
   React.useEffect(() => {
@@ -241,6 +242,37 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
         ...editedScene,
         layers: [...editedScene.layers, duplicatedLayer]
       });
+    }
+  };
+
+  // Export default camera view
+  const handleExportDefaultCamera = async () => {
+    try {
+      const imageDataUrl = await exportDefaultCameraView(editedScene, sceneWidth, sceneHeight);
+      const timestamp = new Date().toISOString().split('T')[0];
+      downloadImage(imageDataUrl, `scene-${editedScene.id}-default-camera-${timestamp}.png`);
+    } catch (error) {
+      console.error('Error exporting default camera:', error);
+      alert('Erreur lors de l\'export de la caméra par défaut: ' + error.message);
+    }
+  };
+
+  // Export all cameras
+  const handleExportAllCameras = async () => {
+    try {
+      const exports = await exportAllCameras(editedScene, sceneWidth, sceneHeight);
+      const timestamp = new Date().toISOString().split('T')[0];
+      
+      exports.forEach((exp, index) => {
+        const cameraName = exp.camera.name || `camera-${index}`;
+        const filename = `scene-${editedScene.id}-${cameraName}-${timestamp}.png`;
+        downloadImage(exp.imageDataUrl, filename);
+      });
+      
+      alert(`${exports.length} caméra(s) exportée(s) avec succès!`);
+    } catch (error) {
+      console.error('Error exporting cameras:', error);
+      alert('Erreur lors de l\'export des caméras: ' + error.message);
     }
   };
 
@@ -494,6 +526,36 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                 onChange={(cameras) => handleChange('cameras', cameras)}
                 type="scene"
               />
+
+              {/* Camera Export Options */}
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-gray-900 dark:text-white font-semibold mb-3 text-sm flex items-center gap-2">
+                  <Download className="w-4 h-4" />
+                  Export Caméras
+                </h3>
+                
+                <div className="space-y-2">
+                  <button
+                    onClick={handleExportDefaultCamera}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded flex items-center justify-center gap-2 transition-colors text-sm"
+                  >
+                    <Download className="w-4 h-4" />
+                    Export Caméra Par Défaut
+                  </button>
+                  
+                  <button
+                    onClick={handleExportAllCameras}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-3 rounded flex items-center justify-center gap-2 transition-colors text-sm"
+                  >
+                    <Download className="w-4 h-4" />
+                    Export Toutes Les Caméras
+                  </button>
+                </div>
+                
+                <p className="text-gray-500 dark:text-gray-400 text-xs mt-2">
+                  Export des vues caméra avec fond blanc, couche par couche
+                </p>
+              </div>
 
               {/* Layers List */}
               <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
