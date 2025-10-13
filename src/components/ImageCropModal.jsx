@@ -26,11 +26,18 @@ const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
     setIsRemovingBackground(true);
     
     let finalImageUrl = imageUrl;
-    let processingError = null;
+    let imageDimensions = null;
     
     try {
       if (!completedCrop || !imgRef.current) {
         // If no crop was made, use the entire image
+        const image = imgRef.current;
+        if (image) {
+          imageDimensions = {
+            width: image.naturalWidth,
+            height: image.naturalHeight
+          };
+        }
         finalImageUrl = imageUrl;
       } else {
         // Create canvas to extract cropped image
@@ -41,6 +48,12 @@ const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
         
         canvas.width = completedCrop.width * scaleX;
         canvas.height = completedCrop.height * scaleY;
+        
+        // Store dimensions for scaling calculation
+        imageDimensions = {
+          width: canvas.width,
+          height: canvas.height
+        };
         
         const ctx = canvas.getContext('2d');
         ctx.drawImage(
@@ -59,7 +72,6 @@ const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         if (!blob) {
           console.error('Canvas is empty');
-          processingError = 'Canvas is empty';
         } else {
           finalImageUrl = URL.createObjectURL(blob);
         }
@@ -72,7 +84,7 @@ const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
       setIsRemovingBackground(false);
       // Use setTimeout to ensure state update completes before callback
       setTimeout(() => {
-        onCropComplete(finalImageUrl);
+        onCropComplete(finalImageUrl, imageDimensions);
       }, 0);
     }
   };
@@ -81,9 +93,18 @@ const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
     setIsRemovingBackground(true);
     
     let finalImageUrl = imageUrl;
+    let imageDimensions = null;
+    
+    // Get dimensions from the image element
+    if (imgRef.current) {
+      imageDimensions = {
+        width: imgRef.current.naturalWidth,
+        height: imgRef.current.naturalHeight
+      };
+    }
     
      setTimeout(() => {
-        onCropComplete(finalImageUrl);
+        onCropComplete(finalImageUrl, imageDimensions);
       }, 0);
   };
 
