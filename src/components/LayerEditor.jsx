@@ -23,6 +23,8 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   const [showCropModal, setShowCropModal] = useState(false);
   const [pendingImageData, setPendingImageData] = useState(null);
   const fileInputRef = useRef(null);
+  const backgroundImageInputRef = useRef(null);
+  const backgroundMusicInputRef = useRef(null);
 
   const sceneWidth = 1920;
   const sceneHeight = 1080;
@@ -107,6 +109,30 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   const handleCropCancel = () => {
     setShowCropModal(false);
     setPendingImageData(null);
+  };
+
+  const handleBackgroundImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        handleChange('backgroundImage', event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+    e.target.value = '';
+  };
+
+  const handleBackgroundMusicUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('audio/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        handleChange('backgroundMusic', event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+    e.target.value = '';
   };
 
   const handleAddTextLayer = () => {
@@ -383,14 +409,31 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                 {/* Background Image */}
                 <div>
                   <label className="block text-gray-300 text-xs mb-1.5">
-                    Image de fond (URL)
+                    Background Image
                   </label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => backgroundImageInputRef.current?.click()}
+                      className="flex-1 bg-gray-700 hover:bg-gray-600 text-white border border-gray-600 rounded px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
+                    >
+                      {editedScene.backgroundImage ? 'Change Background Image' : 'Upload Background Image'}
+                    </button>
+                    {editedScene.backgroundImage && (
+                      <button
+                        onClick={() => handleChange('backgroundImage', null)}
+                        className="bg-red-600 hover:bg-red-700 text-white rounded px-3 py-2 text-sm transition-colors"
+                        title="Remove background"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                   <input
-                    type="text"
-                    value={editedScene.backgroundImage || ''}
-                    onChange={(e) => handleChange('backgroundImage', e.target.value || null)}
-                    className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="https://example.com/image.jpg"
+                    ref={backgroundImageInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleBackgroundImageUpload}
+                    className="hidden"
                   />
                 </div>
 
@@ -413,17 +456,34 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                 {/* Background Music */}
                 <div className="mt-3">
                   <label className="block text-gray-300 text-xs mb-1.5">
-                    Musique de fond (URL)
+                    Background Music
                   </label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => backgroundMusicInputRef.current?.click()}
+                      className="flex-1 bg-gray-700 hover:bg-gray-600 text-white border border-gray-600 rounded px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
+                    >
+                      {editedScene.backgroundMusic ? 'Change Background Music' : 'Upload Background Music'}
+                    </button>
+                    {editedScene.backgroundMusic && (
+                      <button
+                        onClick={() => handleChange('backgroundMusic', null)}
+                        className="bg-red-600 hover:bg-red-700 text-white rounded px-3 py-2 text-sm transition-colors"
+                        title="Remove music"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                   <input
-                    type="text"
-                    value={editedScene.backgroundMusic || ''}
-                    onChange={(e) => handleChange('backgroundMusic', e.target.value || null)}
-                    className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="https://example.com/music.mp3"
+                    ref={backgroundMusicInputRef}
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleBackgroundMusicUpload}
+                    className="hidden"
                   />
                   <p className="text-gray-500 text-xs mt-1">
-                    La musique de fond est pour toute la scène
+                    Background music plays for the entire scene
                   </p>
                 </div>
               </div>
