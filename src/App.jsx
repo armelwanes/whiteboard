@@ -191,6 +191,48 @@ function App() {
     setSelectedSceneIndex(targetIndex)
   }
 
+  // Export scenes configuration to JSON
+  const handleExportConfig = () => {
+    const config = {
+      version: '1.0.0',
+      exportDate: new Date().toISOString(),
+      scenes: scenes
+    }
+    const jsonString = JSON.stringify(config, null, 2)
+    const blob = new Blob([jsonString], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `whiteboard-config-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  // Import scenes configuration from JSON
+  const handleImportConfig = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      try {
+        const config = JSON.parse(event.target.result)
+        if (config.scenes && Array.isArray(config.scenes)) {
+          setScenes(config.scenes)
+          setSelectedSceneIndex(0)
+          alert('Configuration importée avec succès!')
+        } else {
+          alert('Format de fichier invalide. Le fichier doit contenir un tableau "scenes".')
+        }
+      } catch (error) {
+        alert('Erreur lors de la lecture du fichier JSON: ' + error.message)
+      }
+    }
+    reader.readAsText(file)
+  }
+
   // Show hand writing test if toggled
   if (showHandWritingTest) {
     return <HandWritingTest onBack={() => setShowHandWritingTest(false)} />
@@ -215,6 +257,8 @@ function App() {
         onDeleteScene={deleteScene}
         onDuplicateScene={duplicateScene}
         onMoveScene={moveScene}
+        onExportConfig={handleExportConfig}
+        onImportConfig={handleImportConfig}
       />
 
       {/* Main Content Area */}

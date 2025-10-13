@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Upload, Play, Download, FileJson } from "lucide-react";
+import ImageCropModal from "./ImageCropModal";
 
 /**
  * HandWritingFromPython.jsx
@@ -34,6 +35,11 @@ const HandWritingAnimation = () => {
   const [mode, setMode] = useState("image"); // "image" or "json"
   const [animationData, setAnimationData] = useState(null);
   const [sourceImageForJson, setSourceImageForJson] = useState(null);
+  
+  // State for image cropping
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [pendingImageUrl, setPendingImageUrl] = useState(null);
+  const [cropTargetMode, setCropTargetMode] = useState(null); // "image" or "json"
 
   // default variables mirroring AllVariables in python
   const variablesDefault = {
@@ -391,14 +397,15 @@ const HandWritingAnimation = () => {
   const handleSourceImageForJsonUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const img = new Image();
-    img.onload = () => {
-      setSourceImageForJson(img);
-      const ctx = sourceCanvasRef.current.getContext("2d");
-      ctx.clearRect(0, 0, sourceCanvasRef.current.width, sourceCanvasRef.current.height);
-      ctx.drawImage(img, 0, 0, sourceCanvasRef.current.width, sourceCanvasRef.current.height);
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setPendingImageUrl(event.target.result);
+      setCropTargetMode("json");
+      setShowCropModal(true);
     };
-    img.src = URL.createObjectURL(file);
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const generateVideoFromJson = async (animData, sourceImg, handProc) => {
@@ -716,14 +723,42 @@ const HandWritingAnimation = () => {
   const handleSourceUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setPendingImageUrl(event.target.result);
+      setCropTargetMode("image");
+      setShowCropModal(true);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleCropComplete = (croppedImageUrl) => {
     const img = new Image();
     img.onload = () => {
-      setSourceImage(img);
-      const ctx = sourceCanvasRef.current.getContext("2d");
-      ctx.clearRect(0, 0, sourceCanvasRef.current.width, sourceCanvasRef.current.height);
-      ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, sourceCanvasRef.current.width, sourceCanvasRef.current.height);
+      if (cropTargetMode === "image") {
+        setSourceImage(img);
+        const ctx = sourceCanvasRef.current.getContext("2d");
+        ctx.clearRect(0, 0, sourceCanvasRef.current.width, sourceCanvasRef.current.height);
+        ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, sourceCanvasRef.current.width, sourceCanvasRef.current.height);
+      } else if (cropTargetMode === "json") {
+        setSourceImageForJson(img);
+        const ctx = sourceCanvasRef.current.getContext("2d");
+        ctx.clearRect(0, 0, sourceCanvasRef.current.width, sourceCanvasRef.current.height);
+        ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, sourceCanvasRef.current.width, sourceCanvasRef.current.height);
+      }
     };
-    img.src = URL.createObjectURL(file);
+    img.src = croppedImageUrl;
+    setShowCropModal(false);
+    setPendingImageUrl(null);
+    setCropTargetMode(null);
+  };
+
+  const handleCropCancel = () => {
+    setShowCropModal(false);
+    setPendingImageUrl(null);
+    setCropTargetMode(null);
   };
 
   const handleStart = async () => {
@@ -776,6 +811,15 @@ const HandWritingAnimation = () => {
 
   return (
     <div className="p-6 bg-gray-900 min-h-screen">
+      {/* Image Crop Modal */}
+      {showCropModal && pendingImageUrl && (
+        <ImageCropModal
+          imageUrl={pendingImageUrl}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
+      
       <Card className="max-w-4xl mx-auto bg-gray-800 border-gray-700">
         <CardHeader>
           <CardTitle className="text-white">Handwriting Animation Generator</CardTitle>
