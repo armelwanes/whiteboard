@@ -20,10 +20,9 @@ const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
   });
   const [completedCrop, setCompletedCrop] = useState(null);
   const [isRemovingBackground, setIsRemovingBackground] = useState(false);
-  const [removeBackgroundEnabled, setRemoveBackgroundEnabled] = useState(true);
   const imgRef = useRef(null);
 
-  const handleCropComplete = async () => {
+ const handleCropComplete = async () => {
     setIsRemovingBackground(true);
     
     let finalImageUrl = imageUrl;
@@ -65,20 +64,9 @@ const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
           finalImageUrl = URL.createObjectURL(blob);
         }
       }
-      
-      // Apply background removal if enabled and no error occurred
-      if (!processingError && removeBackgroundEnabled) {
-        try {
-          const imageBlob = await removeBackground(finalImageUrl);
-          finalImageUrl = URL.createObjectURL(imageBlob);
-        } catch (error) {
-          console.warn('Background removal failed, using original image:', error);
-          // Continue with the cropped image if background removal fails
-        }
-      }
+
     } catch (error) {
       console.error('Error processing image:', error);
-      processingError = error;
     } finally {
       // Always reset state and call callback in finally block
       setIsRemovingBackground(false);
@@ -94,26 +82,9 @@ const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
     
     let finalImageUrl = imageUrl;
     
-    try {
-      // Apply background removal if enabled
-      if (removeBackgroundEnabled) {
-        try {
-          const imageBlob = await removeBackground(imageUrl);
-          finalImageUrl = URL.createObjectURL(imageBlob);
-        } catch (error) {
-          console.warn('Background removal failed, using original image:', error);
-        }
-      }
-    } catch (error) {
-      console.error('Error processing image:', error);
-    } finally {
-      // Always reset state and call callback in finally block
-      setIsRemovingBackground(false);
-      // Use setTimeout to ensure state update completes before callback
-      setTimeout(() => {
+     setTimeout(() => {
         onCropComplete(finalImageUrl);
       }, 0);
-    }
   };
 
   return (
@@ -160,25 +131,6 @@ const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
               </ReactCrop>
             </div>
           )}
-        </div>
-
-        {/* Background Removal Toggle */}
-        <div className="px-6 py-3 bg-gray-100 dark:bg-gray-800/30 border-t border-gray-200 dark:border-gray-700">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={removeBackgroundEnabled}
-              onChange={(e) => setRemoveBackgroundEnabled(e.target.checked)}
-              disabled={isRemovingBackground}
-              className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-            />
-            <div className="flex items-center gap-2">
-              <Eraser className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-              <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                Automatically remove background
-              </span>
-            </div>
-          </label>
         </div>
 
         {/* Instructions */}
