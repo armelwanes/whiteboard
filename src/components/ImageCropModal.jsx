@@ -26,9 +26,10 @@ const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
   const handleCropComplete = async () => {
     setIsRemovingBackground(true);
     
+    let finalImageUrl = imageUrl;
+    let processingError = null;
+    
     try {
-      let finalImageUrl;
-      
       if (!completedCrop || !imgRef.current) {
         // If no crop was made, use the entire image
         finalImageUrl = imageUrl;
@@ -59,14 +60,14 @@ const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         if (!blob) {
           console.error('Canvas is empty');
-          setIsRemovingBackground(false);
-          return;
+          processingError = 'Canvas is empty';
+        } else {
+          finalImageUrl = URL.createObjectURL(blob);
         }
-        finalImageUrl = URL.createObjectURL(blob);
       }
       
-      // Apply background removal if enabled
-      if (removeBackgroundEnabled) {
+      // Apply background removal if enabled and no error occurred
+      if (!processingError && removeBackgroundEnabled) {
         try {
           const imageBlob = await removeBackground(finalImageUrl);
           finalImageUrl = URL.createObjectURL(imageBlob);
@@ -75,22 +76,25 @@ const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
           // Continue with the cropped image if background removal fails
         }
       }
-      
-      onCropComplete(finalImageUrl);
     } catch (error) {
       console.error('Error processing image:', error);
-      onCropComplete(imageUrl);
+      processingError = error;
     } finally {
+      // Always reset state and call callback in finally block
       setIsRemovingBackground(false);
+      // Use setTimeout to ensure state update completes before callback
+      setTimeout(() => {
+        onCropComplete(finalImageUrl);
+      }, 0);
     }
   };
 
   const handleSkipCrop = async () => {
     setIsRemovingBackground(true);
     
+    let finalImageUrl = imageUrl;
+    
     try {
-      let finalImageUrl = imageUrl;
-      
       // Apply background removal if enabled
       if (removeBackgroundEnabled) {
         try {
@@ -100,13 +104,15 @@ const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
           console.warn('Background removal failed, using original image:', error);
         }
       }
-      
-      onCropComplete(finalImageUrl);
     } catch (error) {
       console.error('Error processing image:', error);
-      onCropComplete(imageUrl);
     } finally {
+      // Always reset state and call callback in finally block
       setIsRemovingBackground(false);
+      // Use setTimeout to ensure state update completes before callback
+      setTimeout(() => {
+        onCropComplete(finalImageUrl);
+      }, 0);
     }
   };
 
