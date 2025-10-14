@@ -5,9 +5,11 @@ import PropertiesPanel from './components/PropertiesPanel'
 import Toolbar from './components/Toolbar'
 import HandWritingTest from './pages/HandWritingTest'
 import ShapeToolbar from './components/ShapeToolbar'
+import AssetLibrary from './components/AssetLibrary'
 import sampleStory from './data/scenes'
 import { createMultiTimeline } from './utils/multiTimelineSystem'
 import { createSceneAudioConfig } from './utils/audioManager'
+import { addAsset } from './utils/assetManager'
 
 function App() {
   const [scenes, setScenes] = useState(() => {
@@ -17,6 +19,7 @@ function App() {
   const [selectedSceneIndex, setSelectedSceneIndex] = useState(0)
   const [showHandWritingTest, setShowHandWritingTest] = useState(false)
   const [showShapeToolbar, setShowShapeToolbar] = useState(false)
+  const [showAssetLibrary, setShowAssetLibrary] = useState(false)
   const [selectedLayerId, setSelectedLayerId] = useState(null)
   const fileInputRef = useRef(null)
 
@@ -132,11 +135,24 @@ function App() {
     setScenes(newScenes)
   }
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0]
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader()
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
+        // Save to asset library
+        try {
+          await addAsset({
+            name: file.name,
+            dataUrl: event.target.result,
+            type: file.type,
+            tags: []
+          })
+        } catch (error) {
+          console.error('Error saving asset:', error)
+        }
+        
+        // Create layer
         const currentScene = scenes[selectedSceneIndex]
         const newLayer = {
           id: `layer-${Date.now()}`,
@@ -158,6 +174,27 @@ function App() {
       }
       reader.readAsDataURL(file)
     }
+  }
+
+  const handleSelectAssetFromLibrary = (asset) => {
+    const currentScene = scenes[selectedSceneIndex]
+    const newLayer = {
+      id: `layer-${Date.now()}`,
+      image_path: asset.dataUrl,
+      name: asset.name,
+      position: { x: 100, y: 100 },
+      z_index: (currentScene.layers?.length || 0) + 1,
+      skip_rate: 10,
+      scale: 1.0,
+      opacity: 1.0,
+      mode: 'draw',
+      type: 'image',
+    }
+    updateScene(selectedSceneIndex, {
+      ...currentScene,
+      layers: [...(currentScene.layers || []), newLayer]
+    })
+    setSelectedLayerId(newLayer.id)
   }
 
   const handleUpdateLayer = (updatedLayer) => {
@@ -352,6 +389,14 @@ function App() {
         />
       )}
 
+      {/* Asset Library Modal */}
+      {showAssetLibrary && (
+        <AssetLibrary
+          onClose={() => setShowAssetLibrary(false)}
+          onSelectAsset={handleSelectAssetFromLibrary}
+        />
+      )}
+
       {/* Left Panel - Scenes List */}
       <ScenePanel
         scenes={scenes}
@@ -372,6 +417,7 @@ function App() {
           onOpenEditor={() => {}}
           onShowHandWritingTest={() => setShowHandWritingTest(true)}
           onOpenShapeToolbar={() => setShowShapeToolbar(true)}
+          onOpenAssetLibrary={() => setShowAssetLibrary(true)}
           onUndo={handleUndo}
           onRedo={handleRedo}
           canUndo={historyIndex > 0}

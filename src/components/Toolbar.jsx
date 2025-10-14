@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button } from './ui/button';
-import { Edit, Type, Square, Image, Camera, Circle, PenTool, Undo, Redo } from 'lucide-react';
+import { Edit, Type, Square, Image, Camera, Circle, PenTool, Undo, Redo, Library } from 'lucide-react';
 
-const Toolbar = ({ onOpenEditor, onShowHandWritingTest, onOpenShapeToolbar, onUndo, onRedo, canUndo, canRedo }) => {
+const Toolbar = ({ onOpenEditor, onShowHandWritingTest, onOpenShapeToolbar, onOpenAssetLibrary, onUndo, onRedo, canUndo, canRedo }) => {
   return (
     <div className="toolbar bg-gradient-to-r from-gray-900 via-gray-900 to-gray-800 border-b border-gray-700 px-6 py-3 flex items-center gap-3 shadow-lg">
       {/* Main Actions */}
@@ -72,6 +72,19 @@ const Toolbar = ({ onOpenEditor, onShowHandWritingTest, onOpenShapeToolbar, onUn
         <Image className="w-4 h-4" />
         <span className="text-sm">Image</span>
       </Button>
+
+      {onOpenAssetLibrary && (
+        <Button
+          onClick={onOpenAssetLibrary}
+          variant="secondary"
+          size="default"
+          className="gap-2 bg-purple-600 hover:bg-purple-700 text-white"
+          title="Bibliothèque d'assets"
+        >
+          <Library className="w-4 h-4" />
+          <span className="text-sm">Assets</span>
+        </Button>
+      )}
 
       <Button
         variant="secondary"
