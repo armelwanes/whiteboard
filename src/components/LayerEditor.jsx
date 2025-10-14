@@ -2,7 +2,8 @@ import React, { useState, useRef } from 'react';
 import { 
   Upload, X, Save, Trash2, Eye, EyeOff, 
   MoveUp, MoveDown, Copy, Image as ImageIcon,
-  Layers as LayersIcon, Type as TextIcon, Square as ShapeIcon, Download, Library
+  Layers as LayersIcon, Type as TextIcon, Square as ShapeIcon, Download, Library,
+  Music as MusicIcon, Video as VideoIcon
 } from 'lucide-react';
 import CameraControls from './CameraControls';
 import LayerAnimationControls from './LayerAnimationControls';
@@ -10,6 +11,8 @@ import SceneCanvas from './SceneCanvas';
 import ShapeToolbar from './ShapeToolbar';
 import ImageCropModal from './ImageCropModal';
 import AssetLibrary from './AssetLibrary';
+import EnhancedAudioManager from './EnhancedAudioManager';
+import ThumbnailMaker from './ThumbnailMaker';
 import { createShapeLayer } from '../utils/shapeUtils';
 import { exportDefaultCameraView, exportAllCameras, downloadImage } from '../utils/cameraExporter';
 import { exportLayerFromJSON, downloadDataUrl, validateLayerJSON } from '../utils/layerExporter';
@@ -27,6 +30,7 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   const [showShapeToolbar, setShowShapeToolbar] = useState(false);
   const [showAssetLibrary, setShowAssetLibrary] = useState(false);
   const [showCropModal, setShowCropModal] = useState(false);
+  const [showThumbnailMaker, setShowThumbnailMaker] = useState(false);
   const [pendingImageData, setPendingImageData] = useState(null);
   const fileInputRef = useRef(null);
   const backgroundImageInputRef = useRef(null);
@@ -656,6 +660,18 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
         />
       )}
       
+      {/* Thumbnail Maker Modal */}
+      {showThumbnailMaker && (
+        <ThumbnailMaker
+          scene={editedScene}
+          onClose={() => setShowThumbnailMaker(false)}
+          onSave={(updatedScene) => {
+            setEditedScene(updatedScene);
+            setShowThumbnailMaker(false);
+          }}
+        />
+      )}
+      
       <div className="bg-white dark:bg-gray-900 shadow-2xl w-full max-w-full max-h-[70vh] flex overflow-hidden border border-gray-200 dark:border-gray-700 rounded-lg">
         {/* Left Side - Canvas Preview with Camera Viewports */}
         <div className="bg-gray-100 dark:bg-gray-950 flex flex-col flex-1 min-w-0">
@@ -675,6 +691,13 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
           <div className="bg-gray-50 dark:bg-gray-800 px-5 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Properties</h2>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowThumbnailMaker(true)}
+                className="bg-red-600 hover:bg-red-700 text-white font-medium py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm shadow-sm"
+                title="Créer Miniature"
+              >
+                <VideoIcon className="w-3.5 h-3.5" />
+              </button>
               <button
                 onClick={() => setShowAssetLibrary(true)}
                 className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm shadow-sm"
@@ -818,10 +841,10 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                   </select>
                 </div>
 
-                {/* Background Music */}
-                <div className="mt-3">
+                {/* Old Background Music - Keeping for backwards compatibility */}
+                <div className="mt-3 hidden">
                   <label className="block text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
-                    Background Music
+                    Background Music (Legacy)
                   </label>
                   <div className="flex gap-2">
                     <button
@@ -852,6 +875,12 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                   </p>
                 </div>
               </div>
+
+              {/* Enhanced Audio Manager */}
+              <EnhancedAudioManager
+                scene={editedScene}
+                onSceneUpdate={(updatedScene) => setEditedScene(updatedScene)}
+              />
 
               {/* Scene Camera Sequence */}
               <CameraControls

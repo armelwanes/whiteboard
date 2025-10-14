@@ -6,11 +6,29 @@ Une application web interactive pour créer des vidéos d'animation structurées
 
 ## 🎯 Fonctionnalités
 
+- **Gestionnaire Audio Amélioré** ⭐ NOUVEAU
+  - Interface moderne et élégante pour la gestion audio
+  - Upload direct de fichiers audio (MP3, WAV, OGG, etc.)
+  - Trois types de pistes : Musique de fond, Voix-off, Effets sonores
+  - Contrôle de volume principal et individuel par piste
+  - Aperçu audio avec lecture/pause en temps réel
+  - Support multi-pistes avec organisation visuelle
+  - Thème sombre moderne avec design gradient
+- **Créateur de Miniatures YouTube** ⭐ NOUVEAU
+  - Création de miniatures aux dimensions YouTube (1280x720)
+  - Aperçu en temps réel style YouTube
+  - Upload d'image de fond personnalisée
+  - Éditeur de texte complet (titre, sous-titre)
+  - Contrôles de position, taille, couleur et alignement
+  - 6 modèles de couleurs professionnels pré-configurés
+  - Effets de texte (contour, ombre)
+  - Grille de composition pour positionnement
+  - Export PNG haute qualité
 - **Gestion de scènes avancée** : Interface complète pour gérer vos scènes
   - Panneau latéral avec aperçu de toutes les scènes
   - Ajout, suppression, duplication et réorganisation des scènes
   - Éditeur modal pour modifier les propriétés des scènes
-- **Export de couches depuis JSON** ⭐ NOUVEAU : Export haute qualité sans screenshot
+- **Export de couches depuis JSON** : Export haute qualité sans screenshot
   - Export individuel ou en masse de toutes les couches
   - Fond blanc ou transparent configurable
   - Support haute résolution (pixelRatio)
