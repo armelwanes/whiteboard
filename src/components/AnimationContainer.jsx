@@ -79,7 +79,7 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
     <div className="animation-container w-full h-full flex flex-col bg-gray-950">
       {/* Main animation area */}
       <div 
-        className="animation-stage flex-1 min-h-0 relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800"
+        className=" relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800"
       >
         {scenes.map((scene, index) => (
           <Scene

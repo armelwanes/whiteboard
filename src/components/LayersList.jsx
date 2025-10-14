@@ -28,12 +28,8 @@ const LayersList = ({
   const sortedLayers = [...scene.layers].sort((a, b) => (a.z_index || 0) - (b.z_index || 0));
 
   return (
-    <div className="layers-list bg-gray-900 bg-opacity-95 text-white p-4 rounded-lg shadow-xl">
-      <h3 className="text-sm font-semibold mb-3 text-gray-300">
-        Couches de la scène ({scene.layers.length})
-      </h3>
-      
-      <div className="flex gap-3 overflow-x-auto pb-2">
+    <div className="layers-list bg-gray-900 bg-opacity-95 text-white rounded-lg shadow-xl">
+      <div className="flex gap-3 overflow-x-auto">
         {sortedLayers.map((layer, index) => {
           const isSelected = selectedLayerId === layer.id;
           
@@ -50,7 +46,7 @@ const LayersList = ({
               `}
             >
               {/* Layer Preview Image */}
-              <div className="relative h-32 bg-gray-950 rounded-t-lg overflow-hidden">
+              <div className="relative h-28 bg-gray-950 rounded-t-lg overflow-hidden">
                 {layer.type === 'image' && layer.image_path ? (
                   <img
                     src={layer.image_path}
