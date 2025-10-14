@@ -3,7 +3,8 @@ import {
   Upload, Save, Trash2, 
   MoveUp, MoveDown, Copy,
   Image as ImageIcon,
-  Layers as LayersIcon
+  Layers as LayersIcon,
+  Library
 } from 'lucide-react';
 import AudioManager from './audio/AudioManager';
 
@@ -17,6 +18,7 @@ const PropertiesPanel = ({
   onDuplicateLayer,
   onMoveLayer,
   onImageUpload,
+  onOpenAssetLibrary,
   fileInputRef
 }) => {
   if (!scene) {
@@ -52,13 +54,22 @@ const PropertiesPanel = ({
       {/* Header */}
       <div className="bg-gray-800 px-6 py-4 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
         <h2 className="text-xl font-bold text-white">Propriétés</h2>
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
-          title="Ajouter une image"
-        >
-          <Upload className="w-4 h-4" />
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={onOpenAssetLibrary}
+            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
+            title="Bibliothèque d'assets"
+          >
+            <Library className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
+            title="Ajouter une image"
+          >
+            <Upload className="w-4 h-4" />
+          </button>
+        </div>
         <input
           ref={fileInputRef}
           type="file"

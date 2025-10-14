@@ -2,17 +2,19 @@ import React, { useState, useRef } from 'react';
 import { 
   Upload, X, Save, Trash2, Eye, EyeOff, 
   MoveUp, MoveDown, Copy, Image as ImageIcon,
-  Layers as LayersIcon, Type as TextIcon, Square as ShapeIcon, Download
+  Layers as LayersIcon, Type as TextIcon, Square as ShapeIcon, Download, Library
 } from 'lucide-react';
 import CameraControls from './CameraControls';
 import LayerAnimationControls from './LayerAnimationControls';
 import SceneCanvas from './SceneCanvas';
 import ShapeToolbar from './ShapeToolbar';
 import ImageCropModal from './ImageCropModal';
+import AssetLibrary from './AssetLibrary';
 import { createShapeLayer } from '../utils/shapeUtils';
 import { exportDefaultCameraView, exportAllCameras, downloadImage } from '../utils/cameraExporter';
 import { exportLayerFromJSON, downloadDataUrl, validateLayerJSON } from '../utils/layerExporter';
 import { exportSceneImage, downloadSceneImage } from '../utils/sceneExporter';
+import { addAsset } from '../utils/assetManager';
 
 const LayerEditor = ({ scene, onClose, onSave }) => {
   const [editedScene, setEditedScene] = useState({ 
@@ -23,6 +25,7 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   const [selectedLayerId, setSelectedLayerId] = useState(null);
   const [selectedCamera, setSelectedCamera] = useState(null);
   const [showShapeToolbar, setShowShapeToolbar] = useState(false);
+  const [showAssetLibrary, setShowAssetLibrary] = useState(false);
   const [showCropModal, setShowCropModal] = useState(false);
   const [pendingImageData, setPendingImageData] = useState(null);
   const fileInputRef = useRef(null);
@@ -51,11 +54,23 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
     onSave(editedScene);
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
+        // Save to asset library
+        try {
+          await addAsset({
+            name: file.name,
+            dataUrl: event.target.result,
+            type: file.type,
+            tags: []
+          });
+        } catch (error) {
+          console.error('Error saving asset:', error);
+        }
+        
         // Store pending image data with file name
         setPendingImageData({
           imageUrl: event.target.result,
@@ -140,6 +155,61 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   const handleCropCancel = () => {
     setShowCropModal(false);
     setPendingImageData(null);
+  };
+
+  const handleSelectAssetFromLibrary = (asset) => {
+    // Calculate initial position based on selected camera
+    let cameraCenterX = sceneWidth / 2;
+    let cameraCenterY = sceneHeight / 2;
+    let cameraWidth = 800;
+    let cameraHeight = 450;
+    
+    if (selectedCamera && selectedCamera.position) {
+      cameraCenterX = selectedCamera.position.x * sceneWidth;
+      cameraCenterY = selectedCamera.position.y * sceneHeight;
+      cameraWidth = selectedCamera.width || 800;
+      cameraHeight = selectedCamera.height || 450;
+    }
+    
+    // Calculate scale to fit image within camera viewport
+    let calculatedScale = 1.0;
+    const maxWidth = cameraWidth * 0.8;
+    const maxHeight = cameraHeight * 0.8;
+    
+    const scaleX = maxWidth / asset.width;
+    const scaleY = maxHeight / asset.height;
+    calculatedScale = Math.min(scaleX, scaleY, 1.0);
+    
+    const scaledImageWidth = asset.width * calculatedScale;
+    const scaledImageHeight = asset.height * calculatedScale;
+    
+    const initialX = cameraCenterX - (scaledImageWidth / 2);
+    const initialY = cameraCenterY - (scaledImageHeight / 2);
+    
+    const newLayer = {
+      id: `layer-${Date.now()}`,
+      image_path: asset.dataUrl,
+      name: asset.name,
+      position: { x: initialX, y: initialY },
+      z_index: editedScene.layers.length + 1,
+      skip_rate: 10,
+      scale: calculatedScale,
+      opacity: 1.0,
+      mode: 'draw',
+      type: 'image',
+      audio: {
+        narration: null,
+        soundEffects: [],
+        typewriter: null,
+        drawing: null,
+      }
+    };
+    
+    setEditedScene({
+      ...editedScene,
+      layers: [...editedScene.layers, newLayer]
+    });
+    setSelectedLayerId(newLayer.id);
   };
 
   const handleBackgroundImageUpload = (e) => {
@@ -565,6 +635,14 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
         />
       )}
       
+      {/* Asset Library Modal */}
+      {showAssetLibrary && (
+        <AssetLibrary
+          onClose={() => setShowAssetLibrary(false)}
+          onSelectAsset={handleSelectAssetFromLibrary}
+        />
+      )}
+      
       {/* Image Crop Modal */}
       {showCropModal && pendingImageData && (
         <ImageCropModal
@@ -594,6 +672,13 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Properties</h2>
             <div className="flex items-center gap-2">
               <button
+                onClick={() => setShowAssetLibrary(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm shadow-sm"
+                title="Asset Library"
+              >
+                <Library className="w-3.5 h-3.5" />
+              </button>
+              <button
                 onClick={() => fileInputRef.current?.click()}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm shadow-sm"
                 title="Add Image"
@@ -609,7 +694,7 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
               </button>
               <button
                 onClick={() => setShowShapeToolbar(true)}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm shadow-sm"
+                className="bg-orange-600 hover:bg-orange-700 text-white font-medium py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm shadow-sm"
                 title="Add Shape"
               >
                 <ShapeIcon className="w-3.5 h-3.5" />
