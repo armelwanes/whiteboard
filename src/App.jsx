@@ -262,12 +262,14 @@ function App() {
           try {
             const cameraExports = await exportAllCameras(scene, 9600, 5400)
             
-            // Add image data URLs to each camera
+            // Add image data URLs and pixel positions to each camera
             const sceneCamerasWithImages = scene.sceneCameras.map(camera => {
               const cameraExport = cameraExports.find(exp => exp.camera.id === camera.id)
               return {
                 ...camera,
-                exportedImageDataUrl: cameraExport ? cameraExport.imageDataUrl : null
+                exportedImageDataUrl: cameraExport ? cameraExport.imageDataUrl : null,
+                pixelPosition: cameraExport?.camera?.pixelPosition || cameraExport?.config?.pixelPosition || null,
+                topLeftPixelPosition: cameraExport?.camera?.topLeftPixelPosition || cameraExport?.config?.topLeftPixelPosition || null
               }
             })
             
