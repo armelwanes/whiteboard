@@ -320,27 +320,12 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   // Export default camera view
   const handleExportDefaultCamera = async () => {
     try {
-      const result = await exportDefaultCameraView(editedScene, sceneWidth, sceneHeight);
+      const imageDataUrl = await exportDefaultCameraView(editedScene, sceneWidth, sceneHeight);
       const timestamp = new Date().toISOString().split('T')[0];
       
-      if (result.configOnly) {
-        // Camera is at default position - save config as JSON
-        const configJson = JSON.stringify(result.config, null, 2);
-        const blob = new Blob([configJson], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `scene-${editedScene.id}-default-camera-config-${timestamp}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        alert('Configuration de la caméra par défaut exportée (JSON uniquement - caméra en position par défaut)');
-      } else {
-        // Export actual image
-        downloadImage(result.imageDataUrl, `scene-${editedScene.id}-default-camera-${timestamp}.png`);
-        alert('Vue caméra par défaut exportée avec succès!');
-      }
+      // Always export the image cropped to camera viewport
+      downloadImage(imageDataUrl, `scene-${editedScene.id}-default-camera-${timestamp}.png`);
+      alert('Vue caméra par défaut exportée avec succès!');
     } catch (error) {
       console.error('Error exporting default camera:', error);
       alert('Erreur lors de l\'export de la caméra par défaut: ' + error.message);
@@ -352,34 +337,15 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
     try {
       const exports = await exportAllCameras(editedScene, sceneWidth, sceneHeight);
       const timestamp = new Date().toISOString().split('T')[0];
-      let imageCount = 0;
-      let configCount = 0;
       
       exports.forEach((exp, index) => {
         const cameraName = exp.camera.name || `camera-${index}`;
-        
-        if (exp.configOnly) {
-          // Save config as JSON for default camera
-          const configJson = JSON.stringify(exp.config, null, 2);
-          const blob = new Blob([configJson], { type: 'application/json' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `scene-${editedScene.id}-${cameraName}-config-${timestamp}.json`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          configCount++;
-        } else {
-          // Download actual image
-          const filename = `scene-${editedScene.id}-${cameraName}-${timestamp}.png`;
-          downloadImage(exp.imageDataUrl, filename);
-          imageCount++;
-        }
+        // Always download actual image cropped to camera viewport
+        const filename = `scene-${editedScene.id}-${cameraName}-${timestamp}.png`;
+        downloadImage(exp.imageDataUrl, filename);
       });
       
-      alert(`${exports.length} caméra(s) exportée(s): ${imageCount} image(s), ${configCount} config(s) JSON (caméras par défaut)`);
+      alert(`${exports.length} caméra(s) exportée(s) avec succès!`);
     } catch (error) {
       console.error('Error exporting cameras:', error);
       alert('Erreur lors de l\'export des caméras: ' + error.message);

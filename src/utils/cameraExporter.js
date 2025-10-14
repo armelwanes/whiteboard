@@ -225,20 +225,17 @@ const renderShapeLayer = (ctx, layer, cameraX, cameraY) => {
 
 /**
  * Export all cameras from a scene
- * Default cameras are exported as JSON config reference only
+ * All cameras are exported as images cropped to their viewport
  * @param {object} scene - The scene object
  * @param {number} sceneWidth - Scene width in pixels
  * @param {number} sceneHeight - Scene height in pixels
- * @returns {Promise<Array>} Array of {camera, imageDataUrl, configOnly} objects
+ * @returns {Promise<Array>} Array of {camera, imageDataUrl, cameraName, isDefault} objects
  */
 export const exportAllCameras = async (scene, sceneWidth = 9600, sceneHeight = 5400) => {
   const cameras = scene.sceneCameras || [];
   const exports = [];
 
   for (const camera of cameras) {
-    // Check if this is a default camera at default position
-    const isDefaultPos = isDefaultCameraPosition(camera);
-    
     // Calculate pixel position (center of camera viewport)
     const pixelPosition = {
       x: camera.position.x * sceneWidth,
@@ -251,41 +248,18 @@ export const exportAllCameras = async (scene, sceneWidth = 9600, sceneHeight = 5
       y: pixelPosition.y - (camera.height / 2),
     };
     
-    if (isDefaultPos) {
-      // For default camera, just save config reference
-      exports.push({
-        camera: camera,
-        imageDataUrl: null, // No image for default camera
-        cameraName: camera.name || 'Camera',
-        isDefault: true,
-        configOnly: true, // Flag to indicate this is config-only
-        config: {
-          id: camera.id,
-          name: camera.name,
-          position: camera.position,
-          pixelPosition: pixelPosition,
-          topLeftPixelPosition: topLeftPixelPosition,
-          width: camera.width,
-          height: camera.height,
-          zoom: camera.zoom,
-          isDefault: true,
-        }
-      });
-    } else {
-      // For custom cameras, export the actual image
-      const imageDataUrl = await exportCameraView(scene, camera, sceneWidth, sceneHeight);
-      exports.push({
-        camera: {
-          ...camera,
-          pixelPosition: pixelPosition,
-          topLeftPixelPosition: topLeftPixelPosition,
-        },
-        imageDataUrl: imageDataUrl,
-        cameraName: camera.name || 'Camera',
-        isDefault: camera.isDefault || false,
-        configOnly: false,
-      });
-    }
+    // Always export the actual image cropped to camera viewport
+    const imageDataUrl = await exportCameraView(scene, camera, sceneWidth, sceneHeight);
+    exports.push({
+      camera: {
+        ...camera,
+        pixelPosition: pixelPosition,
+        topLeftPixelPosition: topLeftPixelPosition,
+      },
+      imageDataUrl: imageDataUrl,
+      cameraName: camera.name || 'Camera',
+      isDefault: camera.isDefault || false,
+    });
   }
 
   return exports;
@@ -484,11 +458,11 @@ const renderShapeLayerCentered = (ctx, layer, centerX, centerY) => {
 
 /**
  * Export default camera view
- * If camera is at default position, returns config object instead of image
+ * Always exports the image cropped to the default camera viewport
  * @param {object} scene - The scene object
  * @param {number} sceneWidth - Scene width in pixels
  * @param {number} sceneHeight - Scene height in pixels
- * @returns {Promise<object>} Object with imageDataUrl or config
+ * @returns {Promise<string>} Data URL of the exported image
  */
 export const exportDefaultCameraView = async (scene, sceneWidth = 9600, sceneHeight = 5400) => {
   const cameras = scene.sceneCameras || [];
@@ -498,44 +472,7 @@ export const exportDefaultCameraView = async (scene, sceneWidth = 9600, sceneHei
     throw new Error('No default camera found in scene');
   }
 
-  // Check if camera is at default position
-  const isDefaultPos = isDefaultCameraPosition(defaultCamera);
-  
-  // Calculate pixel position (center of camera viewport)
-  const pixelPosition = {
-    x: defaultCamera.position.x * sceneWidth,
-    y: defaultCamera.position.y * sceneHeight,
-  };
-  
-  // Calculate top-left corner position
-  const topLeftPixelPosition = {
-    x: pixelPosition.x - (defaultCamera.width / 2),
-    y: pixelPosition.y - (defaultCamera.height / 2),
-  };
-  
-  if (isDefaultPos) {
-    // Return config reference instead of image
-    return {
-      configOnly: true,
-      config: {
-        id: defaultCamera.id,
-        name: defaultCamera.name,
-        position: defaultCamera.position,
-        pixelPosition: pixelPosition,
-        topLeftPixelPosition: topLeftPixelPosition,
-        width: defaultCamera.width,
-        height: defaultCamera.height,
-        zoom: defaultCamera.zoom,
-        isDefault: true,
-      },
-      imageDataUrl: null,
-    };
-  }
-
-  // Export actual image for non-default position
+  // Always export the actual image cropped to camera viewport
   const imageDataUrl = await exportCameraView(scene, defaultCamera, sceneWidth, sceneHeight);
-  return {
-    configOnly: false,
-    imageDataUrl: imageDataUrl,
-  };
+  return imageDataUrl;
 };
