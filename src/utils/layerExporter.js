@@ -12,8 +12,8 @@
  * @param {number} options.height - Canvas height (default: uses camera height or 450)
  * @param {string} options.background - Background color (default: '#FFFFFF', use 'transparent' for transparent)
  * @param {number} options.pixelRatio - Pixel ratio for high-res export (default: 1)
- * @param {number} options.sceneWidth - Scene width for positioning context (default: 9600)
- * @param {number} options.sceneHeight - Scene height for positioning context (default: 5400)
+ * @param {number} options.sceneWidth - Scene width for positioning context (default: 1920)
+ * @param {number} options.sceneHeight - Scene height for positioning context (default: 1080)
  * @param {string} options.sceneBackgroundImage - Optional scene background image URL to render behind the layer
  * @param {object} options.camera - Camera configuration for viewport-relative export. If provided, layer is positioned relative to camera viewport.
  * @param {boolean} options.useFullScene - If true, exports layer with full scene dimensions and real scene position (ignores camera)
@@ -26,8 +26,8 @@ export const exportLayerFromJSON = async (layer, options = {}) => {
     height,
     background = '#FFFFFF',
     pixelRatio = 1,
-    sceneWidth = 9600,
-    sceneHeight = 5400,
+    sceneWidth = 1920,
+    sceneHeight = 1080,
     sceneBackgroundImage = null,
     camera = null,
     useFullScene = false,
@@ -153,7 +153,7 @@ export const exportLayerFromJSON = async (layer, options = {}) => {
  * @param {number} sceneWidth - Scene width for camera cropping
  * @param {number} sceneHeight - Scene height for camera cropping
  */
-const renderBackgroundImage = (ctx, imageUrl, width, height, camera = null, sceneWidth = 9600, sceneHeight = 5400) => {
+const renderBackgroundImage = (ctx, imageUrl, width, height, camera = null, sceneWidth = 1920, sceneHeight = 1080) => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';

@@ -28,7 +28,7 @@ export const isDefaultCameraPosition = (camera) => {
  * @param {number} sceneHeight - Scene height in pixels
  * @returns {Promise<string>} Data URL of the exported image
  */
-export const exportCameraView = async (scene, camera, sceneWidth = 9600, sceneHeight = 5400) => {
+export const exportCameraView = async (scene, camera, sceneWidth = 1920, sceneHeight = 1080) => {
   // Create a canvas for rendering
   const canvas = document.createElement('canvas');
   canvas.width = camera.width || 800;
@@ -231,7 +231,7 @@ const renderShapeLayer = (ctx, layer, cameraX, cameraY) => {
  * @param {number} sceneHeight - Scene height in pixels
  * @returns {Promise<Array>} Array of {camera, imageDataUrl, configOnly} objects
  */
-export const exportAllCameras = async (scene, sceneWidth = 9600, sceneHeight = 5400) => {
+export const exportAllCameras = async (scene, sceneWidth = 1920, sceneHeight = 1080) => {
   const cameras = scene.sceneCameras || [];
   const exports = [];
 
@@ -490,7 +490,7 @@ const renderShapeLayerCentered = (ctx, layer, centerX, centerY) => {
  * @param {number} sceneHeight - Scene height in pixels
  * @returns {Promise<object>} Object with imageDataUrl or config
  */
-export const exportDefaultCameraView = async (scene, sceneWidth = 9600, sceneHeight = 5400) => {
+export const exportDefaultCameraView = async (scene, sceneWidth = 1920, sceneHeight = 1080) => {
   const cameras = scene.sceneCameras || [];
   const defaultCamera = cameras.find(cam => cam.isDefault);
   

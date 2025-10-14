@@ -13,7 +13,7 @@ const testLayer1 = {
   type: 'image',
   name: 'Test Layer',
   image_path: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2ZmMDAwMCIvPjwvc3ZnPg==',
-  position: { x: 4800, y: 2700 }, // Center of 9600x5400 scene
+  position: { x: 960, y: 540 }, // Center of 1920x1080 scene
   scale: 1.0,
   opacity: 1.0,
   z_index: 1,
@@ -23,24 +23,24 @@ const defaultCamera = {
   id: 'default-camera',
   name: 'Caméra Par Défaut',
   position: { x: 0.5, y: 0.5 }, // Center of scene
-  width: 800,
-  height: 450,
+  width: 1920,
+  height: 1080,
   isDefault: true,
 };
 
-console.log('Test 1: Layer at scene center (4800, 2700) with default camera at center (0.5, 0.5)');
-console.log('Expected: Layer should appear centered in 800x450 canvas');
+console.log('Test 1: Layer at scene center (960, 540) with default camera at center (0.5, 0.5)');
+console.log('Expected: Layer should appear centered in 1920x1080 canvas');
 console.log('Camera viewport calculation:');
-console.log('  - Camera position in pixels: (4800, 2700)');
-console.log('  - Camera viewport top-left: (4400, 2475)'); // (4800 - 400, 2700 - 225)
-console.log('  - Layer position relative to camera: (400, 225)'); // (4800 - 4400, 2700 - 2475)
+console.log('  - Camera position in pixels: (960, 540)');
+console.log('  - Camera viewport top-left: (0, 0)'); // (960 - 960, 540 - 540)
+console.log('  - Layer position relative to camera: (960, 540)'); // (960 - 0, 540 - 0)
 console.log('  - Expected: Layer centered in canvas\n');
 
 try {
   const dataUrl = await exportLayerFromJSON(testLayer1, {
     camera: defaultCamera,
-    sceneWidth: 9600,
-    sceneHeight: 5400,
+    sceneWidth: 1920,
+    sceneHeight: 1080,
     background: '#FFFFFF',
     pixelRatio: 1,
   });
@@ -60,25 +60,25 @@ const testLayer2 = {
   type: 'image',
   name: 'Offset Layer',
   image_path: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzAwZmYwMCIvPjwvc3ZnPg==',
-  position: { x: 5000, y: 2800 }, // Offset from center
+  position: { x: 1100, y: 640 }, // Offset from center
   scale: 1.0,
   opacity: 1.0,
   z_index: 1,
 };
 
-console.log('Test 2: Layer offset from camera center (5000, 2800)');
-console.log('Expected: Layer should appear offset from center in 800x450 canvas');
+console.log('Test 2: Layer offset from camera center (1100, 640)');
+console.log('Expected: Layer should appear offset from center in 1920x1080 canvas');
 console.log('Camera viewport calculation:');
-console.log('  - Camera position in pixels: (4800, 2700)');
-console.log('  - Camera viewport top-left: (4400, 2475)');
-console.log('  - Layer position relative to camera: (600, 325)'); // (5000 - 4400, 2800 - 2475)
+console.log('  - Camera position in pixels: (960, 540)');
+console.log('  - Camera viewport top-left: (0, 0)');
+console.log('  - Layer position relative to camera: (1100, 640)'); // (1100 - 0, 640 - 0)
 console.log('  - Expected: Layer offset right and down from center\n');
 
 try {
   const dataUrl = await exportLayerFromJSON(testLayer2, {
     camera: defaultCamera,
-    sceneWidth: 9600,
-    sceneHeight: 5400,
+    sceneWidth: 1920,
+    sceneHeight: 1080,
     background: '#FFFFFF',
     pixelRatio: 1,
   });
@@ -117,23 +117,23 @@ const customCamera = {
   id: 'custom-camera',
   name: 'Custom Camera',
   position: { x: 0.3, y: 0.7 }, // Different position
-  width: 800,
-  height: 450,
+  width: 1920,
+  height: 1080,
   isDefault: false,
 };
 
 console.log('Test 4: Export with custom camera at (0.3, 0.7)');
 console.log('Camera viewport calculation:');
-console.log('  - Camera position in pixels: (2880, 3780)'); // (0.3 * 9600, 0.7 * 5400)
-console.log('  - Camera viewport top-left: (2480, 3555)'); // (2880 - 400, 3780 - 225)
-console.log('  - Layer at (4800, 2700) relative to camera: (2320, -855)');
-console.log('  - Expected: Layer should be outside/partially outside viewport\n');
+console.log('  - Camera position in pixels: (576, 756)'); // (0.3 * 1920, 0.7 * 1080)
+console.log('  - Camera viewport top-left: (-384, 216)'); // (576 - 960, 756 - 540)
+console.log('  - Layer at (960, 540) relative to camera: (1344, 324)');
+console.log('  - Expected: Custom camera viewport exceeds scene bounds\n');
 
 try {
   const dataUrl = await exportLayerFromJSON(testLayer1, {
     camera: customCamera,
-    sceneWidth: 9600,
-    sceneHeight: 5400,
+    sceneWidth: 1920,
+    sceneHeight: 1080,
     background: '#FFFFFF',
     pixelRatio: 1,
   });

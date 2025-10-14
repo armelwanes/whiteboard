@@ -29,8 +29,8 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   const backgroundImageInputRef = useRef(null);
   const backgroundMusicInputRef = useRef(null);
 
-  const sceneWidth = 9600;
-  const sceneHeight = 5400;
+  const sceneWidth = 1920;
+  const sceneHeight = 1080;
 
   // Update editedScene when scene prop changes (switching between scenes)
   React.useEffect(() => {
@@ -845,8 +845,8 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                   Export depuis JSON (pas de screenshot). Fond blanc, haute qualité. Supporte: images, texte, formes, whiteboard.
                 </p>
                 <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">
-                  <strong>Vue Caméra:</strong> Export relatif à la caméra par défaut (800x450)<br/>
-                  <strong>Scène Complète:</strong> Utilisez les boutons d'export individuels sur chaque couche pour exporter avec dimensions réelles de la scène (9600x5400)
+                  <strong>Vue Caméra:</strong> Export relatif à la caméra par défaut (1920x1080)<br/>
+                  <strong>Scène Complète:</strong> Utilisez les boutons d'export individuels sur chaque couche pour exporter avec dimensions réelles de la scène (1920x1080)
                 </p>
               </div>
 
@@ -935,7 +935,7 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                                 handleExportLayerFullScene(layer.id);
                               }}
                               className="p-1 hover:bg-green-600 rounded"
-                              title="Exporter couche (scène complète 9600x5400)"
+                              title="Exporter couche (scène complète 1920x1080)"
                             >
                               <Download className="w-3 h-3 text-green-400" />
                             </button>

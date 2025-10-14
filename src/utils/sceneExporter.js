@@ -10,16 +10,16 @@
  * 
  * @param {object} scene - The scene object with layers and cameras
  * @param {object} options - Export options
- * @param {number} options.sceneWidth - Scene width in pixels (default: 9600)
- * @param {number} options.sceneHeight - Scene height in pixels (default: 5400)
+ * @param {number} options.sceneWidth - Scene width in pixels (default: 1920)
+ * @param {number} options.sceneHeight - Scene height in pixels (default: 1080)
  * @param {string} options.background - Background color (default: '#FFFFFF')
  * @param {number} options.pixelRatio - Pixel ratio for high-res export (default: 1)
  * @returns {Promise<string>} Data URL of the exported PNG
  */
 export const exportSceneImage = async (scene, options = {}) => {
   const {
-    sceneWidth = 9600,
-    sceneHeight = 5400,
+    sceneWidth = 1920,
+    sceneHeight = 1080,
     background = '#FFFFFF',
     pixelRatio = 1,
   } = options;

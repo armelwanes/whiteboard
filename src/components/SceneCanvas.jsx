@@ -19,8 +19,8 @@ const KonvaCamera = ({ camera, isSelected, onSelect, onUpdate, sceneWidth, scene
 
   // Calculate pixel position and dimensions
   const pixelDims = {
-    width: camera.width || 800,
-    height: camera.height || 450,
+    width: camera.width || 1920,
+    height: camera.height || 1080,
   };
   
   const pixelPos = {
@@ -394,8 +394,8 @@ const SceneCanvas = ({
   const stageRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
-  const sceneWidth = 9600;
-  const sceneHeight = 5400;
+  const sceneWidth = 1920;
+  const sceneHeight = 1080;
 
   // Create a new camera
   const handleAddCamera = useCallback(() => {
@@ -407,8 +407,8 @@ const SceneCanvas = ({
       id: `camera-${Date.now()}`,
       name: `Camera ${sceneCameras.length}`,
       position: { x: defaultPosition.x, y: defaultPosition.y }, // Start at default camera position
-      width: 800,
-      height: 450,
+      width: 1920,
+      height: 1080,
       zoom: 1.0,
       duration: 2.0,
       transition_duration: 1.0,

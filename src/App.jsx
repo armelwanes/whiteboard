@@ -260,7 +260,7 @@ function App() {
         // Export all cameras for this scene if they exist
         if (scene.sceneCameras && scene.sceneCameras.length > 0) {
           try {
-            const cameraExports = await exportAllCameras(scene, 9600, 5400)
+            const cameraExports = await exportAllCameras(scene, 1920, 1080)
             
             // Add image data URLs and pixel positions to each camera
             const sceneCamerasWithImages = scene.sceneCameras.map(camera => {

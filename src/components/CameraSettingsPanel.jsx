@@ -62,8 +62,8 @@ const CameraSettingsPanel = ({ camera, onUpdate }) => {
               min="100"
               max="1920"
               step="10"
-              value={camera.width || 800}
-              onChange={(e) => handleChange('width', parseInt(e.target.value) || 800)}
+              value={camera.width || 1920}
+              onChange={(e) => handleChange('width', parseInt(e.target.value) || 1920)}
               className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
               disabled={camera.locked}
             />
@@ -77,8 +77,8 @@ const CameraSettingsPanel = ({ camera, onUpdate }) => {
               min="100"
               max="1080"
               step="10"
-              value={camera.height || 450}
-              onChange={(e) => handleChange('height', parseInt(e.target.value) || 450)}
+              value={camera.height || 1080}
+              onChange={(e) => handleChange('height', parseInt(e.target.value) || 1080)}
               className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
               disabled={camera.locked}
             />

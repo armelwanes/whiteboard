@@ -17,8 +17,8 @@ const mockScene = {
       id: 'default-camera',
       name: 'Caméra Par Défaut',
       position: { x: 0.5, y: 0.5 },
-      width: 800,
-      height: 450,
+      width: 1920,
+      height: 1080,
       isDefault: true,
       zoom: 1.0,
     }
@@ -28,7 +28,7 @@ const mockScene = {
       id: 'layer-1',
       name: 'Test Text Layer',
       type: 'text',
-      position: { x: 4800, y: 2700 },
+      position: { x: 960, y: 540 },
       scale: 1.0,
       opacity: 1.0,
       rotation: 0,
@@ -48,7 +48,7 @@ const mockScene = {
       id: 'layer-2',
       name: 'Test Shape Layer',
       type: 'shape',
-      position: { x: 4600, y: 2500 },
+      position: { x: 920, y: 500 },
       scale: 1.0,
       opacity: 0.8,
       rotation: 0,
@@ -91,17 +91,17 @@ console.log();
 console.log('Test 2: Verify camera viewport calculation');
 try {
   const camera = mockScene.sceneCameras[0];
-  const sceneWidth = 9600;
-  const sceneHeight = 5400;
+  const sceneWidth = 1920;
+  const sceneHeight = 1080;
   
   // Camera is at (0.5, 0.5) which is center of scene
   const cameraX = (camera.position.x * sceneWidth) - (camera.width / 2);
   const cameraY = (camera.position.y * sceneHeight) - (camera.height / 2);
   
   console.log('Camera viewport top-left:', { x: cameraX, y: cameraY });
-  console.log('Expected:', { x: 4400, y: 2475 });
+  console.log('Expected:', { x: 0, y: 0 });
   
-  if (Math.abs(cameraX - 4400) < 1 && Math.abs(cameraY - 2475) < 1) {
+  if (Math.abs(cameraX - 0) < 1 && Math.abs(cameraY - 0) < 1) {
     console.log('✓ PASS - Camera viewport calculated correctly');
   } else {
     console.log('✗ FAIL - Camera viewport calculation incorrect');
@@ -115,9 +115,9 @@ console.log();
 console.log('Test 3: Verify layer-to-camera relative positioning');
 try {
   const camera = mockScene.sceneCameras[0];
-  const layer = mockScene.layers[0]; // Text layer at (4800, 2700)
-  const sceneWidth = 9600;
-  const sceneHeight = 5400;
+  const layer = mockScene.layers[0]; // Text layer at (960, 540)
+  const sceneWidth = 1920;
+  const sceneHeight = 1080;
   
   const cameraX = (camera.position.x * sceneWidth) - (camera.width / 2);
   const cameraY = (camera.position.y * sceneHeight) - (camera.height / 2);
@@ -127,9 +127,9 @@ try {
   
   console.log('Layer scene position:', layer.position);
   console.log('Layer position relative to camera:', { x: layerRelativeX, y: layerRelativeY });
-  console.log('Expected (centered in camera):', { x: 400, y: 225 });
+  console.log('Expected (centered in camera):', { x: 960, y: 540 });
   
-  if (Math.abs(layerRelativeX - 400) < 1 && Math.abs(layerRelativeY - 225) < 1) {
+  if (Math.abs(layerRelativeX - 960) < 1 && Math.abs(layerRelativeY - 540) < 1) {
     console.log('✓ PASS - Layer positioned correctly relative to camera');
   } else {
     console.log('✗ FAIL - Layer positioning incorrect');

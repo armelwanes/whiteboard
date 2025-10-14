@@ -26,11 +26,11 @@ const CameraViewport = ({
   const viewportRef = useRef(null);
 
   // Calculate pixel dimensions based on camera zoom
-  // Camera viewport represents a fixed output size (e.g., 1920x1080 or 800x450)
+  // Camera viewport represents a fixed output size (e.g., 1920x1080 YouTube standard)
   // Zoom affects what portion of the scene is visible, not the viewport size
   const getPixelDimensions = useCallback(() => {
-    const baseWidth = camera.width || 800;
-    const baseHeight = camera.height || 450;
+    const baseWidth = camera.width || 1920;
+    const baseHeight = camera.height || 1080;
     
     // Fixed viewport size - represents the camera frame size
     return {
@@ -153,8 +153,8 @@ const CameraViewport = ({
       setIsResizing(true);
       setResizeHandle(e.target.dataset.handle);
       setInitialDimensions({
-        width: camera.width || 800,
-        height: camera.height || 450,
+        width: camera.width || 1920,
+        height: camera.height || 1080,
       });
       setInitialZoom(camera.zoom || 1.0);
     } else if (e.target.classList.contains('camera-frame') || 
