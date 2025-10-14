@@ -107,6 +107,8 @@ const TextLayer = ({ layer, isSelected, onSelect, onChange }) => {
         shadowOffsetX={layer.shadowEnabled ? 4 : 0}
         shadowOffsetY={layer.shadowEnabled ? 4 : 0}
         align={layer.align}
+        offsetX={layer.align === 'center' ? 0 : 0} // Center text on x position
+        offsetY={layer.fontSize / 2} // Center text vertically
         draggable
         onClick={onSelect}
         onTap={onSelect}
@@ -327,13 +329,17 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
             <div className="space-y-4">
               {/* Konva Stage */}
               <div className="bg-gray-950 rounded-xl p-4">
-                <div className="relative inline-block">
+                <div className="relative" style={{ maxWidth: '100%', overflow: 'hidden' }}>
                   <Stage
                     width={WIDTH}
                     height={HEIGHT}
                     ref={stageRef}
                     className="border-2 border-gray-700 rounded-lg shadow-2xl"
-                    style={{ maxWidth: '100%', height: 'auto' }}
+                    style={{ 
+                      maxWidth: '100%', 
+                      height: 'auto',
+                      display: 'block'
+                    }}
                     onMouseDown={(e) => {
                       // Deselect when clicking on empty area
                       const clickedOnEmpty = e.target === e.target.getStage();
