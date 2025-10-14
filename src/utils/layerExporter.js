@@ -17,6 +17,7 @@
  * @param {string} options.sceneBackgroundImage - Optional scene background image URL to render behind the layer
  * @returns {Promise<string>} Data URL of the exported PNG
  */
+
 export const exportLayerFromJSON = async (layer, options = {}) => {
   const {
     width = 1920,
@@ -41,25 +42,36 @@ export const exportLayerFromJSON = async (layer, options = {}) => {
     ctx.fillRect(0, 0, width, height);
   }
 
-  // Render scene background image if provided (the whiteboard background)
+  // Render scene background image FIRST (if provided)
   if (sceneBackgroundImage) {
+    console.log('Rendering scene background:', sceneBackgroundImage);
     await renderBackgroundImage(ctx, sceneBackgroundImage, width, height);
   }
 
-  // Render layer based on type
+  // THEN render the layer - CENTER IT on the canvas
+  console.log('Rendering layer:', layer.type, layer);
   try {
+    // Create a modified layer with centered position
+    const centeredLayer = {
+      ...layer,
+      position: {
+        x: width / 2,  // Center horizontally
+        y: height / 2  // Center vertically
+      }
+    };
+
     switch (layer.type) {
       case 'image':
-        await renderImageLayerFromJSON(ctx, layer);
+        await renderImageLayerFromJSON(ctx, centeredLayer);
         break;
       case 'text':
-        renderTextLayerFromJSON(ctx, layer);
+        renderTextLayerFromJSON(ctx, centeredLayer);
         break;
       case 'shape':
-        renderShapeLayerFromJSON(ctx, layer);
+        renderShapeLayerFromJSON(ctx, centeredLayer);
         break;
       case 'whiteboard':
-        renderWhiteboardLayerFromJSON(ctx, layer);
+        renderWhiteboardLayerFromJSON(ctx, centeredLayer);
         break;
       default:
         console.warn(`Unsupported layer type: ${layer.type}`);
@@ -110,6 +122,8 @@ const renderBackgroundImage = (ctx, imageUrl, width, height) => {
  */
 const renderImageLayerFromJSON = (ctx, layer) => {
   return new Promise((resolve, reject) => {
+    console.log('Rendering image layer:', layer.image_path, 'position:', layer.position);
+    
     if (!layer.image_path) {
       reject(new Error('Image layer missing image_path'));
       return;
@@ -120,6 +134,7 @@ const renderImageLayerFromJSON = (ctx, layer) => {
 
     img.onload = () => {
       try {
+        console.log('Image loaded:', img.width, 'x', img.height);
         ctx.save();
 
         // Apply layer transformations
@@ -128,6 +143,8 @@ const renderImageLayerFromJSON = (ctx, layer) => {
         const scale = layer.scale || 1.0;
         const opacity = layer.opacity !== undefined ? layer.opacity : 1.0;
         const rotation = layer.rotation || 0;
+
+        console.log('Drawing at:', { x, y, scale, opacity, rotation });
 
         ctx.globalAlpha = opacity;
 
@@ -140,6 +157,7 @@ const renderImageLayerFromJSON = (ctx, layer) => {
         // Draw image centered on position
         const imgWidth = img.width * scale;
         const imgHeight = img.height * scale;
+        
         ctx.drawImage(
           img,
           -imgWidth / 2,
@@ -149,13 +167,16 @@ const renderImageLayerFromJSON = (ctx, layer) => {
         );
 
         ctx.restore();
+        console.log('Image rendered successfully');
         resolve();
       } catch (error) {
+        console.error('Error drawing image:', error);
         reject(error);
       }
     };
 
-    img.onerror = () => {
+    img.onerror = (e) => {
+      console.error('Image load error:', e);
       reject(new Error(`Failed to load image: ${layer.image_path}`));
     };
 
@@ -448,12 +469,42 @@ export const exportLayersAsZip = async (layers, options = {}, onProgress = null)
  * @param {string} filename - Filename for download
  */
 export const downloadDataUrl = (dataUrl, filename) => {
-  const a = document.createElement('a');
-  a.href = dataUrl;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  try {
+    // Pour les data URLs, conversion directe en blob est plus efficace
+    const arr = dataUrl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    
+    const blob = new Blob([u8arr], { type: mime });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Cleanup
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }, 100);
+    
+  } catch (error) {
+    console.error('Error downloading data URL:', error);
+    // Fallback simple
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
 };
 
 /**

@@ -358,9 +358,10 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
         sceneBackgroundImage: editedScene.backgroundImage, // Include scene background
       });
       
+
       const filename = `scene-${editedScene.id}-layer-${layer.name || layer.id}-${timestamp}.png`;
       downloadDataUrl(dataUrl, filename);
-      alert(`Couche "${layer.name || layer.id}" exportée avec succès!`);
+     // alert(`Couche "${layer.name || layer.id}" exportée avec succès!`);
     } catch (error) {
       console.error('Error exporting layer:', error);
       alert(`Erreur lors de l'export de la couche: ${error.message}`);
