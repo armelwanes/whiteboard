@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scene Export Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      border-bottom: 2px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    .section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 4px;
+      border-left: 4px solid #2196F3;
+    }
+    .section h3 {
+      margin-top: 0;
+      color: #2196F3;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .canvas-container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+    .canvas-wrapper {
+      border: 2px solid #ddd;
+      padding: 10px;
+      background: white;
+      border-radius: 4px;
+    }
+    .canvas-wrapper h4 {
+      margin: 0 0 10px 0;
+      color: #666;
+    }
+    canvas {
+      border: 1px solid #333;
+      display: block;
+    }
+    .info {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 20px 0;
+      border-left: 4px solid #2196F3;
+    }
+    .success {
+      background: #e8f5e9;
+      border-left-color: #4CAF50;
+      color: #2e7d32;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .stat-box {
+      background: white;
+      padding: 15px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+    code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎬 Scene Export Demo</h1>
+    
+    <div class="info">
+      <p><strong>What this demo shows:</strong></p>
+      <ul>
+        <li>Export of complete scene with all layers combined</li>
+        <li>Camera-based cropping (uses default camera viewport)</li>
+        <li>Real dimensions (camera size: 800x450)</li>
+        <li>Proper layer positioning relative to camera</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3>Test Scene Configuration</h3>
+      <div class="stats">
+        <div class="stat-box">
+          <div class="stat-label">Scene Size</div>
+          <div class="stat-value">9600x5400</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Camera Size</div>
+          <div class="stat-value">800x450</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Camera Position</div>
+          <div class="stat-value">(0.5, 0.5)</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Total Layers</div>
+          <div class="stat-value" id="layerCount">3</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Export Actions</h3>
+      <button id="exportBtn">Export Scene</button>
+      <button id="downloadBtn" disabled>Download Exported Image</button>
+      <p style="color: #666; font-size: 14px; margin-top: 10px;">
+        Click "Export Scene" to render all layers with camera cropping
+      </p>
+    </div>
+
+    <div class="canvas-container">
+      <div class="canvas-wrapper">
+        <h4>Full Scene (9600x5400) - Preview scaled</h4>
+        <canvas id="sceneCanvas" width="480" height="270"></canvas>
+        <p style="font-size: 12px; color: #666; margin-top: 5px;">
+          Scaled to 5% for display. Shows camera viewport in pink.
+        </p>
+      </div>
+      
+      <div class="canvas-wrapper">
+        <h4>Exported Scene (800x450) - Camera View</h4>
+        <canvas id="exportCanvas" width="800" height="450"></canvas>
+        <p style="font-size: 12px; color: #666; margin-top: 5px;">
+          Actual size. Only content visible in camera viewport.
+        </p>
+      </div>
+    </div>
+
+    <div id="result" style="margin-top: 20px;"></div>
+  </div>
+
+  <script type="module">
+    // Mock scene data
+    const mockScene = {
+      id: 'demo-scene',
+      title: 'Demo Scene',
+      backgroundImage: null,
+      sceneCameras: [
+        {
+          id: 'default-camera',
+          name: 'Caméra Par Défaut',
+          position: { x: 0.5, y: 0.5 },
+          width: 800,
+          height: 450,
+          isDefault: true,
+          zoom: 1.0,
+        }
+      ],
+      layers: [
+        {
+          id: 'layer-1',
+          name: 'Background Rectangle',
+          type: 'shape',
+          position: { x: 4800, y: 2700 },
+          scale: 1.0,
+          opacity: 0.3,
+          rotation: 0,
+          visible: true,
+          z_index: 1,
+          shape_config: {
+            shape_type: 'rectangle',
+            width: 600,
+            height: 350,
+            fill_color: [100, 150, 255, 255],
+            stroke_color: [0, 50, 150, 255],
+            stroke_width: 3,
+            fill_mode: 'both',
+          }
+        },
+        {
+          id: 'layer-2',
+          name: 'Circle',
+          type: 'shape',
+          position: { x: 4600, y: 2550 },
+          scale: 1.0,
+          opacity: 0.8,
+          rotation: 0,
+          visible: true,
+          z_index: 2,
+          shape_config: {
+            shape_type: 'circle',
+            width: 150,
+            height: 150,
+            fill_color: [255, 100, 100, 255],
+            stroke_color: [150, 0, 0, 255],
+            stroke_width: 4,
+            fill_mode: 'both',
+          }
+        },
+        {
+          id: 'layer-3',
+          name: 'Title Text',
+          type: 'text',
+          position: { x: 4800, y: 2700 },
+          scale: 1.0,
+          opacity: 1.0,
+          rotation: 0,
+          visible: true,
+          z_index: 3,
+          text_config: {
+            text: 'Scene Export\nDemo',
+            size: 48,
+            font: 'Arial',
+            color: [0, 0, 0],
+            align: 'center',
+            line_height: 1.2,
+            style: 'bold',
+          }
+        }
+      ]
+    };
+
+    const sceneWidth = 9600;
+    const sceneHeight = 5400;
+    let exportedDataUrl = null;
+
+    // Draw full scene preview with camera viewport highlighted
+    function drawScenePreview() {
+      const canvas = document.getElementById('sceneCanvas');
+      const ctx = canvas.getContext('2d');
+      const scale = canvas.width / sceneWidth; // 0.05
+
+      ctx.fillStyle = '#f0f0f0';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw all layers at their positions
+      mockScene.layers.forEach(layer => {
+        ctx.save();
+        const x = layer.position.x * scale;
+        const y = layer.position.y * scale;
+        
+        ctx.translate(x, y);
+        
+        if (layer.type === 'shape') {
+          const config = layer.shape_config;
+          const w = config.width * scale;
+          const h = config.height * scale;
+          
+          ctx.globalAlpha = layer.opacity;
+          ctx.fillStyle = `rgba(${config.fill_color.slice(0,3).join(',')})`;
+          ctx.strokeStyle = `rgba(${config.stroke_color.slice(0,3).join(',')})`;
+          ctx.lineWidth = config.stroke_width * scale;
+          
+          if (config.shape_type === 'rectangle') {
+            ctx.fillRect(-w/2, -h/2, w, h);
+            ctx.strokeRect(-w/2, -h/2, w, h);
+          } else if (config.shape_type === 'circle') {
+            ctx.beginPath();
+            ctx.arc(0, 0, w/2, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+          }
+        } else if (layer.type === 'text') {
+          const config = layer.text_config;
+          ctx.globalAlpha = layer.opacity;
+          ctx.font = `bold ${config.size * scale}px ${config.font}`;
+          ctx.fillStyle = `rgb(${config.color.join(',')})`;
+          ctx.textAlign = config.align;
+          ctx.textBaseline = 'middle';
+          
+          const lines = config.text.split('\n');
+          lines.forEach((line, i) => {
+            ctx.fillText(line, 0, (i - (lines.length-1)/2) * config.size * scale * 1.2);
+          });
+        }
+        
+        ctx.restore();
+      });
+
+      // Draw camera viewport
+      const camera = mockScene.sceneCameras[0];
+      const cameraX = (camera.position.x * sceneWidth - camera.width / 2) * scale;
+      const cameraY = (camera.position.y * sceneHeight - camera.height / 2) * scale;
+      const cameraW = camera.width * scale;
+      const cameraH = camera.height * scale;
+
+      ctx.strokeStyle = '#ff1493';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.strokeRect(cameraX, cameraY, cameraW, cameraH);
+      ctx.setLineDash([]);
+      
+      // Label
+      ctx.fillStyle = '#ff1493';
+      ctx.font = 'bold 10px Arial';
+      ctx.fillText('Camera Viewport', cameraX + 5, cameraY - 5);
+    }
+
+    // Render scene export (simulated)
+    function renderSceneExport() {
+      const canvas = document.getElementById('exportCanvas');
+      const ctx = canvas.getContext('2d');
+      const camera = mockScene.sceneCameras[0];
+
+      // White background
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Calculate camera viewport
+      const cameraX = (camera.position.x * sceneWidth) - (camera.width / 2);
+      const cameraY = (camera.position.y * sceneHeight) - (camera.height / 2);
+
+      // Render each layer
+      mockScene.layers.forEach(layer => {
+        const layerX = layer.position.x - cameraX;
+        const layerY = layer.position.y - cameraY;
+        
+        ctx.save();
+        ctx.translate(layerX, layerY);
+        ctx.globalAlpha = layer.opacity;
+        
+        if (layer.type === 'shape') {
+          const config = layer.shape_config;
+          const w = config.width;
+          const h = config.height;
+          
+          ctx.fillStyle = `rgba(${config.fill_color.slice(0,3).join(',')})`;
+          ctx.strokeStyle = `rgba(${config.stroke_color.slice(0,3).join(',')})`;
+          ctx.lineWidth = config.stroke_width;
+          
+          if (config.shape_type === 'rectangle') {
+            ctx.fillRect(-w/2, -h/2, w, h);
+            ctx.strokeRect(-w/2, -h/2, w, h);
+          } else if (config.shape_type === 'circle') {
+            ctx.beginPath();
+            ctx.arc(0, 0, w/2, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+          }
+        } else if (layer.type === 'text') {
+          const config = layer.text_config;
+          ctx.font = `bold ${config.size}px ${config.font}`;
+          ctx.fillStyle = `rgb(${config.color.join(',')})`;
+          ctx.textAlign = config.align;
+          ctx.textBaseline = 'middle';
+          
+          const lines = config.text.split('\n');
+          lines.forEach((line, i) => {
+            ctx.fillText(line, 0, (i - (lines.length-1)/2) * config.size * 1.2);
+          });
+        }
+        
+        ctx.restore();
+      });
+
+      return canvas.toDataURL('image/png');
+    }
+
+    // Initialize
+    drawScenePreview();
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      exportedDataUrl = renderSceneExport();
+      document.getElementById('downloadBtn').disabled = false;
+      
+      const result = document.getElementById('result');
+      result.innerHTML = `
+        <div class="info success">
+          <strong>✓ Export successful!</strong>
+          <p>Scene exported with:</p>
+          <ul>
+            <li>Dimensions: 800x450 (camera size)</li>
+            <li>Layers: ${mockScene.layers.length} combined</li>
+            <li>Camera position: (${mockScene.sceneCameras[0].position.x}, ${mockScene.sceneCameras[0].position.y})</li>
+            <li>All layers positioned relative to camera viewport</li>
+          </ul>
+        </div>
+      `;
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      if (exportedDataUrl) {
+        const a = document.createElement('a');
+        a.href = exportedDataUrl;
+        a.download = 'scene-export-demo.png';
+        a.click();
+      }
+    });
+  </script>
+</body>
+</html>

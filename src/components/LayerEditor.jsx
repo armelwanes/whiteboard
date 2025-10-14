@@ -12,6 +12,7 @@ import ImageCropModal from './ImageCropModal';
 import { createShapeLayer } from '../utils/shapeUtils';
 import { exportDefaultCameraView, exportAllCameras, downloadImage } from '../utils/cameraExporter';
 import { exportLayerFromJSON, downloadDataUrl, validateLayerJSON } from '../utils/layerExporter';
+import { exportSceneImage, downloadSceneImage } from '../utils/sceneExporter';
 
 const LayerEditor = ({ scene, onClose, onSave }) => {
   const [editedScene, setEditedScene] = useState({ 
@@ -291,6 +292,28 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
         ...editedScene,
         layers: [...editedScene.layers, duplicatedLayer]
       });
+    }
+  };
+
+  // Export complete scene as a single image
+  const handleExportScene = async () => {
+    try {
+      const timestamp = new Date().toISOString().split('T')[0];
+      
+      // Export scene with all layers combined
+      const dataUrl = await exportSceneImage(editedScene, {
+        sceneWidth: sceneWidth,
+        sceneHeight: sceneHeight,
+        background: '#FFFFFF',
+        pixelRatio: 1,
+      });
+      
+      const filename = `scene-${editedScene.id}-complete-${timestamp}.png`;
+      downloadSceneImage(dataUrl, filename);
+      alert('Scène exportée avec succès!');
+    } catch (error) {
+      console.error('Error exporting scene:', error);
+      alert('Erreur lors de l\'export de la scène: ' + error.message);
     }
   };
 
@@ -713,6 +736,28 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                 onChange={(cameras) => handleChange('cameras', cameras)}
                 type="scene"
               />
+
+              {/* Scene Export Options */}
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-gray-900 dark:text-white font-semibold mb-3 text-sm flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4" />
+                  Export Scène Complète
+                </h3>
+                
+                <div className="space-y-2">
+                  <button
+                    onClick={handleExportScene}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-3 rounded flex items-center justify-center gap-2 transition-colors text-sm"
+                  >
+                    <Download className="w-4 h-4" />
+                    Exporter Scène
+                  </button>
+                </div>
+                
+                <p className="text-gray-500 dark:text-gray-400 text-xs mt-2">
+                  Export de toutes les couches combinées avec les dimensions de la caméra par défaut et cropping automatique
+                </p>
+              </div>
 
               {/* Camera Export Options */}
               <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
