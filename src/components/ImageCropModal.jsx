@@ -141,6 +141,7 @@ const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
                 onChange={(c) => setCrop(c)}
                 onComplete={(c) => setCompletedCrop(c)}
                 aspect={undefined}
+                className=' bg-white'
               >
                 <img
                   ref={imgRef}
