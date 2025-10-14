@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Scene from './Scene';
-import Timeline from './Timeline';
+import LayersList from './LayersList';
 import LayerEditor from './LayerEditor';
 import { createTimeline } from '../utils/timelineSystem';
 
@@ -73,21 +73,7 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
     };
   }, [isPlaying, totalDuration]);
 
-  const handlePlayPause = () => {
-    if (currentTime >= totalDuration) {
-      setCurrentTime(0);
-    }
-    setIsPlaying(!isPlaying);
-  };
 
-  const handleSeek = (time) => {
-    setCurrentTime(Math.max(0, Math.min(time, totalDuration)));
-    lastTimeRef.current = Date.now();
-  };
-
-  const handleUpdateTimeline = (updatedTimeline) => {
-    setGlobalTimeline(updatedTimeline);
-  };
 
   return (
     <div className="animation-container w-full h-full flex flex-col bg-gray-950">
@@ -115,7 +101,7 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
         )}
       </div>
 
-      {/* Layer Editor Block above timeline */}
+      {/* Layer Editor Block above layers list */}
       {scenes[selectedSceneIndex] && (
         <LayerEditor
           scene={scenes[selectedSceneIndex]}
@@ -126,19 +112,68 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
         />
       )}
 
-      {/* Timeline controls always visible at the bottom */}
-      <div className="timeline-container p-4">
-        <Timeline
-          currentTime={currentTime}
-          totalDuration={totalDuration}
-          isPlaying={isPlaying}
-          onPlayPause={handlePlayPause}
-          onSeek={handleSeek}
-          scenes={scenes}
-          currentSceneIndex={currentSceneIndex}
-          timeline={globalTimeline}
-          onUpdateTimeline={handleUpdateTimeline}
-        />
+      {/* Layers list - horizontal scrollable display of current scene's layers */}
+      <div className="layers-container p-4">
+        {scenes[selectedSceneIndex] && (
+          <LayersList
+            scene={scenes[selectedSceneIndex]}
+            selectedLayerId={null}
+            onSelectLayer={(layerId) => {
+              // Handle layer selection if needed
+              console.log('Selected layer:', layerId);
+            }}
+            onUpdateLayer={(layer) => {
+              const currentScene = scenes[selectedSceneIndex];
+              const updatedLayers = currentScene.layers.map(l => 
+                l.id === layer.id ? layer : l
+              );
+              updateScene(selectedSceneIndex, { ...currentScene, layers: updatedLayers });
+            }}
+            onDeleteLayer={(layerId) => {
+              const currentScene = scenes[selectedSceneIndex];
+              const updatedLayers = currentScene.layers.filter(l => l.id !== layerId);
+              updateScene(selectedSceneIndex, { ...currentScene, layers: updatedLayers });
+            }}
+            onDuplicateLayer={(layerId) => {
+              const currentScene = scenes[selectedSceneIndex];
+              const layerToDuplicate = currentScene.layers.find(l => l.id === layerId);
+              if (layerToDuplicate) {
+                const newLayer = {
+                  ...layerToDuplicate,
+                  id: `layer-${Date.now()}`,
+                  name: `${layerToDuplicate.name || 'Layer'} (copie)`,
+                  z_index: (layerToDuplicate.z_index || 0) + 1
+                };
+                updateScene(selectedSceneIndex, { 
+                  ...currentScene, 
+                  layers: [...currentScene.layers, newLayer] 
+                });
+              }
+            }}
+            onMoveLayer={(layerId, direction) => {
+              const currentScene = scenes[selectedSceneIndex];
+              const layerIndex = currentScene.layers.findIndex(l => l.id === layerId);
+              if (layerIndex === -1) return;
+              
+              const sortedLayers = [...currentScene.layers].sort((a, b) => 
+                (a.z_index || 0) - (b.z_index || 0)
+              );
+              const sortedIndex = sortedLayers.findIndex(l => l.id === layerId);
+              
+              if (direction === 'up' && sortedIndex > 0) {
+                const temp = sortedLayers[sortedIndex].z_index;
+                sortedLayers[sortedIndex].z_index = sortedLayers[sortedIndex - 1].z_index;
+                sortedLayers[sortedIndex - 1].z_index = temp;
+              } else if (direction === 'down' && sortedIndex < sortedLayers.length - 1) {
+                const temp = sortedLayers[sortedIndex].z_index;
+                sortedLayers[sortedIndex].z_index = sortedLayers[sortedIndex + 1].z_index;
+                sortedLayers[sortedIndex + 1].z_index = temp;
+              }
+              
+              updateScene(selectedSceneIndex, { ...currentScene, layers: sortedLayers });
+            }}
+          />
+        )}
       </div>
     </div>
   );
