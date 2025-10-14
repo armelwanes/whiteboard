@@ -16,6 +16,7 @@
  * @param {number} options.sceneHeight - Scene height for positioning context (default: 5400)
  * @param {string} options.sceneBackgroundImage - Optional scene background image URL to render behind the layer
  * @param {object} options.camera - Camera configuration for viewport-relative export. If provided, layer is positioned relative to camera viewport.
+ * @param {boolean} options.useFullScene - If true, exports layer with full scene dimensions and real scene position (ignores camera)
  * @returns {Promise<string>} Data URL of the exported PNG
  */
 
@@ -29,13 +30,18 @@ export const exportLayerFromJSON = async (layer, options = {}) => {
     sceneHeight = 5400,
     sceneBackgroundImage = null,
     camera = null,
+    useFullScene = false,
   } = options;
 
   // Determine canvas dimensions
   let canvasWidth = width;
   let canvasHeight = height;
   
-  if (camera) {
+  if (useFullScene) {
+    // Use full scene dimensions for export
+    canvasWidth = sceneWidth;
+    canvasHeight = sceneHeight;
+  } else if (camera) {
     // Use camera dimensions when camera is provided
     canvasWidth = camera.width || 800;
     canvasHeight = camera.height || 450;
@@ -62,8 +68,14 @@ export const exportLayerFromJSON = async (layer, options = {}) => {
 
   // Render scene background image FIRST (if provided)
   if (sceneBackgroundImage) {
-    console.log('Rendering scene background:', sceneBackgroundImage);
-    await renderBackgroundImage(ctx, sceneBackgroundImage, canvasWidth, canvasHeight);
+    console.log('Rendering scene background:', sceneBackgroundImage, 'useFullScene:', useFullScene);
+    if (useFullScene) {
+      // For full scene mode, render background at full scene size without cropping
+      await renderBackgroundImage(ctx, sceneBackgroundImage, canvasWidth, canvasHeight);
+    } else {
+      // For camera mode, render background cropped to camera viewport
+      await renderBackgroundImage(ctx, sceneBackgroundImage, canvasWidth, canvasHeight, camera, sceneWidth, sceneHeight);
+    }
   }
 
   // THEN render the layer
@@ -71,7 +83,16 @@ export const exportLayerFromJSON = async (layer, options = {}) => {
   try {
     let modifiedLayer;
     
-    if (camera) {
+    if (useFullScene) {
+      // Full scene mode: use layer's real scene position
+      modifiedLayer = {
+        ...layer,
+        position: {
+          x: layer.position?.x || (sceneWidth / 2),
+          y: layer.position?.y || (sceneHeight / 2)
+        }
+      };
+    } else if (camera) {
       // Camera-relative positioning: calculate camera viewport and layer position relative to it
       const cameraX = (camera.position.x * sceneWidth) - (canvasWidth / 2);
       const cameraY = (camera.position.y * sceneHeight) - (canvasHeight / 2);
@@ -128,8 +149,11 @@ export const exportLayerFromJSON = async (layer, options = {}) => {
  * @param {string} imageUrl - Background image URL
  * @param {number} width - Canvas width
  * @param {number} height - Canvas height
+ * @param {object} camera - Optional camera for viewport cropping
+ * @param {number} sceneWidth - Scene width for camera cropping
+ * @param {number} sceneHeight - Scene height for camera cropping
  */
-const renderBackgroundImage = (ctx, imageUrl, width, height) => {
+const renderBackgroundImage = (ctx, imageUrl, width, height, camera = null, sceneWidth = 9600, sceneHeight = 5400) => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -137,8 +161,34 @@ const renderBackgroundImage = (ctx, imageUrl, width, height) => {
     img.onload = () => {
       try {
         ctx.save();
-        // Draw background image to cover the entire canvas
-        ctx.drawImage(img, 0, 0, width, height);
+        
+        if (camera) {
+          // Camera mode: crop background to camera viewport
+          // Calculate camera viewport in scene coordinates
+          const cameraX = (camera.position.x * sceneWidth) - (width / 2);
+          const cameraY = (camera.position.y * sceneHeight) - (height / 2);
+          
+          // Scale background image to scene dimensions
+          const scaleX = img.width / sceneWidth;
+          const scaleY = img.height / sceneHeight;
+          
+          // Source rectangle in background image
+          const srcX = cameraX * scaleX;
+          const srcY = cameraY * scaleY;
+          const srcWidth = width * scaleX;
+          const srcHeight = height * scaleY;
+          
+          // Draw cropped section
+          ctx.drawImage(
+            img,
+            srcX, srcY, srcWidth, srcHeight,  // source rectangle
+            0, 0, width, height                // destination rectangle
+          );
+        } else {
+          // Full scene mode or legacy: cover entire canvas
+          ctx.drawImage(img, 0, 0, width, height);
+        }
+        
         ctx.restore();
         resolve();
       } catch (error) {

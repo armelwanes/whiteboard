@@ -486,6 +486,40 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
     }
   };
 
+  // Export a single layer with full scene dimensions
+  const handleExportLayerFullScene = async (layerId) => {
+    const layer = editedScene.layers.find(l => l.id === layerId);
+    if (!layer) {
+      alert('Couche non trouvée');
+      return;
+    }
+
+    const validation = validateLayerJSON(layer);
+    if (!validation.valid) {
+      alert(`Couche invalide: ${validation.errors.join(', ')}`);
+      return;
+    }
+
+    try {
+      const timestamp = new Date().toISOString().split('T')[0];
+      const dataUrl = await exportLayerFromJSON(layer, {
+        useFullScene: true,
+        sceneWidth: sceneWidth,
+        sceneHeight: sceneHeight,
+        background: '#FFFFFF',
+        pixelRatio: 1,
+        sceneBackgroundImage: editedScene.backgroundImage, // Include scene background
+      });
+      
+      const filename = `scene-${editedScene.id}-layer-${layer.name || layer.id}-fullscene-${timestamp}.png`;
+      downloadDataUrl(dataUrl, filename);
+      alert(`Couche "${layer.name || layer.id}" exportée avec dimensions complètes de la scène!`);
+    } catch (error) {
+      console.error('Error exporting layer with full scene:', error);
+      alert(`Erreur lors de l'export de la couche: ${error.message}`);
+    }
+  };
+
   const handleMoveLayer = (layerId, direction) => {
     const currentIndex = editedScene.layers.findIndex(l => l.id === layerId);
     if (currentIndex === -1) return;
@@ -803,12 +837,16 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                     className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-3 rounded flex items-center justify-center gap-2 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Download className="w-4 h-4" />
-                    Export Toutes Les Couches
+                    Export Toutes Les Couches (Vue Caméra)
                   </button>
                 </div>
                 
                 <p className="text-gray-500 dark:text-gray-400 text-xs mt-2">
                   Export depuis JSON (pas de screenshot). Fond blanc, haute qualité. Supporte: images, texte, formes, whiteboard.
+                </p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">
+                  <strong>Vue Caméra:</strong> Export relatif à la caméra par défaut (800x450)<br/>
+                  <strong>Scène Complète:</strong> Utilisez les boutons d'export individuels sur chaque couche pour exporter avec dimensions réelles de la scène (9600x5400)
                 </p>
               </div>
 
@@ -887,9 +925,19 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                                 handleExportLayer(layer.id);
                               }}
                               className="p-1 hover:bg-purple-600 rounded"
-                              title="Exporter couche (JSON)"
+                              title="Exporter couche (vue caméra)"
                             >
                               <Download className="w-3 h-3 text-purple-400" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleExportLayerFullScene(layer.id);
+                              }}
+                              className="p-1 hover:bg-green-600 rounded"
+                              title="Exporter couche (scène complète 9600x5400)"
+                            >
+                              <Download className="w-3 h-3 text-green-400" />
                             </button>
                             <button
                               onClick={(e) => {
