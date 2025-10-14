@@ -355,6 +355,7 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
         height: 1080,
         background: '#FFFFFF',
         pixelRatio: 1,
+        sceneBackgroundImage: editedScene.backgroundImage, // Include scene background
       });
       
       const filename = `scene-${editedScene.id}-layer-${layer.name || layer.id}-${timestamp}.png`;
@@ -392,6 +393,7 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
             height: 1080,
             background: '#FFFFFF',
             pixelRatio: 1,
+            sceneBackgroundImage: editedScene.backgroundImage, // Include scene background
           });
           
           const filename = `scene-${editedScene.id}-layer-${layer.name || layer.id}-${timestamp}.png`;

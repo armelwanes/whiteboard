@@ -14,6 +14,7 @@
  * @param {number} options.pixelRatio - Pixel ratio for high-res export (default: 1)
  * @param {number} options.sceneWidth - Scene width for positioning context (default: 9600)
  * @param {number} options.sceneHeight - Scene height for positioning context (default: 5400)
+ * @param {string} options.sceneBackgroundImage - Optional scene background image URL to render behind the layer
  * @returns {Promise<string>} Data URL of the exported PNG
  */
 export const exportLayerFromJSON = async (layer, options = {}) => {
@@ -22,6 +23,7 @@ export const exportLayerFromJSON = async (layer, options = {}) => {
     height = 1080,
     background = '#FFFFFF',
     pixelRatio = 1,
+    sceneBackgroundImage = null,
   } = options;
 
   // Create canvas with pixel ratio scaling
@@ -37,6 +39,11 @@ export const exportLayerFromJSON = async (layer, options = {}) => {
   if (background !== 'transparent') {
     ctx.fillStyle = background;
     ctx.fillRect(0, 0, width, height);
+  }
+
+  // Render scene background image if provided (the whiteboard background)
+  if (sceneBackgroundImage) {
+    await renderBackgroundImage(ctx, sceneBackgroundImage, width, height);
   }
 
   // Render layer based on type
@@ -63,6 +70,39 @@ export const exportLayerFromJSON = async (layer, options = {}) => {
   }
 
   return canvas.toDataURL('image/png');
+};
+
+/**
+ * Render scene background image
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {string} imageUrl - Background image URL
+ * @param {number} width - Canvas width
+ * @param {number} height - Canvas height
+ */
+const renderBackgroundImage = (ctx, imageUrl, width, height) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+
+    img.onload = () => {
+      try {
+        ctx.save();
+        // Draw background image to cover the entire canvas
+        ctx.drawImage(img, 0, 0, width, height);
+        ctx.restore();
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    img.onerror = () => {
+      console.warn('Failed to load background image:', imageUrl);
+      resolve(); // Continue even if background fails
+    };
+
+    img.src = imageUrl;
+  });
 };
 
 /**

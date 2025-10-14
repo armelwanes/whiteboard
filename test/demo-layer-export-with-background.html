@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layer Export with Background Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+    }
+    .demo-section {
+      margin: 20px 0;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 4px;
+    }
+    .preview-image {
+      max-width: 100%;
+      border: 2px solid #ddd;
+      margin: 10px 0;
+    }
+    .code {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      margin: 10px 0;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Layer Export with Background Demo</h1>
+    <p>This demo tests the new layer export functionality that includes scene background images.</p>
+    
+    <div class="demo-section">
+      <h2>Test 1: Export Image Layer with Background</h2>
+      <p>This test exports an image layer on top of a scene background (whiteboard).</p>
+      <button onclick="testImageLayerWithBackground()">Run Test</button>
+      <div id="result1" class="result"></div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Test 2: Export Text Layer with Background</h2>
+      <p>This test exports a text layer on top of a scene background.</p>
+      <button onclick="testTextLayerWithBackground()">Run Test</button>
+      <div id="result2" class="result"></div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Test 3: Export Shape Layer with Background</h2>
+      <p>This test exports a shape layer on top of a scene background.</p>
+      <button onclick="testShapeLayerWithBackground()">Run Test</button>
+      <div id="result3" class="result"></div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Test 4: Export Whiteboard Strokes with Background</h2>
+      <p>This test exports whiteboard strokes on top of a scene background.</p>
+      <button onclick="testWhiteboardLayerWithBackground()">Run Test</button>
+      <div id="result4" class="result"></div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Test 5: Backward Compatibility (No Background)</h2>
+      <p>This test ensures the export still works without a background image.</p>
+      <button onclick="testBackwardCompatibility()">Run Test</button>
+      <div id="result5" class="result"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { exportLayerFromJSON, downloadDataUrl } from '../src/utils/layerExporter.js';
+
+    // Create a simple background image (red 100x100)
+    function createBackgroundImage() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 100;
+      canvas.height = 100;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffcccc';
+      ctx.fillRect(0, 0, 100, 100);
+      ctx.fillStyle = '#ff0000';
+      ctx.fillText('Background', 10, 50);
+      return canvas.toDataURL();
+    }
+
+    // Create a simple layer image (blue 50x50)
+    function createLayerImage() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 50;
+      canvas.height = 50;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#0000ff';
+      ctx.fillRect(0, 0, 50, 50);
+      return canvas.toDataURL();
+    }
+
+    async function displayResult(resultId, success, message, dataUrl = null) {
+      const resultDiv = document.getElementById(resultId);
+      resultDiv.innerHTML = `
+        <div class="${success ? 'success' : 'error'}">
+          ${success ? '✓' : '✗'} ${message}
+        </div>
+        ${dataUrl ? `<img src="${dataUrl}" class="preview-image" alt="Exported layer">` : ''}
+      `;
+    }
+
+    // Test 1: Image Layer with Background
+    window.testImageLayerWithBackground = async function() {
+      try {
+        const backgroundImage = createBackgroundImage();
+        const layerImage = createLayerImage();
+        
+        const layer = {
+          id: 'img-1',
+          type: 'image',
+          image_path: layerImage,
+          position: { x: 100, y: 100 },
+          scale: 1.0,
+          opacity: 0.8,
+        };
+
+        const dataUrl = await exportLayerFromJSON(layer, {
+          width: 200,
+          height: 200,
+          background: '#FFFFFF',
+          pixelRatio: 1,
+          sceneBackgroundImage: backgroundImage,
+        });
+
+        await displayResult('result1', true, 'Image layer exported with background successfully!', dataUrl);
+      } catch (error) {
+        await displayResult('result1', false, `Error: ${error.message}`);
+      }
+    };
+
+    // Test 2: Text Layer with Background
+    window.testTextLayerWithBackground = async function() {
+      try {
+        const backgroundImage = createBackgroundImage();
+        
+        const layer = {
+          id: 'text-1',
+          type: 'text',
+          text_config: {
+            text: 'Hello World',
+            font: 'Arial',
+            size: 24,
+            color: [0, 0, 255],
+          },
+          position: { x: 100, y: 100 },
+          scale: 1.0,
+        };
+
+        const dataUrl = await exportLayerFromJSON(layer, {
+          width: 200,
+          height: 200,
+          background: '#FFFFFF',
+          pixelRatio: 1,
+          sceneBackgroundImage: backgroundImage,
+        });
+
+        await displayResult('result2', true, 'Text layer exported with background successfully!', dataUrl);
+      } catch (error) {
+        await displayResult('result2', false, `Error: ${error.message}`);
+      }
+    };
+
+    // Test 3: Shape Layer with Background
+    window.testShapeLayerWithBackground = async function() {
+      try {
+        const backgroundImage = createBackgroundImage();
+        
+        const layer = {
+          id: 'shape-1',
+          type: 'shape',
+          shape_config: {
+            shape_type: 'circle',
+            width: 60,
+            height: 60,
+            fill_color: '#00ff00',
+            stroke_color: '#000000',
+            stroke_width: 2,
+            fill_mode: 'both',
+          },
+          position: { x: 100, y: 100 },
+          scale: 1.0,
+        };
+
+        const dataUrl = await exportLayerFromJSON(layer, {
+          width: 200,
+          height: 200,
+          background: '#FFFFFF',
+          pixelRatio: 1,
+          sceneBackgroundImage: backgroundImage,
+        });
+
+        await displayResult('result3', true, 'Shape layer exported with background successfully!', dataUrl);
+      } catch (error) {
+        await displayResult('result3', false, `Error: ${error.message}`);
+      }
+    };
+
+    // Test 4: Whiteboard Layer with Background
+    window.testWhiteboardLayerWithBackground = async function() {
+      try {
+        const backgroundImage = createBackgroundImage();
+        
+        const layer = {
+          id: 'whiteboard-1',
+          type: 'whiteboard',
+          strokes: [
+            {
+              points: [
+                { x: 10, y: 10 },
+                { x: 50, y: 30 },
+                { x: 80, y: 20 },
+                { x: 90, y: 50 },
+              ],
+              strokeWidth: 3,
+              strokeColor: '#000000',
+            },
+          ],
+          position: { x: 100, y: 100 },
+          scale: 1.0,
+        };
+
+        const dataUrl = await exportLayerFromJSON(layer, {
+          width: 200,
+          height: 200,
+          background: '#FFFFFF',
+          pixelRatio: 1,
+          sceneBackgroundImage: backgroundImage,
+        });
+
+        await displayResult('result4', true, 'Whiteboard layer exported with background successfully!', dataUrl);
+      } catch (error) {
+        await displayResult('result4', false, `Error: ${error.message}`);
+      }
+    };
+
+    // Test 5: Backward Compatibility
+    window.testBackwardCompatibility = async function() {
+      try {
+        const layer = {
+          id: 'shape-1',
+          type: 'shape',
+          shape_config: {
+            shape_type: 'rectangle',
+            width: 80,
+            height: 60,
+            fill_color: '#ff00ff',
+          },
+          position: { x: 100, y: 100 },
+          scale: 1.0,
+        };
+
+        const dataUrl = await exportLayerFromJSON(layer, {
+          width: 200,
+          height: 200,
+          background: '#FFFFFF',
+          pixelRatio: 1,
+          // No sceneBackgroundImage - should still work
+        });
+
+        await displayResult('result5', true, 'Layer exported without background (backward compatible)!', dataUrl);
+      } catch (error) {
+        await displayResult('result5', false, `Error: ${error.message}`);
+      }
+    };
+  </script>
+</body>
+</html>

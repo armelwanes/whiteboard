@@ -30,6 +30,7 @@ Export a single layer to PNG from JSON data.
   - `pixelRatio` (number) - Pixel ratio for high-res export (default: 1, use 2 or 3 for retina displays)
   - `sceneWidth` (number) - Scene width for positioning context (default: 9600)
   - `sceneHeight` (number) - Scene height for positioning context (default: 5400)
+  - `sceneBackgroundImage` (string) - Optional scene background image URL to render behind the layer (whiteboard background)
 
 **Returns:** `Promise<string>` - Data URL of the exported PNG
 
@@ -288,7 +289,26 @@ const dataUrl = await exportLayerFromJSON(layer, {
 });
 ```
 
-### 4. Export Whiteboard Layer
+### 4. Export Layer with Scene Background (Whiteboard)
+
+```javascript
+const layer = {
+  id: 'img-1',
+  type: 'image',
+  image_path: '/layer-image.png',
+  position: { x: 960, y: 540 },
+  scale: 1.0
+};
+
+// Export layer with scene background image behind it
+const dataUrl = await exportLayerFromJSON(layer, {
+  sceneBackgroundImage: '/whiteboard-background.png'
+});
+
+// This renders the background first, then the layer on top at its recorded position
+```
+
+### 5. Export Whiteboard Layer
 
 ```javascript
 const whiteboardLayer = {
@@ -310,7 +330,7 @@ const whiteboardLayer = {
 const dataUrl = await exportLayerFromJSON(whiteboardLayer);
 ```
 
-### 5. Batch Export Multiple Layers
+### 6. Batch Export Multiple Layers
 
 ```javascript
 const scene = { layers: [...] };
