@@ -8,29 +8,47 @@
  * Export a single layer to PNG from JSON data
  * @param {object} layer - Layer object from JSON
  * @param {object} options - Export options
- * @param {number} options.width - Canvas width (default: 1920)
- * @param {number} options.height - Canvas height (default: 1080)
+ * @param {number} options.width - Canvas width (default: uses camera width or 800)
+ * @param {number} options.height - Canvas height (default: uses camera height or 450)
  * @param {string} options.background - Background color (default: '#FFFFFF', use 'transparent' for transparent)
  * @param {number} options.pixelRatio - Pixel ratio for high-res export (default: 1)
  * @param {number} options.sceneWidth - Scene width for positioning context (default: 9600)
  * @param {number} options.sceneHeight - Scene height for positioning context (default: 5400)
  * @param {string} options.sceneBackgroundImage - Optional scene background image URL to render behind the layer
+ * @param {object} options.camera - Camera configuration for viewport-relative export. If provided, layer is positioned relative to camera viewport.
  * @returns {Promise<string>} Data URL of the exported PNG
  */
 
 export const exportLayerFromJSON = async (layer, options = {}) => {
   const {
-    width = 1920,
-    height = 1080,
+    width,
+    height,
     background = '#FFFFFF',
     pixelRatio = 1,
+    sceneWidth = 9600,
+    sceneHeight = 5400,
     sceneBackgroundImage = null,
+    camera = null,
   } = options;
+
+  // Determine canvas dimensions
+  let canvasWidth = width;
+  let canvasHeight = height;
+  
+  if (camera) {
+    // Use camera dimensions when camera is provided
+    canvasWidth = camera.width || 800;
+    canvasHeight = camera.height || 450;
+  } else {
+    // Fallback to provided dimensions or defaults
+    canvasWidth = width || 1920;
+    canvasHeight = height || 1080;
+  }
 
   // Create canvas with pixel ratio scaling
   const canvas = document.createElement('canvas');
-  canvas.width = width * pixelRatio;
-  canvas.height = height * pixelRatio;
+  canvas.width = canvasWidth * pixelRatio;
+  canvas.height = canvasHeight * pixelRatio;
   const ctx = canvas.getContext('2d');
 
   // Scale context for pixel ratio
@@ -39,39 +57,59 @@ export const exportLayerFromJSON = async (layer, options = {}) => {
   // Fill background
   if (background !== 'transparent') {
     ctx.fillStyle = background;
-    ctx.fillRect(0, 0, width, height);
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
   }
 
   // Render scene background image FIRST (if provided)
   if (sceneBackgroundImage) {
     console.log('Rendering scene background:', sceneBackgroundImage);
-    await renderBackgroundImage(ctx, sceneBackgroundImage, width, height);
+    await renderBackgroundImage(ctx, sceneBackgroundImage, canvasWidth, canvasHeight);
   }
 
-  // THEN render the layer - CENTER IT on the canvas
+  // THEN render the layer
   console.log('Rendering layer:', layer.type, layer);
   try {
-    // Create a modified layer with centered position
-    const centeredLayer = {
-      ...layer,
-      position: {
-        x: width / 2,  // Center horizontally
-        y: height / 2  // Center vertically
-      }
-    };
+    let modifiedLayer;
+    
+    if (camera) {
+      // Camera-relative positioning: calculate camera viewport and layer position relative to it
+      const cameraX = (camera.position.x * sceneWidth) - (canvasWidth / 2);
+      const cameraY = (camera.position.y * sceneHeight) - (canvasHeight / 2);
+      
+      // Calculate layer position relative to camera viewport
+      const layerX = (layer.position?.x || 0) - cameraX;
+      const layerY = (layer.position?.y || 0) - cameraY;
+      
+      modifiedLayer = {
+        ...layer,
+        position: {
+          x: layerX,
+          y: layerY
+        }
+      };
+    } else {
+      // Legacy behavior: center the layer on the canvas
+      modifiedLayer = {
+        ...layer,
+        position: {
+          x: canvasWidth / 2,
+          y: canvasHeight / 2
+        }
+      };
+    }
 
     switch (layer.type) {
       case 'image':
-        await renderImageLayerFromJSON(ctx, centeredLayer);
+        await renderImageLayerFromJSON(ctx, modifiedLayer);
         break;
       case 'text':
-        renderTextLayerFromJSON(ctx, centeredLayer);
+        renderTextLayerFromJSON(ctx, modifiedLayer);
         break;
       case 'shape':
-        renderShapeLayerFromJSON(ctx, centeredLayer);
+        renderShapeLayerFromJSON(ctx, modifiedLayer);
         break;
       case 'whiteboard':
-        renderWhiteboardLayerFromJSON(ctx, centeredLayer);
+        renderWhiteboardLayerFromJSON(ctx, modifiedLayer);
         break;
       default:
         console.warn(`Unsupported layer type: ${layer.type}`);

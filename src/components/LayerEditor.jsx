@@ -348,11 +348,21 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
       return;
     }
 
+    // Get the default camera for export
+    const cameras = editedScene.sceneCameras || [];
+    const defaultCamera = cameras.find(cam => cam.isDefault) || {
+      position: { x: 0.5, y: 0.5 },
+      width: 800,
+      height: 450,
+      isDefault: true
+    };
+
     try {
       const timestamp = new Date().toISOString().split('T')[0];
       const dataUrl = await exportLayerFromJSON(layer, {
-        width: 1920,
-        height: 1080,
+        camera: defaultCamera,
+        sceneWidth: sceneWidth,
+        sceneHeight: sceneHeight,
         background: '#FFFFFF',
         pixelRatio: 1,
         sceneBackgroundImage: editedScene.backgroundImage, // Include scene background
@@ -375,6 +385,15 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
       return;
     }
 
+    // Get the default camera for export
+    const cameras = editedScene.sceneCameras || [];
+    const defaultCamera = cameras.find(cam => cam.isDefault) || {
+      position: { x: 0.5, y: 0.5 },
+      width: 800,
+      height: 450,
+      isDefault: true
+    };
+
     try {
       const timestamp = new Date().toISOString().split('T')[0];
       let successCount = 0;
@@ -390,8 +409,9 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
           }
 
           const dataUrl = await exportLayerFromJSON(layer, {
-            width: 1920,
-            height: 1080,
+            camera: defaultCamera,
+            sceneWidth: sceneWidth,
+            sceneHeight: sceneHeight,
             background: '#FFFFFF',
             pixelRatio: 1,
             sceneBackgroundImage: editedScene.backgroundImage, // Include scene background
