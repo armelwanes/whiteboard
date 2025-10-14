@@ -28,7 +28,7 @@ test('Validate image layer with scene position', () => {
     id: 'img-1',
     type: 'image',
     image_path: '/test.png',
-    position: { x: 4800, y: 2700 }, // Center of 9600x5400 scene
+    position: { x: 960, y: 540 }, // Center of 1920x1080 scene
     scale: 1.0,
     opacity: 1.0,
   };
@@ -92,13 +92,13 @@ test('Export options should include useFullScene parameter', () => {
       width: 100,
       height: 100,
     },
-    position: { x: 4800, y: 2700 },
+    position: { x: 960, y: 540 },
   };
 
   const options = {
     useFullScene: true,
-    sceneWidth: 9600,
-    sceneHeight: 5400,
+    sceneWidth: 1920,
+    sceneHeight: 1080,
     background: '#FFFFFF',
     pixelRatio: 1,
   };
@@ -107,11 +107,11 @@ test('Export options should include useFullScene parameter', () => {
   if (!options.useFullScene) {
     throw new Error('useFullScene flag not set');
   }
-  if (options.sceneWidth !== 9600) {
-    throw new Error('Expected sceneWidth to be 9600');
+  if (options.sceneWidth !== 1920) {
+    throw new Error('Expected sceneWidth to be 1920');
   }
-  if (options.sceneHeight !== 5400) {
-    throw new Error('Expected sceneHeight to be 5400');
+  if (options.sceneHeight !== 1080) {
+    throw new Error('Expected sceneHeight to be 1080');
   }
 });
 
@@ -124,8 +124,8 @@ test('useFullScene should take precedence over camera option', () => {
       width: 800,
       height: 450,
     },
-    sceneWidth: 9600,
-    sceneHeight: 5400,
+    sceneWidth: 1920,
+    sceneHeight: 1080,
   };
 
   // The logic should use full scene dimensions when useFullScene is true
@@ -133,7 +133,7 @@ test('useFullScene should take precedence over camera option', () => {
   const expectedWidth = options.sceneWidth;
   const expectedHeight = options.sceneHeight;
 
-  if (expectedWidth !== 9600 || expectedHeight !== 5400) {
+  if (expectedWidth !== 1920 || expectedHeight !== 1080) {
     throw new Error('Expected full scene dimensions');
   }
 });
@@ -157,7 +157,7 @@ test('Layer without position should default to scene center', () => {
   }
   
   // Layer should be valid even without position
-  // The export function should default to scene center (4800, 2700)
+  // The export function should default to scene center (960, 540)
 });
 
 console.log('\n' + '='.repeat(50));

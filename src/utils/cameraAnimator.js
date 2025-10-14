@@ -14,8 +14,8 @@ export const DEFAULT_CAMERA = {
   duration: 2.0,
   transition_duration: 0,
   easing: 'ease_out',
-  width: 800,
-  height: 450,
+  width: 1920,
+  height: 1080,
   locked: false,
   isDefault: false,
   pauseDuration: 0,
@@ -45,19 +45,19 @@ export const createCamera = (overrides = {}) => {
  * @returns {object} Default camera configuration
  */
 export const createDefaultCamera = (aspectRatio = '16:9') => {
-  // Calculate camera dimensions based on aspect ratio
-  let cameraWidth = 800;
-  let cameraHeight = 450;
+  // Calculate camera dimensions based on aspect ratio (YouTube standard sizes)
+  let cameraWidth = 1920;
+  let cameraHeight = 1080;
   
   if (aspectRatio === '16:9') {
-    cameraWidth = 800;
-    cameraHeight = 450;
+    cameraWidth = 1920;
+    cameraHeight = 1080;
   } else if (aspectRatio === '4:3') {
-    cameraWidth = 800;
-    cameraHeight = 600;
+    cameraWidth = 1440;
+    cameraHeight = 1080;
   } else if (aspectRatio === '1:1') {
-    cameraWidth = 600;
-    cameraHeight = 600;
+    cameraWidth = 1080;
+    cameraHeight = 1080;
   }
   
   return {
