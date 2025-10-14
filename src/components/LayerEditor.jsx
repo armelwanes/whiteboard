@@ -59,22 +59,14 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = async (event) => {
-        // Save to asset library
-        try {
-          await addAsset({
-            name: file.name,
-            dataUrl: event.target.result,
-            type: file.type,
-            tags: []
-          });
-        } catch (error) {
-          console.error('Error saving asset:', error);
-        }
+        const originalImageUrl = event.target.result;
         
-        // Store pending image data with file name
+        // Store pending image data with file name and original URL
         setPendingImageData({
-          imageUrl: event.target.result,
-          fileName: file.name
+          imageUrl: originalImageUrl,
+          fileName: file.name,
+          originalUrl: originalImageUrl,
+          fileType: file.type
         });
         setShowCropModal(true);
       };
@@ -84,8 +76,20 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
     e.target.value = '';
   };
 
-  const handleCropComplete = (croppedImageUrl, imageDimensions) => {
+  const handleCropComplete = async (croppedImageUrl, imageDimensions) => {
     if (!pendingImageData) return;
+
+    // Save ORIGINAL (uncropped) image to asset library
+    try {
+      await addAsset({
+        name: pendingImageData.fileName,
+        dataUrl: pendingImageData.originalUrl, // Save original, not cropped
+        type: pendingImageData.fileType,
+        tags: []
+      });
+    } catch (error) {
+      console.error('Error saving asset to library:', error);
+    }
 
     // Calculate initial position based on selected camera
     let cameraCenterX = sceneWidth / 2;

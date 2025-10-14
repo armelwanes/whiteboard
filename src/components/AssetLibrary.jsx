@@ -12,6 +12,7 @@ import {
   getAssetStats,
   addAsset
 } from '../utils/assetManager';
+import ImageCropModal from './ImageCropModal';
 
 const AssetLibrary = ({ onClose, onSelectAsset }) => {
   const [assets, setAssets] = useState([]);
@@ -26,6 +27,8 @@ const AssetLibrary = ({ onClose, onSelectAsset }) => {
   const [editTags, setEditTags] = useState('');
   const [stats, setStats] = useState(null);
   const [viewMode, setViewMode] = useState('all'); // 'all', 'cached', 'recent'
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [pendingImageData, setPendingImageData] = useState(null);
   const fileInputRef = useRef(null);
 
   const loadAssets = useCallback(() => {
@@ -110,24 +113,48 @@ const AssetLibrary = ({ onClose, onSelectAsset }) => {
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = async (event) => {
-        try {
-          await addAsset({
-            name: file.name,
-            dataUrl: event.target.result,
-            type: file.type,
-            tags: []
-          });
-          loadAssets();
-          setAllTags(getAllTags());
-          setStats(getAssetStats());
-        } catch (error) {
-          console.error('Error adding asset:', error);
-          alert('Erreur lors de l\'ajout de l\'asset');
-        }
+        const originalImageUrl = event.target.result;
+        
+        // Store pending image data to show crop modal
+        setPendingImageData({
+          imageUrl: originalImageUrl,
+          fileName: file.name,
+          fileType: file.type
+        });
+        setShowCropModal(true);
       };
       reader.readAsDataURL(file);
     }
     e.target.value = '';
+  };
+
+  const handleCropComplete = async () => {
+    if (!pendingImageData) return;
+
+    try {
+      // Save ORIGINAL (uncropped) image to asset library
+      await addAsset({
+        name: pendingImageData.fileName,
+        dataUrl: pendingImageData.imageUrl, // Save original, not cropped
+        type: pendingImageData.fileType,
+        tags: []
+      });
+      loadAssets();
+      setAllTags(getAllTags());
+      setStats(getAssetStats());
+    } catch (error) {
+      console.error('Error adding asset:', error);
+      alert('Erreur lors de l\'ajout de l\'asset');
+    }
+
+    // Close modal and reset pending data
+    setShowCropModal(false);
+    setPendingImageData(null);
+  };
+
+  const handleCropCancel = () => {
+    setShowCropModal(false);
+    setPendingImageData(null);
   };
 
   const formatSize = (bytes) => {
@@ -146,8 +173,18 @@ const AssetLibrary = ({ onClose, onSelectAsset }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-900 rounded-lg shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col border border-gray-700">
+    <>
+      {/* Image Crop Modal */}
+      {showCropModal && pendingImageData && (
+        <ImageCropModal
+          imageUrl={pendingImageData.imageUrl}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
+      
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-gray-900 rounded-lg shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col border border-gray-700">
         {/* Header */}
         <div className="bg-gray-800 px-6 py-4 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
@@ -449,8 +486,9 @@ const AssetLibrary = ({ onClose, onSelectAsset }) => {
             </div>
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
