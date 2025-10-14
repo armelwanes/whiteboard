@@ -79,13 +79,13 @@ const renderImageLayer = (ctx, layer, cameraX, cameraY) => {
       ctx.save();
       ctx.globalAlpha = opacity;
       
-      // Draw image centered on its position
+      // Draw image with top-left corner at position (matching editor behavior)
       const imgWidth = img.width * scale;
       const imgHeight = img.height * scale;
       ctx.drawImage(
         img,
-        layerX - (imgWidth / 2), // Center horizontally
-        layerY - (imgHeight / 2), // Center vertically
+        layerX,
+        layerY,
         imgWidth,
         imgHeight
       );

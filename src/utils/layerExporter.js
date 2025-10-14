@@ -236,23 +236,33 @@ const renderImageLayerFromJSON = (ctx, layer) => {
 
         ctx.globalAlpha = opacity;
 
-        // Translate to position and apply rotation
-        ctx.translate(x, y);
-        if (rotation) {
-          ctx.rotate(rotation * Math.PI / 180);
-        }
-
-        // Draw image centered on position
+        // Draw image with top-left corner at position (matching editor behavior)
         const imgWidth = img.width * scale;
         const imgHeight = img.height * scale;
         
-        ctx.drawImage(
-          img,
-          -imgWidth / 2,
-          -imgHeight / 2,
-          imgWidth,
-          imgHeight
-        );
+        // If there's rotation, we need to translate to center, rotate, then draw offset
+        if (rotation) {
+          // Translate to the center point of where the image will be
+          ctx.translate(x + imgWidth / 2, y + imgHeight / 2);
+          ctx.rotate(rotation * Math.PI / 180);
+          // Draw image centered on this rotated point
+          ctx.drawImage(
+            img,
+            -imgWidth / 2,
+            -imgHeight / 2,
+            imgWidth,
+            imgHeight
+          );
+        } else {
+          // No rotation: simple top-left positioning
+          ctx.drawImage(
+            img,
+            x,
+            y,
+            imgWidth,
+            imgHeight
+          );
+        }
 
         ctx.restore();
         console.log('Image rendered successfully');

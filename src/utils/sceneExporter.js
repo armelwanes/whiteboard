@@ -160,22 +160,33 @@ const renderImageLayer = (ctx, layer, cameraX, cameraY) => {
         ctx.save();
         ctx.globalAlpha = opacity;
         
-        // Translate to position and apply rotation
-        ctx.translate(layerX, layerY);
-        if (rotation) {
-          ctx.rotate(rotation * Math.PI / 180);
-        }
-        
-        // Draw image centered on its position
+        // Draw image with top-left corner at position (matching editor behavior)
         const imgWidth = img.width * scale;
         const imgHeight = img.height * scale;
-        ctx.drawImage(
-          img,
-          -imgWidth / 2,
-          -imgHeight / 2,
-          imgWidth,
-          imgHeight
-        );
+        
+        // If there's rotation, we need to translate to center, rotate, then draw offset
+        if (rotation) {
+          // Translate to the center point of where the image will be
+          ctx.translate(layerX + imgWidth / 2, layerY + imgHeight / 2);
+          ctx.rotate(rotation * Math.PI / 180);
+          // Draw image centered on this rotated point
+          ctx.drawImage(
+            img,
+            -imgWidth / 2,
+            -imgHeight / 2,
+            imgWidth,
+            imgHeight
+          );
+        } else {
+          // No rotation: simple top-left positioning
+          ctx.drawImage(
+            img,
+            layerX,
+            layerY,
+            imgWidth,
+            imgHeight
+          );
+        }
         
         ctx.restore();
         resolve();
