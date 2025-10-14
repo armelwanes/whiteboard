@@ -72,14 +72,14 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
     if (!pendingImageData) return;
 
     // Calculate initial position based on selected camera
-    let initialX = sceneWidth / 2;
-    let initialY = sceneHeight / 2;
+    let cameraCenterX = sceneWidth / 2;
+    let cameraCenterY = sceneHeight / 2;
     let cameraWidth = 800; // Default camera width
     let cameraHeight = 450; // Default camera height
     
     if (selectedCamera && selectedCamera.position) {
-      initialX = selectedCamera.position.x * sceneWidth;
-      initialY = selectedCamera.position.y * sceneHeight;
+      cameraCenterX = selectedCamera.position.x * sceneWidth;
+      cameraCenterY = selectedCamera.position.y * sceneHeight;
       cameraWidth = selectedCamera.width || 800;
       cameraHeight = selectedCamera.height || 450;
     }
@@ -97,6 +97,16 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
       // Use the smaller scale to ensure the image fits within both dimensions
       calculatedScale = Math.min(scaleX, scaleY, 1.0); // Don't scale up, only down
     }
+    
+    // Calculate layer position to center it in the camera viewport
+    // The camera position represents the CENTER of the camera
+    // But layer position represents the TOP-LEFT corner of the image
+    // So we need to subtract half of the scaled image dimensions
+    const scaledImageWidth = imageDimensions ? imageDimensions.width * calculatedScale : 0;
+    const scaledImageHeight = imageDimensions ? imageDimensions.height * calculatedScale : 0;
+    
+    const initialX = cameraCenterX - (scaledImageWidth / 2);
+    const initialY = cameraCenterY - (scaledImageHeight / 2);
     
     const newLayer = {
       id: `layer-${Date.now()}`,
@@ -157,13 +167,24 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
 
   const handleAddTextLayer = () => {
     // Calculate initial position based on selected camera
-    let initialX = sceneWidth / 2;
-    let initialY = sceneHeight / 2;
+    let cameraCenterX = sceneWidth / 2;
+    let cameraCenterY = sceneHeight / 2;
     
     if (selectedCamera && selectedCamera.position) {
-      initialX = selectedCamera.position.x * sceneWidth;
-      initialY = selectedCamera.position.y * sceneHeight;
+      cameraCenterX = selectedCamera.position.x * sceneWidth;
+      cameraCenterY = selectedCamera.position.y * sceneHeight;
     }
+    
+    // For text, we estimate dimensions based on font size
+    // Average character width is roughly 0.6 * fontSize
+    const text = 'Votre texte ici';
+    const fontSize = 48;
+    const estimatedWidth = text.length * fontSize * 0.6;
+    const estimatedHeight = fontSize * 1.2; // line height
+    
+    // Center the text in the camera viewport
+    const initialX = cameraCenterX - (estimatedWidth / 2);
+    const initialY = cameraCenterY - (estimatedHeight / 2);
     
     const newLayer = {
       id: `layer-${Date.now()}`,
@@ -176,9 +197,9 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
       mode: 'draw',
       type: 'text',
       text_config: {
-        text: 'Votre texte ici',
+        text: text,
         font: 'Arial',
-        size: 48,
+        size: fontSize,
         color: [0, 0, 0],
         style: 'normal',
         line_height: 1.2,
@@ -200,14 +221,23 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
   };
 
   const handleAddShape = (shapeLayer) => {
-    // Calculate initial position based on selected camera
-    let initialX = sceneWidth / 2;
-    let initialY = sceneHeight / 2;
+    // Calculate camera center position
+    let cameraCenterX = sceneWidth / 2;
+    let cameraCenterY = sceneHeight / 2;
     
     if (selectedCamera && selectedCamera.position) {
-      initialX = selectedCamera.position.x * sceneWidth;
-      initialY = selectedCamera.position.y * sceneHeight;
+      cameraCenterX = selectedCamera.position.x * sceneWidth;
+      cameraCenterY = selectedCamera.position.y * sceneHeight;
     }
+    
+    // Get shape dimensions from shape_config
+    const shapeWidth = shapeLayer.shape_config?.width || 100;
+    const shapeHeight = shapeLayer.shape_config?.height || 100;
+    
+    // Center the shape in the camera viewport
+    // Shape position represents the top-left corner, so subtract half dimensions
+    const initialX = cameraCenterX - (shapeWidth / 2);
+    const initialY = cameraCenterY - (shapeHeight / 2);
     
     // Update shape position to camera center
     const updatedShapeLayer = {
