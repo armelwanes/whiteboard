@@ -239,6 +239,18 @@ export const exportAllCameras = async (scene, sceneWidth = 9600, sceneHeight = 5
     // Check if this is a default camera at default position
     const isDefaultPos = isDefaultCameraPosition(camera);
     
+    // Calculate pixel position (center of camera viewport)
+    const pixelPosition = {
+      x: camera.position.x * sceneWidth,
+      y: camera.position.y * sceneHeight,
+    };
+    
+    // Calculate top-left corner position
+    const topLeftPixelPosition = {
+      x: pixelPosition.x - (camera.width / 2),
+      y: pixelPosition.y - (camera.height / 2),
+    };
+    
     if (isDefaultPos) {
       // For default camera, just save config reference
       exports.push({
@@ -251,6 +263,8 @@ export const exportAllCameras = async (scene, sceneWidth = 9600, sceneHeight = 5
           id: camera.id,
           name: camera.name,
           position: camera.position,
+          pixelPosition: pixelPosition,
+          topLeftPixelPosition: topLeftPixelPosition,
           width: camera.width,
           height: camera.height,
           zoom: camera.zoom,
@@ -261,7 +275,11 @@ export const exportAllCameras = async (scene, sceneWidth = 9600, sceneHeight = 5
       // For custom cameras, export the actual image
       const imageDataUrl = await exportCameraView(scene, camera, sceneWidth, sceneHeight);
       exports.push({
-        camera: camera,
+        camera: {
+          ...camera,
+          pixelPosition: pixelPosition,
+          topLeftPixelPosition: topLeftPixelPosition,
+        },
         imageDataUrl: imageDataUrl,
         cameraName: camera.name || 'Camera',
         isDefault: camera.isDefault || false,
@@ -483,6 +501,18 @@ export const exportDefaultCameraView = async (scene, sceneWidth = 9600, sceneHei
   // Check if camera is at default position
   const isDefaultPos = isDefaultCameraPosition(defaultCamera);
   
+  // Calculate pixel position (center of camera viewport)
+  const pixelPosition = {
+    x: defaultCamera.position.x * sceneWidth,
+    y: defaultCamera.position.y * sceneHeight,
+  };
+  
+  // Calculate top-left corner position
+  const topLeftPixelPosition = {
+    x: pixelPosition.x - (defaultCamera.width / 2),
+    y: pixelPosition.y - (defaultCamera.height / 2),
+  };
+  
   if (isDefaultPos) {
     // Return config reference instead of image
     return {
@@ -491,6 +521,8 @@ export const exportDefaultCameraView = async (scene, sceneWidth = 9600, sceneHei
         id: defaultCamera.id,
         name: defaultCamera.name,
         position: defaultCamera.position,
+        pixelPosition: pixelPosition,
+        topLeftPixelPosition: topLeftPixelPosition,
         width: defaultCamera.width,
         height: defaultCamera.height,
         zoom: defaultCamera.zoom,
