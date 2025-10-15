@@ -27,16 +27,16 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
 }) => {
   const importInputRef = useRef<HTMLInputElement>(null);
   return (
-    <div className="scene-panel w-60 bg-gradient-to-b from-gray-900 to-gray-950 border-r border-gray-700 flex flex-col shadow-2xl">
+    <div className="scene-panel w-60 bg-white border-r border-border flex flex-col shadow-sm">
       {/* Header */}
-      <div className="p-4 border-b border-gray-700 bg-gray-800/50">
+      <div className="p-4 border-b border-border bg-secondary/30">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="text-white font-bold text-lg">Scènes</h2>
-            <p className="text-gray-400 text-xs mt-0.5">{scenes.length} scène{scenes.length > 1 ? 's' : ''}</p>
+            <h2 className="text-foreground font-bold text-lg">Scènes</h2>
+            <p className="text-muted-foreground text-xs mt-0.5">{scenes.length} scène{scenes.length > 1 ? 's' : ''}</p>
           </div>
-          <div className="w-9 h-9 rounded-full bg-blue-600/20 flex items-center justify-center">
-            <span className="text-blue-400 font-bold text-base">{scenes.length}</span>
+          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+            <span className="text-primary font-bold text-base">{scenes.length}</span>
           </div>
         </div>
         <Button
@@ -83,10 +83,10 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
         {scenes.map((scene, index) => (
           <Card
             key={scene.id}
-            className={`mb-2 cursor-pointer transition-all hover:shadow-lg ${
+            className={`mb-2 cursor-pointer transition-all hover:shadow-md ${
               selectedSceneIndex === index
-                ? 'border-primary shadow-lg bg-blue-600/5'
-                : 'border-gray-700 hover:border-primary/50'
+                ? 'border-primary shadow-md bg-primary/5'
+                : 'border-border hover:border-primary/50'
             }`}
             onClick={() => onSelectScene(index)}
           >
@@ -94,7 +94,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
               {/* Thumbnail and Info */}
               <div className="flex gap-2 mb-2">
                 {/* Thumbnail */}
-                <div className="flex-shrink-0 w-16 h-12 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 text-xs overflow-hidden shadow-md border border-gray-700">
+                <div className="flex-shrink-0 w-16 h-12 bg-secondary rounded-lg flex items-center justify-center text-muted-foreground text-xs overflow-hidden shadow-sm border border-border">
                   {scene.backgroundImage ? (
                     <img
                       src={scene.backgroundImage}
@@ -109,14 +109,14 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
                 {/* Scene Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-white font-bold text-xs truncate">
+                    <h3 className="text-foreground font-semibold text-xs truncate">
                       {index + 1}. {scene.title}
                     </h3>
                   </div>
-                  <p className="text-gray-400 text-xs truncate mb-1.5 leading-relaxed">
+                  <p className="text-muted-foreground text-xs truncate mb-1.5 leading-relaxed">
                     {scene.content}
                   </p>
-                  <div className="flex items-center gap-2 text-gray-400 text-xs">
+                  <div className="flex items-center gap-2 text-muted-foreground text-xs">
                     <span className="flex items-center gap-1">
                       ⏱ {scene.duration}s
                     </span>
@@ -131,7 +131,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
 
               {/* Scene Actions */}
               {selectedSceneIndex === index && (
-                <div className="flex gap-1 pt-2 border-t border-gray-700">
+                <div className="flex gap-1 pt-2 border-t border-border">
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();

@@ -24,8 +24,8 @@ const LayersList: React.FC<LayersListProps> = ({
 }) => {
   if (!scene || !scene.layers || scene.layers.length === 0) {
     return (
-      <div className="layers-list bg-gray-900 bg-opacity-95 text-white p-4 rounded-lg shadow-xl">
-        <div className="text-center text-gray-400 py-8">
+      <div className="layers-list bg-secondary/30 text-foreground p-4 rounded-lg shadow-sm">
+        <div className="text-center text-muted-foreground py-8">
           <p>Aucune couche dans cette scène</p>
           <p className="text-sm mt-2">Ajoutez des images pour commencer</p>
         </div>
@@ -37,7 +37,7 @@ const LayersList: React.FC<LayersListProps> = ({
   const sortedLayers = [...scene.layers].sort((a, b) => (a.z_index || 0) - (b.z_index || 0));
 
   return (
-    <div className="layers-list bg-gray-900 bg-opacity-95 text-white rounded-lg shadow-xl">
+    <div className="layers-list bg-secondary/30 text-foreground rounded-lg shadow-sm">
       <div className="flex gap-3 overflow-x-auto">
         {sortedLayers.map((layer, index) => {
           const isSelected = selectedLayerId === layer.id;
@@ -49,13 +49,13 @@ const LayersList: React.FC<LayersListProps> = ({
               className={`
                 flex-shrink-0 w-48 cursor-pointer rounded-lg border-2 transition-all
                 ${isSelected 
-                  ? 'border-blue-500 bg-blue-600 bg-opacity-20 shadow-lg' 
-                  : 'border-gray-700 bg-gray-800 hover:bg-gray-750 hover:border-gray-600'
+                  ? 'border-primary bg-primary/10 shadow-md' 
+                  : 'border-border bg-white hover:bg-secondary/50 hover:border-primary/50'
                 }
               `}
             >
               {/* Layer Preview Image */}
-              <div className="relative h-28 bg-gray-950 rounded-t-lg overflow-hidden">
+              <div className="relative h-28 bg-secondary rounded-t-lg overflow-hidden">
                 {layer.type === 'image' && layer.image_path ? (
                   <img
                     src={layer.image_path}
@@ -106,7 +106,7 @@ const LayersList: React.FC<LayersListProps> = ({
               {/* Layer Info */}
               <div className="p-2">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium text-white truncate flex-1">
+                  <span className="text-xs font-medium text-foreground truncate flex-1">
                     {layer.name || `Couche ${index + 1}`}
                   </span>
                   <span className="text-xs text-gray-400 ml-2">
