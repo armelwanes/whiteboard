@@ -56,7 +56,7 @@ const CameraToolbar: React.FC<CameraToolbarProps> = ({
               <SelectValue placeholder="Aucune sélection" />
             </SelectTrigger>
             <SelectContent style={{ maxHeight: '300px' }}>
-              <SelectItem value="">Aucune sélection</SelectItem>
+              <SelectItem value="none">Aucune sélection</SelectItem>
               {cameras.map((camera, index) => (
                 <SelectItem key={camera.id} value={camera.id}>
                   {index + 1}. {camera.name || `Camera ${camera.id}`} ({camera.zoom.toFixed(1)}x)

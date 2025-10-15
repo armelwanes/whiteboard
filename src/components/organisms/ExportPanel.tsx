@@ -8,7 +8,8 @@ import {
   exportWithPreset,
   estimateFileSize,
   formatBytes,
-  validateExportOptions
+  validateExportOptions,
+  scaleCanvas
 } from '../../utils/exportFormats';
 import {
   Select,
@@ -36,6 +37,21 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
   const [quality, setQuality] = useState(0.95);
   const [isExporting, setIsExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState<any>(null);
+
+  // Custom export dimensions (allows exporting scaled copies)
+  const [customWidth, setCustomWidth] = useState<number>(canvas?.width || 1920);
+  const [customHeight, setCustomHeight] = useState<number>(canvas?.height || 1080);
+  const [useCustomSize, setUseCustomSize] = useState<boolean>(!canvas);
+
+  React.useEffect(() => {
+    if (canvas) {
+      setCustomWidth(canvas.width);
+      setCustomHeight(canvas.height);
+      setUseCustomSize(false);
+    } else {
+      setUseCustomSize(true);
+    }
+  }, [canvas]);
 
   const formats = [
     { 
@@ -86,16 +102,19 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
 
     try {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+
+      // Prepare canvas for export (scale if custom size is selected)
+      const exportCanvasElement = useCustomSize ? scaleCanvas(canvas, exportWidth, exportHeight) : canvas;
       
       switch (selectedFormat) {
         case 'png':
-          await exportAsPNG(canvas, `export_${timestamp}.png`);
+          await exportAsPNG(exportCanvasElement!, `export_${timestamp}.png`);
           break;
         case 'jpeg':
-          await exportAsJPEG(canvas, `export_${timestamp}.jpg`, quality);
+          await exportAsJPEG(exportCanvasElement!, `export_${timestamp}.jpg`, quality);
           break;
         case 'webp':
-          await exportAsWebP(canvas, `export_${timestamp}.webp`, quality);
+          await exportAsWebP(exportCanvasElement!, `export_${timestamp}.webp`, quality);
           break;
         case 'webm':
           setExportStatus({ 
@@ -120,7 +139,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
       if (onExport) {
         onExport({ format: selectedFormat, success: true });
       }
-    } catch (error) {
+    } catch (error:any) {
       console.error('Export error:', error);
       setExportStatus({ type: 'error', message: `Erreur: ${error.message}` });
       
@@ -152,7 +171,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
       if (onExport) {
         onExport({ preset: selectedPreset, success: true });
       }
-    } catch (error) {
+    } catch (error:any) {
       console.error('Preset export error:', error);
       setExportStatus({ type: 'error', message: `Erreur: ${error.message}` });
       
@@ -164,18 +183,22 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
     }
   };
 
+  // Determine effective export dimensions (canvas or custom)
+  const exportWidth = useCustomSize ? customWidth : (canvas?.width || customWidth);
+  const exportHeight = useCustomSize ? customHeight : (canvas?.height || customHeight);
+
   // Get file size estimate
   const sizeEstimate = estimateFileSize(
-    canvas?.width || customWidth,
-    canvas?.height || customHeight,
+    exportWidth,
+    exportHeight,
     selectedFormat,
     1
   );
 
   // Validate options
   const validation = validateExportOptions({
-    width: canvas?.width || customWidth,
-    height: canvas?.height || customHeight,
+    width: exportWidth,
+    height: exportHeight,
     format: selectedFormat,
     quality
   });
@@ -257,11 +280,43 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
 
       {/* Canvas Info */}
       {canvas && (
-        <div className="p-3 bg-gray-800 rounded-lg space-y-1">
+        <div className="p-3 bg-gray-800 rounded-lg space-y-2">
           <div className="text-sm text-gray-400">Dimensions du canvas</div>
-          <div className="text-white font-medium">{canvas.width} × {canvas.height} px</div>
-          <div className="text-xs text-gray-500">
-            Taille estimée: {sizeEstimate.formatted}
+          {canvas ? (
+            <>
+              <div className="text-white font-medium">{canvas.width} × {canvas.height} px</div>
+              <div className="text-xs text-gray-500">Taille estimée: {sizeEstimate.formatted}</div>
+            </>
+          ) : (
+            <div className="text-xs text-gray-400">Aucun canvas actif — utilisez des dimensions personnalisées</div>
+          )}
+
+          <div className="mt-2 border-t border-gray-700 pt-2">
+            <label className="flex items-center gap-2 text-xs text-gray-300">
+              <input type="checkbox" checked={useCustomSize} onChange={(e) => setUseCustomSize(e.target.checked)} disabled={isExporting} />
+              <span>Utiliser dimensions personnalisées</span>
+            </label>
+
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <input
+                type="number"
+                min={1}
+                value={customWidth}
+                onChange={(e) => setCustomWidth(Number(e.target.value) || 1)}
+                className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm"
+                disabled={!useCustomSize}
+              />
+              <input
+                type="number"
+                min={1}
+                value={customHeight}
+                onChange={(e) => setCustomHeight(Number(e.target.value) || 1)}
+                className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm"
+                disabled={!useCustomSize}
+              />
+            </div>
+
+            <div className="text-xs text-gray-400 mt-1">Taille d'export: {exportWidth} × {exportHeight} px</div>
           </div>
         </div>
       )}
