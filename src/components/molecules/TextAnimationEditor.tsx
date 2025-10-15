@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Type, Play, Square, Settings } from 'lucide-react';
-import { TEXT_ANIMATION_PRESETS, applyTypingEffect } from '../../utils/textAnimation';
+import { TEXT_ANIMATION_PRESETS } from '../../utils/textAnimation';
 import { TEXT_EFFECT_PRESETS } from '../../utils/textEffects';
 import {
   Select,
@@ -10,11 +10,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface TextAnimationEditorProps {
+  layer: any;
+  onLayerUpdate: (updates: any) => void;
+}
+
 /**
  * Text Animation Editor Component
  * UI for creating and configuring text animations
  */
-const TextAnimationEditor = ({ 
+const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({ 
   layer, 
   onLayerUpdate 
 }) => {

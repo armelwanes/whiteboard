@@ -2,15 +2,20 @@ import React, { useState, useRef } from 'react';
 import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from '../atoms';
-import { X, Check, Crop, Eraser } from 'lucide-react';
-import { removeBackground } from '@imgly/background-removal';
+import { X, Check, Crop as CropIcon, Eraser } from 'lucide-react';
+
+interface ImageCropModalProps {
+  imageUrl: string;
+  onCropComplete: (croppedImageUrl: string) => void;
+  onCancel: () => void;
+}
 
 /**
  * ImageCropModal - Modal component for cropping images
  * Allows users to select a portion of an uploaded image before using it
  * Now with automatic background removal feature
  */
-const ImageCropModal = ({ imageUrl, onCropComplete, onCancel }) => {
+const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplete, onCancel }) => {
   const [crop, setCrop] = useState({
     unit: '%',
     width: 50,

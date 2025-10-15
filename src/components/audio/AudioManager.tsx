@@ -2,17 +2,24 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Music, Volume2, VolumeX, Upload, Plus, Trash2, Play, Pause } from 'lucide-react';
 import { AudioManager as AudioManagerClass, AudioTrackType, createAudioTrack } from '../../utils/audioManager';
 
+interface AudioManagerProps {
+  scene: any;
+  onSceneUpdate: (updates: any) => void;
+  currentTime?: number;
+  isPlaying?: boolean;
+}
+
 /**
  * AudioManager Component
  * Main component for managing audio tracks in scenes
  */
-const AudioManager = ({ scene, onSceneUpdate, currentTime = 0, isPlaying = false }) => {
+const AudioManager: React.FC<AudioManagerProps> = ({ scene, onSceneUpdate, currentTime = 0, isPlaying = false }) => {
   const [expanded, setExpanded] = useState(false);
   const [tracks, setTracks] = useState([]);
   const [masterVolume, setMasterVolume] = useState(1.0);
-  const [previewingTrack, setPreviewingTrack] = useState(null);
-  const audioManagerRef = useRef(null);
-  const fileInputRefs = useRef({});
+  const [previewingTrack, setPreviewingTrack] = useState<any>(null);
+  const audioManagerRef = useRef<AudioManagerClass | null>(null);
+  const fileInputRefs = useRef<Record<string, HTMLInputElement>>({});
 
   // Initialize audio manager
   useEffect(() => {
@@ -69,14 +76,14 @@ const AudioManager = ({ scene, onSceneUpdate, currentTime = 0, isPlaying = false
     }
   }, [masterVolume]);
 
-  const handleAddTrack = (type) => {
+  const handleAddTrack = (type: string) => {
     const inputRef = fileInputRefs.current[type];
     if (inputRef) {
       inputRef.click();
     }
   };
 
-  const handleFileUpload = (e, type) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
     const file = e.target.files[0];
     if (!file) return;
 

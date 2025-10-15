@@ -18,21 +18,24 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface ExportPanelProps {
+  canvas: HTMLCanvasElement | null;
+  onExport?: (result: any) => void;
+}
+
 /**
  * Export Panel Component
  * UI for exporting scenes in various formats
  */
-const ExportPanel = ({ 
+const ExportPanel: React.FC<ExportPanelProps> = ({ 
   canvas,
   onExport 
 }) => {
   const [selectedFormat, setSelectedFormat] = useState('png');
   const [selectedPreset, setSelectedPreset] = useState('youtube');
-  const [customWidth, setCustomWidth] = useState(1920);
-  const [customHeight, setCustomHeight] = useState(1080);
   const [quality, setQuality] = useState(0.95);
   const [isExporting, setIsExporting] = useState(false);
-  const [exportStatus, setExportStatus] = useState(null);
+  const [exportStatus, setExportStatus] = useState<any>(null);
 
   const formats = [
     { 

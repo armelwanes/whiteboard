@@ -4,7 +4,13 @@ import { LayersList } from '../molecules';
 import LayerEditor from './LayerEditor';
 import { createTimeline } from '../../utils/timelineSystem';
 
-const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }) => {
+interface AnimationContainerProps {
+  scenes?: any[];
+  updateScene: (sceneIndex: number, updates: any) => void;
+  selectedSceneIndex?: number;
+}
+
+const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], updateScene, selectedSceneIndex = 0 }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
@@ -13,7 +19,7 @@ const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }
     const totalDuration = scenes.reduce((sum, scene) => sum + scene.duration, 0);
     return createTimeline(totalDuration, 30);
   });
-  const animationRef = useRef(null);
+  const animationRef = useRef<number | null>(null);
   const lastTimeRef = useRef(Date.now());
 
   // Calculate total duration

@@ -8,11 +8,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface LayerAnimationControlsProps {
+  animation: any;
+  onChange: (animation: any) => void;
+}
+
 /**
  * LayerAnimationControls Component
  * Provides UI controls for managing layer-level animations (zoom_in, zoom_out)
  */
-const LayerAnimationControls = ({ animation, onChange }) => {
+const LayerAnimationControls: React.FC<LayerAnimationControlsProps> = ({ animation, onChange }) => {
   const [isExpanded, setIsExpanded] = useState(!!animation);
 
   const handleAddAnimation = () => {

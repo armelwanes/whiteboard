@@ -10,16 +10,22 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const SceneEditor = ({ scene, onClose, onSave }) => {
+interface SceneEditorProps {
+  scene: any;
+  onClose: () => void;
+  onSave: (scene: any) => void;
+}
+
+const SceneEditor: React.FC<SceneEditorProps> = ({ scene, onClose, onSave }) => {
   const [editedScene, setEditedScene] = useState({ 
     ...scene,
     objects: scene.objects || []
   });
-  const [selectedObjectId, setSelectedObjectId] = useState(null);
+  const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
   const [showThumbnailMaker, setShowThumbnailMaker] = useState(false);
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleChange = (field, value) => {
+  const handleChange = (field: string, value: any) => {
     setEditedScene({ ...editedScene, [field]: value });
   };
 
@@ -27,7 +33,7 @@ const SceneEditor = ({ scene, onClose, onSave }) => {
     onSave(editedScene);
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();

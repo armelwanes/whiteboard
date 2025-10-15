@@ -8,11 +8,22 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface CameraToolbarProps {
+  cameras?: any[];
+  selectedCameraId: string | null;
+  onAddCamera: () => void;
+  onSelectCamera: (id: string) => void;
+  onZoomCamera: (delta: number) => void;
+  onDeleteCamera?: () => void;
+  onToggleCameraLock?: () => void;
+  [key: string]: any;
+}
+
 /**
  * CameraToolbar Component
  * Provides controls for managing cameras in the viewport
  */
-const CameraToolbar = ({
+const CameraToolbar: React.FC<CameraToolbarProps> = ({
   cameras = [],
   selectedCameraId,
   onAddCamera,

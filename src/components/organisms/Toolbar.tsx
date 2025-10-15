@@ -2,7 +2,18 @@ import React from 'react';
 import { Button } from '../atoms';
 import { Edit, Type, Square, Image, Camera, Circle, PenTool, Undo, Redo, Library } from 'lucide-react';
 
-const Toolbar = ({ onOpenEditor, onShowHandWritingTest, onOpenShapeToolbar, onOpenAssetLibrary, onUndo, onRedo, canUndo, canRedo }) => {
+interface ToolbarProps {
+  onOpenEditor: () => void;
+  onShowHandWritingTest?: () => void;
+  onOpenShapeToolbar: () => void;
+  onOpenAssetLibrary?: () => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
+}
+
+const Toolbar: React.FC<ToolbarProps> = ({ onOpenEditor, onShowHandWritingTest, onOpenShapeToolbar, onOpenAssetLibrary, onUndo, onRedo, canUndo, canRedo }) => {
   return (
     <div className="toolbar bg-gradient-to-r from-gray-900 via-gray-900 to-gray-800 border-b border-gray-700 px-6 py-3 flex items-center gap-3 shadow-lg">
       {/* Main Actions */}

@@ -2,20 +2,35 @@ import React, { useEffect, useRef } from 'react';
 import { ParticleSystem as ParticleEngine } from '../utils/particleEngine';
 import { PARTICLE_PRESETS } from '../utils/particlePresets';
 
+interface ParticleEffect {
+  type: string;
+  x: number;
+  y: number;
+  options?: any;
+}
+
+interface ParticleSystemProps {
+  effects?: ParticleEffect[];
+  width?: number;
+  height?: number;
+  className?: string;
+  autoStart?: boolean;
+}
+
 /**
  * ParticleSystem Component
  * Canvas-based particle effects renderer
  */
-const ParticleSystem = ({ 
+const ParticleSystem: React.FC<ParticleSystemProps> = ({ 
   effects = [],
   width = 800,
   height = 600,
   className = '',
   autoStart = true
 }) => {
-  const canvasRef = useRef(null);
-  const particleSystemRef = useRef(null);
-  const effectsRef = useRef([]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const particleSystemRef = useRef<ParticleEngine | null>(null);
+  const effectsRef = useRef<any[]>([]);
 
   // Initialize particle system
   useEffect(() => {

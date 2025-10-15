@@ -15,7 +15,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const PropertiesPanel = ({ 
+interface PropertiesPanelProps {
+  scene: any;
+  selectedLayerId: string | null;
+  onSelectLayer: (layerId: string) => void;
+  onUpdateScene: (updates: any) => void;
+  onUpdateLayer: (layerId: string, updates: any) => void;
+  onDeleteLayer: (layerId: string) => void;
+  onDuplicateLayer: (layerId: string) => void;
+  [key: string]: any;
+}
+
+const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ 
   scene, 
   selectedLayerId,
   onSelectLayer,

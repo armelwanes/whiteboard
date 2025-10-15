@@ -1,13 +1,32 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Camera, X, Lock, Unlock } from 'lucide-react';
 
+interface CameraData {
+  position: { x: number; y: number };
+  width?: number;
+  height?: number;
+  zoom?: number;
+  [key: string]: any;
+}
+
+interface CameraViewportProps {
+  camera: CameraData;
+  isSelected: boolean;
+  onSelect: () => void;
+  onUpdate: (updates: Partial<CameraData>) => void;
+  onDelete: () => void;
+  sceneWidth?: number;
+  sceneHeight?: number;
+  canvasZoom?: number;
+}
+
 /**
  * CameraViewport Component
  * Represents a visual camera frame that can be positioned and zoomed
  * on a scrollable scene canvas. The viewport has a fixed size and only
  * the zoom level can be adjusted (not the frame size itself).
  */
-const CameraViewport = ({
+const CameraViewport: React.FC<CameraViewportProps> = ({
   camera,
   isSelected,
   onSelect,
@@ -19,11 +38,11 @@ const CameraViewport = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
-  const [resizeHandle, setResizeHandle] = useState(null);
+  const [resizeHandle, setResizeHandle] = useState<string | null>(null);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialDimensions, setInitialDimensions] = useState({ width: 0, height: 0 });
   const [initialZoom, setInitialZoom] = useState(1.0);
-  const viewportRef = useRef(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
 
   // Calculate pixel dimensions based on camera zoom
   // Camera viewport represents a fixed output size (e.g., 1920x1080 YouTube standard)

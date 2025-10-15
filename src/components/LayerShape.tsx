@@ -13,15 +13,23 @@ import {
   Shape,
   Path,
 } from 'react-konva';
-import { ShapeType } from '../utils/shapeUtils';
+import Konva from 'konva';
+import { ShapeType, ShapeLayer } from '../utils/shapeUtils';
+
+interface LayerShapeProps {
+  layer: ShapeLayer;
+  isSelected: boolean;
+  onSelect: () => void;
+  onChange: (layer: ShapeLayer) => void;
+}
 
 /**
  * LayerShape Component
  * Renders different types of shapes using React-Konva
  */
-const LayerShape = ({ layer, isSelected, onSelect, onChange }) => {
-  const shapeRef = useRef();
-  const transformerRef = useRef();
+const LayerShape: React.FC<LayerShapeProps> = ({ layer, isSelected, onSelect, onChange }) => {
+  const shapeRef = useRef<any>(null);
+  const transformerRef = useRef<Konva.Transformer>(null);
 
   useEffect(() => {
     if (isSelected && transformerRef.current && shapeRef.current) {
@@ -38,7 +46,7 @@ const LayerShape = ({ layer, isSelected, onSelect, onChange }) => {
   const shapeType = shapeConfig.shape;
 
   // Helper function to get fill and stroke based on fillMode
-  const getFillStrokeProps = (config) => {
+  const getFillStrokeProps = (config: any) => {
     const fillMode = config.fillMode || 'both';
     const props = {};
     

@@ -2,7 +2,19 @@ import React, { useRef } from 'react';
 import { Button, Card } from '../atoms';
 import { Plus, ArrowUp, ArrowDown, Copy, Trash2, Download, Upload } from 'lucide-react';
 
-const ScenePanel = ({
+interface ScenePanelProps {
+  scenes: any[];
+  selectedSceneIndex: number;
+  onSelectScene: (index: number) => void;
+  onAddScene: () => void;
+  onDeleteScene: (index: number) => void;
+  onDuplicateScene: (index: number) => void;
+  onMoveScene: (index: number, direction: 'up' | 'down') => void;
+  onExportConfig: () => void;
+  onImportConfig: (config: any) => void;
+}
+
+const ScenePanel: React.FC<ScenePanelProps> = ({
   scenes,
   selectedSceneIndex,
   onSelectScene,
@@ -13,7 +25,7 @@ const ScenePanel = ({
   onExportConfig,
   onImportConfig,
 }) => {
-  const importInputRef = useRef(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
   return (
     <div className="scene-panel w-60 bg-gradient-to-b from-gray-900 to-gray-950 border-r border-gray-700 flex flex-col shadow-2xl">
       {/* Header */}

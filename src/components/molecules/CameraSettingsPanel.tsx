@@ -8,11 +8,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface CameraSettingsPanelProps {
+  camera: any;
+  onUpdate: (updates: any) => void;
+}
+
 /**
  * CameraSettingsPanel Component
  * Displays detailed settings for the selected camera
  */
-const CameraSettingsPanel = ({ camera, onUpdate }) => {
+const CameraSettingsPanel: React.FC<CameraSettingsPanelProps> = ({ camera, onUpdate }) => {
   if (!camera) {
     return (
       <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">

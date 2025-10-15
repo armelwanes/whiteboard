@@ -1,11 +1,20 @@
 import React from 'react';
 import { Eye, EyeOff, Trash2, Copy, MoveUp, MoveDown } from 'lucide-react';
 
+interface LayersListProps {
+  scene: any;
+  selectedLayerId: string | null;
+  onSelectLayer: (layerId: string) => void;
+  onDeleteLayer: (layerId: string) => void;
+  onDuplicateLayer: (layerId: string) => void;
+  onMoveLayer: (layerId: string, direction: 'up' | 'down') => void;
+}
+
 /**
  * LayersList - Horizontal scrollable list of layers from the current scene
  * Shows preview images for each layer
  */
-const LayersList = ({ 
+const LayersList: React.FC<LayersListProps> = ({ 
   scene,
   selectedLayerId,
   onSelectLayer,
