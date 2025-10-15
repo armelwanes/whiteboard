@@ -1,4 +1,3 @@
-// Molecule components exports
 export { default as CameraControls } from './CameraControls';
 export { default as CameraToolbar } from './CameraToolbar';
 export { default as CameraViewport } from './CameraViewport';

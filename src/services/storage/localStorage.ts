@@ -1,6 +1,5 @@
-// Local Storage Service
 class LocalStorageService {
-  get(key) {
+  get<T = any>(key: string): T | null {
     try {
       const item = localStorage.getItem(key);
       return item ? JSON.parse(item) : null;
@@ -10,7 +9,7 @@ class LocalStorageService {
     }
   }
 
-  set(key, value) {
+  set<T = any>(key: string, value: T): boolean {
     try {
       localStorage.setItem(key, JSON.stringify(value));
       return true;
@@ -20,7 +19,7 @@ class LocalStorageService {
     }
   }
 
-  remove(key) {
+  remove(key: string): boolean {
     try {
       localStorage.removeItem(key);
       return true;
@@ -30,7 +29,7 @@ class LocalStorageService {
     }
   }
 
-  clear() {
+  clear(): boolean {
     try {
       localStorage.clear();
       return true;
@@ -40,7 +39,7 @@ class LocalStorageService {
     }
   }
 
-  has(key) {
+  has(key: string): boolean {
     return localStorage.getItem(key) !== null;
   }
 }

@@ -1,4 +1,3 @@
-// Organism components exports
 export { default as AnimationContainer } from './AnimationContainer';
 export { default as LayerEditor } from './LayerEditor';
 export { default as SceneCanvas } from './SceneCanvas';
