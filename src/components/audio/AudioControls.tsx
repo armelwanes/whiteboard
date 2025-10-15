@@ -1,11 +1,19 @@
 import React from 'react';
 import { Volume2, VolumeX, Music } from 'lucide-react';
 
+interface AudioControlsProps {
+  volume?: number;
+  onVolumeChange: (volume: number) => void;
+  muted?: boolean;
+  onMuteToggle: () => void;
+  className?: string;
+}
+
 /**
  * AudioControls Component
  * Simple audio control panel for volume adjustment
  */
-const AudioControls = ({ 
+const AudioControls: React.FC<AudioControlsProps> = ({ 
   volume = 1.0, 
   onVolumeChange,
   muted = false,

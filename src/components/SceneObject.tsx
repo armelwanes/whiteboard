@@ -1,6 +1,30 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
-const SceneObject = ({ 
+interface SceneObjectType {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation?: number;
+  flipX?: boolean;
+  flipY?: boolean;
+  zIndex?: number;
+  type?: string;
+  src?: string;
+  name?: string;
+}
+
+interface SceneObjectProps {
+  object: SceneObjectType;
+  isSelected: boolean;
+  onSelect: (id: string) => void;
+  onUpdate: (id: string, updates: Partial<SceneObjectType>) => void;
+  onDelete: (id: string) => void;
+  isEditing: boolean;
+}
+
+const SceneObject: React.FC<SceneObjectProps> = ({ 
   object, 
   isSelected, 
   onSelect, 
