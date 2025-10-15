@@ -327,6 +327,20 @@ npm run build
 npm run preview
 ```
 
+## 📐 Architecture & Guide de Développement
+
+Pour comprendre l'architecture du projet et développer de nouvelles fonctionnalités efficacement, consultez notre guide complet :
+
+📘 **[Guide d'Architecture & Développement](./docs/ARCHITECTURE_GUIDE.md)**
+
+Ce guide couvre :
+- Architecture modulaire recommandée
+- Patterns de développement avec React Query, Zustand, et Zod
+- Conventions de code et bonnes pratiques
+- Exemples de code pour chaque pattern
+- Plan de migration progressive vers TypeScript
+- Instructions pour l'IA lors du développement
+
 ## 🤝 Contribution
 
 Les contributions sont les bienvenues ! N'hésitez pas à :
