@@ -1,18 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Stage, Layer as KonvaLayer, Image as KonvaImage, Transformer, Text as KonvaText, Rect } from 'react-konva';
+import Konva from 'konva';
 import useImage from 'use-image';
 import { 
   Image as ImageIcon, Type, Download, Eye, Upload, 
   Palette, Trash2, Layers, X, Plus
 } from 'lucide-react';
 
+interface ImageLayerProps {
+  layer: any;
+  isSelected: boolean;
+  onSelect: () => void;
+  onChange: (updates: any) => void;
+}
+
 /**
  * Konva Image Layer Component
  */
-const ImageLayer = ({ layer, isSelected, onSelect, onChange }) => {
+const ImageLayer: React.FC<ImageLayerProps> = ({ layer, isSelected, onSelect, onChange }) => {
   const [img] = useImage(layer.src);
-  const imageRef = useRef();
-  const transformerRef = useRef();
+  const imageRef = useRef<Konva.Image>(null);
+  const transformerRef = useRef<Konva.Transformer>(null);
 
   useEffect(() => {
     if (isSelected && transformerRef.current && imageRef.current && img) {

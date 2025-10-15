@@ -1,14 +1,22 @@
 import React, { useState, useRef } from 'react';
 import { Stage, Layer, Image as KonvaImage, Transformer, Text, Rect } from 'react-konva';
+import Konva from 'konva';
 import useImage from 'use-image';
 import { Button, Input, Label, Textarea, Card, CardContent, CardHeader, CardTitle } from '../atoms';
 import { Upload, X, Save, RotateCw, FlipHorizontal2, FlipVertical2, Trash2 } from 'lucide-react';
 
+interface SceneImageProps {
+  image: any;
+  isSelected: boolean;
+  onSelect: () => void;
+  onChange: (updates: any) => void;
+}
+
 // Konva Image Component
-const SceneImage = ({ image, isSelected, onSelect, onChange }) => {
+const SceneImage: React.FC<SceneImageProps> = ({ image, isSelected, onSelect, onChange }) => {
   const [img] = useImage(image.src);
-  const imageRef = useRef();
-  const transformerRef = useRef();
+  const imageRef = useRef<Konva.Image>(null);
+  const transformerRef = useRef<Konva.Transformer>(null);
 
   React.useEffect(() => {
     if (isSelected && transformerRef.current && imageRef.current && img) {

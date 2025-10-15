@@ -8,11 +8,16 @@ import {
 } from 'lucide-react';
 import { ShapeType, createShapeLayer, getShapeDisplayName } from '../../utils/shapeUtils';
 
+interface ShapeToolbarProps {
+  onAddShape: (shape: any) => void;
+  onClose: () => void;
+}
+
 /**
  * ShapeToolbar Component
  * Floating toolbar for selecting and adding shapes to the scene
  */
-const ShapeToolbar = ({ onAddShape, onClose }) => {
+const ShapeToolbar: React.FC<ShapeToolbarProps> = ({ onAddShape, onClose }) => {
   const [selectedCategory, setSelectedCategory] = useState('basic');
 
   const shapeCategories = {

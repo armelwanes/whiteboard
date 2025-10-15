@@ -1,14 +1,24 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Stage, Layer as KonvaLayer, Image as KonvaImage, Transformer, Rect, Group, Line, Text } from 'react-konva';
+import Konva from 'konva';
 import useImage from 'use-image';
 import { CameraToolbar } from '../molecules';
 import { createDefaultCamera } from '../../utils/cameraAnimator';
 import LayerShape from '../LayerShape';
 
+interface KonvaCameraProps {
+  camera: any;
+  isSelected: boolean;
+  onSelect: () => void;
+  onUpdate: (updates: any) => void;
+  sceneWidth: number;
+  sceneHeight: number;
+}
+
 // Konva Camera Component
-const KonvaCamera = ({ camera, isSelected, onSelect, onUpdate, sceneWidth, sceneHeight }) => {
-  const groupRef = useRef();
-  const transformerRef = useRef();
+const KonvaCamera: React.FC<KonvaCameraProps> = ({ camera, isSelected, onSelect, onUpdate, sceneWidth, sceneHeight }) => {
+  const groupRef = useRef<Konva.Group>(null);
+  const transformerRef = useRef<Konva.Transformer>(null);
 
   React.useEffect(() => {
     if (isSelected && transformerRef.current && groupRef.current) {

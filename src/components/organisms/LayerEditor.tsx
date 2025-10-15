@@ -31,22 +31,28 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const LayerEditor = ({ scene, onClose, onSave }) => {
+interface LayerEditorProps {
+  scene: any;
+  onClose: () => void;
+  onSave: (scene: any) => void;
+}
+
+const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => {
   const [editedScene, setEditedScene] = useState({ 
     ...scene,
     layers: scene.layers || [],
     sceneCameras: scene.sceneCameras || []
   });
-  const [selectedLayerId, setSelectedLayerId] = useState(null);
-  const [selectedCamera, setSelectedCamera] = useState(null);
+  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
+  const [selectedCamera, setSelectedCamera] = useState<any>(null);
   const [showShapeToolbar, setShowShapeToolbar] = useState(false);
   const [showAssetLibrary, setShowAssetLibrary] = useState(false);
   const [showCropModal, setShowCropModal] = useState(false);
   const [showThumbnailMaker, setShowThumbnailMaker] = useState(false);
-  const [pendingImageData, setPendingImageData] = useState(null);
-  const fileInputRef = useRef(null);
-  const backgroundImageInputRef = useRef(null);
-  const backgroundMusicInputRef = useRef(null);
+  const [pendingImageData, setPendingImageData] = useState<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const backgroundImageInputRef = useRef<HTMLInputElement>(null);
+  const backgroundMusicInputRef = useRef<HTMLInputElement>(null);
 
   const sceneWidth = 1920;
   const sceneHeight = 1080;

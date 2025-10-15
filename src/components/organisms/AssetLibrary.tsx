@@ -21,8 +21,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const AssetLibrary = ({ onClose, onSelectAsset }) => {
-  const [assets, setAssets] = useState([]);
+interface AssetLibraryProps {
+  onClose: () => void;
+  onSelectAsset: (asset: any) => void;
+}
+
+const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) => {
+  const [assets, setAssets] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [allTags, setAllTags] = useState([]);
