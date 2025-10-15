@@ -3,12 +3,58 @@
  * Provides export functionality for various formats (GIF, WebM, PNG sequence)
  */
 
+export interface SocialMediaPreset {
+  name: string;
+  width: number;
+  height: number;
+  fps: number;
+  format: string;
+  description: string;
+}
+
+export interface GIFOptions {
+  delay?: number;
+  quality?: number;
+  width?: number;
+  height?: number;
+}
+
+export interface WebMOptions {
+  fps?: number;
+  videoBitsPerSecond?: number;
+  mimeType?: string;
+}
+
+export interface SizeEstimate {
+  bytes: number;
+  mb: string;
+  formatted: string;
+}
+
+export interface ExportOptions {
+  width?: number;
+  height?: number;
+  fps?: number;
+  quality?: number;
+  format?: string;
+  duration?: number;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+type ProgressCallback = (current: number, total: number) => void;
+type RenderFrameFunction = (frameIndex: number) => Promise<void> | void;
+
 /**
  * Simple browser-based file download
  * @param {Blob} blob - Blob to download
  * @param {string} filename - Name of the file
  */
-function saveAs(blob, filename) {
+function saveAs(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -22,7 +68,7 @@ function saveAs(blob, filename) {
 /**
  * Social media presets for video export
  */
-export const SOCIAL_MEDIA_PRESETS = {
+export const SOCIAL_MEDIA_PRESETS: Record<string, SocialMediaPreset> = {
   youtube: {
     name: 'YouTube',
     width: 1920,
@@ -104,7 +150,7 @@ export const SOCIAL_MEDIA_PRESETS = {
  * @param {number} quality - Image quality (0-1)
  * @returns {Promise<Blob>} Image blob
  */
-export async function captureCanvas(canvas, format = 'png', quality = 1.0) {
+export async function captureCanvas(canvas: HTMLCanvasElement, format: string = 'png', quality: number = 1.0): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
@@ -125,7 +171,7 @@ export async function captureCanvas(canvas, format = 'png', quality = 1.0) {
  * @param {HTMLCanvasElement} canvas - Canvas to export
  * @param {string} filename - Output filename
  */
-export async function exportAsPNG(canvas, filename = 'export.png') {
+export async function exportAsPNG(canvas: HTMLCanvasElement, filename: string = 'export.png'): Promise<void> {
   const blob = await captureCanvas(canvas, 'png');
   saveAs(blob, filename);
 }
@@ -136,7 +182,7 @@ export async function exportAsPNG(canvas, filename = 'export.png') {
  * @param {string} filename - Output filename
  * @param {number} quality - JPEG quality (0-1)
  */
-export async function exportAsJPEG(canvas, filename = 'export.jpg', quality = 0.95) {
+export async function exportAsJPEG(canvas: HTMLCanvasElement, filename: string = 'export.jpg', quality: number = 0.95): Promise<void> {
   const blob = await captureCanvas(canvas, 'jpeg', quality);
   saveAs(blob, filename);
 }
@@ -147,7 +193,7 @@ export async function exportAsJPEG(canvas, filename = 'export.jpg', quality = 0.
  * @param {string} filename - Output filename
  * @param {number} quality - WebP quality (0-1)
  */
-export async function exportAsWebP(canvas, filename = 'export.webp', quality = 0.9) {
+export async function exportAsWebP(canvas: HTMLCanvasElement, filename: string = 'export.webp', quality: number = 0.9): Promise<void> {
   const blob = await captureCanvas(canvas, 'webp', quality);
   saveAs(blob, filename);
 }
@@ -160,18 +206,20 @@ export async function exportAsWebP(canvas, filename = 'export.webp', quality = 0
  * @param {Function} onProgress - Progress callback
  * @returns {Promise<Array<Blob>>} Array of frame blobs
  */
-export async function captureFrames(renderFrame, frameCount, canvas, onProgress) {
-  const frames = [];
+export async function captureFrames(
+  renderFrame: RenderFrameFunction,
+  frameCount: number,
+  canvas: HTMLCanvasElement,
+  onProgress?: ProgressCallback
+): Promise<Blob[]> {
+  const frames: Blob[] = [];
   
   for (let i = 0; i < frameCount; i++) {
-    // Render frame
     await renderFrame(i);
     
-    // Capture frame
     const blob = await captureCanvas(canvas, 'png');
     frames.push(blob);
     
-    // Report progress
     if (onProgress) {
       onProgress(i + 1, frameCount);
     }
@@ -189,27 +237,23 @@ export async function captureFrames(renderFrame, frameCount, canvas, onProgress)
  * @param {Function} onProgress - Progress callback
  */
 export async function exportAsPNGSequence(
-  renderFrame,
-  frameCount,
-  canvas,
-  basename = 'frame',
-  onProgress
-) {
+  renderFrame: RenderFrameFunction,
+  frameCount: number,
+  canvas: HTMLCanvasElement,
+  basename: string = 'frame',
+  onProgress?: ProgressCallback
+): Promise<void> {
   for (let i = 0; i < frameCount; i++) {
-    // Render frame
     await renderFrame(i);
     
-    // Capture and save frame
     const blob = await captureCanvas(canvas, 'png');
     const filename = `${basename}_${String(i).padStart(5, '0')}.png`;
     saveAs(blob, filename);
     
-    // Report progress
     if (onProgress) {
       onProgress(i + 1, frameCount);
     }
     
-    // Small delay to prevent browser hanging
     await new Promise(resolve => setTimeout(resolve, 10));
   }
 }
@@ -227,44 +271,21 @@ export async function exportAsPNGSequence(
  * @returns {Promise<Blob>} GIF blob
  */
 export async function exportAsGIF(
-  renderFrame,
-  frameCount,
-  canvas,
-  options = {},
-  onProgress
-) {
+  renderFrame: RenderFrameFunction,
+  frameCount: number,
+  canvas: HTMLCanvasElement,
+  options: GIFOptions = {},
+  onProgress?: ProgressCallback
+): Promise<Blob> {
   const {
-    delay = 100, // ms between frames
-    quality = 10, // 1-30, lower is better
+    delay = 100,
+    quality = 10,
     width = canvas.width,
     height = canvas.height
   } = options;
 
-  // This is a placeholder for GIF export
-  // In a real implementation, you would use a library like gif.js:
-  // 
-  // import GIF from 'gif.js';
-  // const gif = new GIF({
-  //   workers: 2,
-  //   quality: quality,
-  //   width: width,
-  //   height: height
-  // });
-  //
-  // for (let i = 0; i < frameCount; i++) {
-  //   await renderFrame(i);
-  //   gif.addFrame(canvas, { delay: delay, copy: true });
-  //   if (onProgress) onProgress(i + 1, frameCount);
-  // }
-  //
-  // return new Promise((resolve) => {
-  //   gif.on('finished', (blob) => resolve(blob));
-  //   gif.render();
-  // });
-
   console.warn('GIF export requires gif.js library. Install with: npm install gif.js');
   
-  // For now, export first frame as PNG
   await renderFrame(0);
   const blob = await captureCanvas(canvas, 'png');
   saveAs(blob, 'export.gif.png');
@@ -281,14 +302,13 @@ export async function exportAsGIF(
  * @param {object} options - Recording options
  * @returns {Promise<Blob>} WebM video blob
  */
-export async function exportAsWebM(canvas, duration, options = {}) {
+export async function exportAsWebM(canvas: HTMLCanvasElement, duration: number, options: WebMOptions = {}): Promise<Blob> {
   const {
     fps = 30,
     videoBitsPerSecond = 2500000,
     mimeType = 'video/webm;codecs=vp9'
   } = options;
 
-  // Check if MediaRecorder supports WebM
   if (!MediaRecorder.isTypeSupported(mimeType)) {
     throw new Error(`${mimeType} is not supported by this browser`);
   }
@@ -299,7 +319,7 @@ export async function exportAsWebM(canvas, duration, options = {}) {
     videoBitsPerSecond
   });
 
-  const chunks = [];
+  const chunks: Blob[] = [];
 
   return new Promise((resolve, reject) => {
     mediaRecorder.ondataavailable = (e) => {
@@ -319,7 +339,6 @@ export async function exportAsWebM(canvas, duration, options = {}) {
 
     mediaRecorder.start();
 
-    // Stop recording after duration
     setTimeout(() => {
       mediaRecorder.stop();
     }, duration * 1000);
@@ -333,12 +352,14 @@ export async function exportAsWebM(canvas, duration, options = {}) {
  * @param {number} targetHeight - Target height
  * @returns {HTMLCanvasElement} Scaled canvas
  */
-export function scaleCanvas(sourceCanvas, targetWidth, targetHeight) {
+export function scaleCanvas(sourceCanvas: HTMLCanvasElement, targetWidth: number, targetHeight: number): HTMLCanvasElement {
   const scaledCanvas = document.createElement('canvas');
   scaledCanvas.width = targetWidth;
   scaledCanvas.height = targetHeight;
   
   const ctx = scaledCanvas.getContext('2d');
+  if (!ctx) throw new Error('Failed to get canvas context');
+  
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   
@@ -353,17 +374,15 @@ export function scaleCanvas(sourceCanvas, targetWidth, targetHeight) {
  * @param {string} presetName - Preset name from SOCIAL_MEDIA_PRESETS
  * @param {string} filename - Output filename
  */
-export async function exportWithPreset(canvas, presetName, filename) {
+export async function exportWithPreset(canvas: HTMLCanvasElement, presetName: string, filename?: string): Promise<void> {
   const preset = SOCIAL_MEDIA_PRESETS[presetName];
   
   if (!preset) {
     throw new Error(`Unknown preset: ${presetName}`);
   }
   
-  // Scale canvas to preset dimensions
   const scaledCanvas = scaleCanvas(canvas, preset.width, preset.height);
   
-  // Export based on format
   switch (preset.format) {
     case 'png':
       await exportAsPNG(scaledCanvas, filename || `${presetName}_export.png`);
@@ -377,7 +396,6 @@ export async function exportWithPreset(canvas, presetName, filename) {
       break;
     case 'mp4':
       console.warn('MP4 export requires server-side processing or ffmpeg.wasm');
-      // Fallback to PNG for now
       await exportAsPNG(scaledCanvas, filename || `${presetName}_export.png`);
       break;
     default:
@@ -393,29 +411,28 @@ export async function exportWithPreset(canvas, presetName, filename) {
  * @param {number} duration - Duration in seconds (for video)
  * @returns {object} Size estimate
  */
-export function estimateFileSize(width, height, format, duration = 1) {
+export function estimateFileSize(width: number, height: number, format: string, duration: number = 1): SizeEstimate {
   const pixels = width * height;
   
-  let bytesPerPixel = 4; // RGBA
+  let bytesPerPixel = 4;
   let compressionRatio = 1;
   
   switch (format) {
     case 'png':
-      compressionRatio = 0.3; // ~30% of raw size
+      compressionRatio = 0.3;
       break;
     case 'jpeg':
-      compressionRatio = 0.1; // ~10% of raw size
+      compressionRatio = 0.1;
       break;
     case 'webp':
-      compressionRatio = 0.08; // ~8% of raw size
+      compressionRatio = 0.08;
       break;
     case 'gif':
-      compressionRatio = 0.2; // ~20% of raw size
-      bytesPerPixel = 1; // Indexed color
+      compressionRatio = 0.2;
+      bytesPerPixel = 1;
       break;
     case 'webm':
     case 'mp4':
-      // Rough estimate: 2.5 Mbps
       const bitsPerSecond = 2500000;
       const bytes = (bitsPerSecond * duration) / 8;
       return {
@@ -439,7 +456,7 @@ export function estimateFileSize(width, height, format, duration = 1) {
  * @param {number} bytes - Byte count
  * @returns {string} Formatted string
  */
-export function formatBytes(bytes) {
+export function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
   
   const k = 1024;
@@ -454,9 +471,9 @@ export function formatBytes(bytes) {
  * @param {object} options - Export options
  * @returns {object} Validation result
  */
-export function validateExportOptions(options) {
-  const errors = [];
-  const warnings = [];
+export function validateExportOptions(options: ExportOptions): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
   
   if (options.width && (options.width < 1 || options.width > 4096)) {
     errors.push('Width must be between 1 and 4096');
@@ -481,7 +498,7 @@ export function validateExportOptions(options) {
     options.duration || 1
   );
   
-  if (sizeEstimate.bytes > 100 * 1024 * 1024) { // > 100 MB
+  if (sizeEstimate.bytes > 100 * 1024 * 1024) {
     warnings.push(`Large file size: ${sizeEstimate.formatted}`);
   }
   

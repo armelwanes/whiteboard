@@ -5,30 +5,53 @@
 
 const ASSETS_STORAGE_KEY = 'whiteboard-assets';
 const ASSET_CACHE_KEY = 'whiteboard-asset-cache';
-const MAX_CACHE_SIZE = 50; // Maximum number of cached assets
+const MAX_CACHE_SIZE = 50;
 
-/**
- * Asset structure:
- * {
- *   id: string (unique identifier)
- *   name: string (asset name)
- *   dataUrl: string (base64 data URL)
- *   type: string (image/png, image/jpeg, etc.)
- *   size: number (file size in bytes)
- *   width: number (image width in pixels)
- *   height: number (image height in pixels)
- *   tags: string[] (array of tags)
- *   uploadDate: number (timestamp)
- *   lastUsed: number (timestamp, for caching)
- *   usageCount: number (how many times used)
- * }
- */
+export interface Asset {
+  id: string;
+  name: string;
+  dataUrl: string;
+  type: string;
+  size: number;
+  width: number;
+  height: number;
+  tags: string[];
+  uploadDate: number;
+  lastUsed: number;
+  usageCount: number;
+}
+
+export interface AssetData {
+  name: string;
+  dataUrl: string;
+  type: string;
+  tags?: string[];
+}
+
+export interface SearchCriteria {
+  query?: string;
+  tags?: string[];
+  sortBy?: 'name' | 'uploadDate' | 'lastUsed' | 'usageCount' | 'size';
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface AssetStats {
+  totalCount: number;
+  totalSize: number;
+  totalSizeMB: string;
+  uniqueTags: number;
+  mostUsed: Asset | null;
+}
+
+export interface AssetCache {
+  [key: string]: number;
+}
 
 /**
  * Get all assets from storage
  * @returns {Array} Array of asset objects
  */
-export function getAllAssets() {
+export function getAllAssets(): Asset[] {
   try {
     const stored = localStorage.getItem(ASSETS_STORAGE_KEY);
     return stored ? JSON.parse(stored) : [];
@@ -42,15 +65,13 @@ export function getAllAssets() {
  * Save assets to storage
  * @param {Array} assets - Array of asset objects
  */
-function saveAssets(assets) {
+function saveAssets(assets: Asset[]): void {
   try {
     localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets));
   } catch (error) {
     console.error('Error saving assets:', error);
-    // If quota exceeded, try to free up space
-    if (error.name === 'QuotaExceededError') {
+    if ((error as any).name === 'QuotaExceededError') {
       cleanupOldAssets();
-      // Try again
       try {
         localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets));
       } catch (retryError) {
@@ -64,7 +85,7 @@ function saveAssets(assets) {
  * Get asset cache (frequently used assets)
  * @returns {Object} Cache object with asset IDs as keys
  */
-function getAssetCache() {
+function getAssetCache(): AssetCache {
   try {
     const stored = localStorage.getItem(ASSET_CACHE_KEY);
     return stored ? JSON.parse(stored) : {};
@@ -78,7 +99,7 @@ function getAssetCache() {
  * Update asset cache
  * @param {Object} cache - Cache object
  */
-function saveAssetCache(cache) {
+function saveAssetCache(cache: AssetCache): void {
   try {
     localStorage.setItem(ASSET_CACHE_KEY, JSON.stringify(cache));
   } catch (error) {
@@ -91,7 +112,7 @@ function saveAssetCache(cache) {
  * @param {string} dataUrl - Base64 data URL
  * @returns {Promise<{width: number, height: number}>}
  */
-function getImageDimensions(dataUrl) {
+function getImageDimensions(dataUrl: string): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -107,16 +128,14 @@ function getImageDimensions(dataUrl) {
  * @param {Object} assetData - Asset data (name, dataUrl, type, tags)
  * @returns {Promise<Object>} The created asset object
  */
-export async function addAsset(assetData) {
+export async function addAsset(assetData: AssetData): Promise<Asset> {
   const { name, dataUrl, type, tags = [] } = assetData;
   
-  // Get image dimensions
   const dimensions = await getImageDimensions(dataUrl);
   
-  // Calculate approximate size (base64 data size)
   const size = Math.round((dataUrl.length * 3) / 4);
   
-  const asset = {
+  const asset: Asset = {
     id: `asset-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     name,
     dataUrl,
@@ -134,7 +153,6 @@ export async function addAsset(assetData) {
   assets.push(asset);
   saveAssets(assets);
   
-  // Add to cache if it's a new upload
   updateAssetCache(asset.id);
   
   return asset;
@@ -145,12 +163,11 @@ export async function addAsset(assetData) {
  * @param {string} assetId - Asset ID
  * @returns {Object|null} Asset object or null if not found
  */
-export function getAssetById(assetId) {
+export function getAssetById(assetId: string): Asset | null {
   const assets = getAllAssets();
   const asset = assets.find(a => a.id === assetId);
   
   if (asset) {
-    // Update usage stats
     updateAssetUsage(assetId);
   }
   
@@ -161,7 +178,7 @@ export function getAssetById(assetId) {
  * Update asset usage statistics
  * @param {string} assetId - Asset ID
  */
-function updateAssetUsage(assetId) {
+function updateAssetUsage(assetId: string): void {
   const assets = getAllAssets();
   const assetIndex = assets.findIndex(a => a.id === assetId);
   
@@ -177,11 +194,10 @@ function updateAssetUsage(assetId) {
  * Update asset cache with frequently used assets
  * @param {string} assetId - Asset ID to add to cache
  */
-function updateAssetCache(assetId) {
+function updateAssetCache(assetId: string): void {
   const cache = getAssetCache();
   cache[assetId] = Date.now();
   
-  // Keep only top MAX_CACHE_SIZE most recently used
   const cacheEntries = Object.entries(cache)
     .sort((a, b) => b[1] - a[1])
     .slice(0, MAX_CACHE_SIZE);
@@ -194,7 +210,7 @@ function updateAssetCache(assetId) {
  * Get frequently used assets (from cache)
  * @returns {Array} Array of cached asset objects
  */
-export function getCachedAssets() {
+export function getCachedAssets(): Asset[] {
   const cache = getAssetCache();
   const cachedIds = Object.keys(cache);
   const assets = getAllAssets();
@@ -209,11 +225,10 @@ export function getCachedAssets() {
  * @param {Object} criteria - Search criteria
  * @returns {Array} Filtered array of assets
  */
-export function searchAssets(criteria = {}) {
+export function searchAssets(criteria: SearchCriteria = {}): Asset[] {
   const { query = '', tags = [], sortBy = 'uploadDate', sortOrder = 'desc' } = criteria;
   let assets = getAllAssets();
   
-  // Filter by query (name search)
   if (query.trim()) {
     const searchTerm = query.toLowerCase().trim();
     assets = assets.filter(asset => 
@@ -221,7 +236,6 @@ export function searchAssets(criteria = {}) {
     );
   }
   
-  // Filter by tags
   if (tags.length > 0) {
     const searchTags = tags.map(tag => tag.toLowerCase().trim());
     assets = assets.filter(asset => 
@@ -229,7 +243,6 @@ export function searchAssets(criteria = {}) {
     );
   }
   
-  // Sort assets
   assets.sort((a, b) => {
     let comparison = 0;
     
@@ -265,20 +278,19 @@ export function searchAssets(criteria = {}) {
  * @param {Object} updates - Object with fields to update
  * @returns {Object|null} Updated asset or null if not found
  */
-export function updateAsset(assetId, updates) {
+export function updateAsset(assetId: string, updates: Partial<Pick<Asset, 'name' | 'tags'>>): Asset | null {
   const assets = getAllAssets();
   const assetIndex = assets.findIndex(a => a.id === assetId);
   
   if (assetIndex === -1) return null;
   
-  // Only allow updating certain fields
-  const allowedFields = ['name', 'tags'];
-  const safeUpdates = {};
+  const allowedFields = ['name', 'tags'] as const;
+  const safeUpdates: Partial<Asset> = {};
   
   for (const field of allowedFields) {
     if (updates[field] !== undefined) {
       safeUpdates[field] = field === 'tags' 
-        ? updates[field].map(tag => tag.toLowerCase().trim())
+        ? (updates[field] as string[]).map(tag => tag.toLowerCase().trim())
         : updates[field];
     }
   }
@@ -294,17 +306,16 @@ export function updateAsset(assetId, updates) {
  * @param {string} assetId - Asset ID
  * @returns {boolean} True if deleted, false if not found
  */
-export function deleteAsset(assetId) {
+export function deleteAsset(assetId: string): boolean {
   const assets = getAllAssets();
   const filteredAssets = assets.filter(a => a.id !== assetId);
   
   if (filteredAssets.length === assets.length) {
-    return false; // Asset not found
+    return false;
   }
   
   saveAssets(filteredAssets);
   
-  // Remove from cache
   const cache = getAssetCache();
   delete cache[assetId];
   saveAssetCache(cache);
@@ -316,9 +327,9 @@ export function deleteAsset(assetId) {
  * Get all unique tags from assets
  * @returns {Array} Array of unique tag strings
  */
-export function getAllTags() {
+export function getAllTags(): string[] {
   const assets = getAllAssets();
-  const tagSet = new Set();
+  const tagSet = new Set<string>();
   
   assets.forEach(asset => {
     asset.tags.forEach(tag => tagSet.add(tag));
@@ -331,7 +342,7 @@ export function getAllTags() {
  * Get asset statistics
  * @returns {Object} Statistics object
  */
-export function getAssetStats() {
+export function getAssetStats(): AssetStats {
   const assets = getAllAssets();
   
   const totalSize = assets.reduce((sum, asset) => sum + asset.size, 0);
@@ -351,7 +362,7 @@ export function getAssetStats() {
  * Clean up old unused assets (for storage management)
  * Removes assets that haven't been used in 90 days and have low usage count
  */
-function cleanupOldAssets() {
+function cleanupOldAssets(): void {
   const assets = getAllAssets();
   const ninetyDaysAgo = Date.now() - (90 * 24 * 60 * 60 * 1000);
   
@@ -369,7 +380,7 @@ function cleanupOldAssets() {
 /**
  * Clear all assets (use with caution)
  */
-export function clearAllAssets() {
+export function clearAllAssets(): void {
   localStorage.removeItem(ASSETS_STORAGE_KEY);
   localStorage.removeItem(ASSET_CACHE_KEY);
 }
@@ -378,7 +389,7 @@ export function clearAllAssets() {
  * Export assets as JSON
  * @returns {string} JSON string of all assets
  */
-export function exportAssets() {
+export function exportAssets(): string {
   const assets = getAllAssets();
   return JSON.stringify(assets, null, 2);
 }
@@ -389,7 +400,7 @@ export function exportAssets() {
  * @param {boolean} merge - If true, merge with existing assets; if false, replace
  * @returns {number} Number of assets imported
  */
-export function importAssets(jsonData, merge = true) {
+export function importAssets(jsonData: string, merge: boolean = true): number {
   try {
     const importedAssets = JSON.parse(jsonData);
     
@@ -397,11 +408,10 @@ export function importAssets(jsonData, merge = true) {
       throw new Error('Invalid assets data format');
     }
     
-    let existingAssets = merge ? getAllAssets() : [];
+    const existingAssets = merge ? getAllAssets() : [];
     
-    // Filter out duplicates and add new assets
     const existingIds = new Set(existingAssets.map(a => a.id));
-    const newAssets = importedAssets.filter(asset => !existingIds.has(asset.id));
+    const newAssets = importedAssets.filter((asset: Asset) => !existingIds.has(asset.id));
     
     const finalAssets = [...existingAssets, ...newAssets];
     saveAssets(finalAssets);
