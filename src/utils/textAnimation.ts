@@ -3,20 +3,68 @@
  * Provides character-by-character and word-by-word animation effects
  */
 
+export interface WordInfo {
+  text: string;
+  index: number;
+}
+
+export interface CharacterInfo {
+  char: string;
+  index: number;
+  isVisible: boolean;
+  opacity: number;
+  delay: number;
+}
+
+export interface WordAnimationInfo {
+  text: string;
+  index: number;
+  isVisible: boolean;
+  opacity: number;
+  delay: number;
+}
+
+export interface AnimationOptions {
+  mode?: 'character' | 'word';
+  cursor?: string;
+  showCursor?: boolean;
+  baseDelay?: number;
+  randomness?: number;
+  staggered?: boolean;
+  easing?: string;
+  fromScale?: number;
+  toScale?: number;
+  direction?: 'left' | 'right' | 'up' | 'down';
+  distance?: number;
+}
+
+export interface AnimationStyle {
+  opacity?: number;
+  transition?: string;
+  transform?: string;
+}
+
+export interface TextAnimationPreset {
+  name: string;
+  description: string;
+  apply: (text: string, progress: number, options?: AnimationOptions) => string;
+  getStyle?: (progress: number, options?: AnimationOptions) => AnimationStyle;
+}
+
 /**
  * Split text into characters while preserving spaces and newlines
  */
-export function splitIntoCharacters(text) {
+export function splitIntoCharacters(text: string): string[] {
   return text.split('');
 }
 
 /**
  * Split text into words while preserving whitespace
  */
-export function splitIntoWords(text) {
-  const words = [];
+export function splitIntoWords(text: string): WordInfo[] {
+  const words: WordInfo[] = [];
   const regex = /(\S+|\s+)/g;
-  let match;
+  let match: RegExpExecArray | null;
   
   while ((match = regex.exec(text)) !== null) {
     words.push({
@@ -34,7 +82,7 @@ export function splitIntoWords(text) {
  * @param {number} totalChars - Total number of characters
  * @returns {number} Number of characters to reveal
  */
-export function calculateCharacterReveal(progress, totalChars) {
+export function calculateCharacterReveal(progress: number, totalChars: number): number {
   return Math.floor(progress * totalChars);
 }
 
@@ -44,7 +92,7 @@ export function calculateCharacterReveal(progress, totalChars) {
  * @param {number} totalWords - Total number of words
  * @returns {number} Number of words to reveal
  */
-export function calculateWordReveal(progress, totalWords) {
+export function calculateWordReveal(progress: number, totalWords: number): number {
   return Math.floor(progress * totalWords);
 }
 
@@ -55,7 +103,7 @@ export function calculateWordReveal(progress, totalWords) {
  * @param {object} options - Animation options
  * @returns {string} Visible portion of text
  */
-export function applyTypingEffect(text, progress, options = {}) {
+export function applyTypingEffect(text: string, progress: number, options: AnimationOptions = {}): string {
   const { mode = 'character', cursor = '|', showCursor = true } = options;
   
   if (mode === 'character') {
@@ -90,7 +138,7 @@ export function applyTypingEffect(text, progress, options = {}) {
  * @param {object} options - Animation options
  * @returns {number} Delay in milliseconds
  */
-export function calculateCharDelay(charIndex, totalChars, options = {}) {
+export function calculateCharDelay(charIndex: number, totalChars: number, options: AnimationOptions = {}): number {
   const { baseDelay = 50, randomness = 0 } = options;
   const randomDelay = randomness * Math.random() * baseDelay;
   return charIndex * baseDelay + randomDelay;
@@ -103,7 +151,7 @@ export function calculateCharDelay(charIndex, totalChars, options = {}) {
  * @param {object} options - Animation options
  * @returns {Array} Array of character objects with visibility state
  */
-export function getAnimatedCharacters(text, currentTime, options = {}) {
+export function getAnimatedCharacters(text: string, currentTime: number, options: AnimationOptions = {}): CharacterInfo[] {
   const { baseDelay = 50, randomness = 0, staggered = true } = options;
   const chars = splitIntoCharacters(text);
   
@@ -134,7 +182,7 @@ export function getAnimatedCharacters(text, currentTime, options = {}) {
  * @param {object} options - Animation options
  * @returns {Array} Array of word objects with visibility state
  */
-export function getAnimatedWords(text, currentTime, options = {}) {
+export function getAnimatedWords(text: string, currentTime: number, options: AnimationOptions = {}): WordAnimationInfo[] {
   const { baseDelay = 200, randomness = 0 } = options;
   const words = splitIntoWords(text);
   
@@ -158,7 +206,7 @@ export function getAnimatedWords(text, currentTime, options = {}) {
  * @param {object} options - Animation options
  * @returns {object} Style object
  */
-export function createFadeInAnimation(progress, options = {}) {
+export function createFadeInAnimation(progress: number, options: AnimationOptions = {}): AnimationStyle {
   const { easing = 'ease-in-out' } = options;
   return {
     opacity: progress,
@@ -172,7 +220,7 @@ export function createFadeInAnimation(progress, options = {}) {
  * @param {object} options - Animation options
  * @returns {object} Style object
  */
-export function createScaleAnimation(progress, options = {}) {
+export function createScaleAnimation(progress: number, options: AnimationOptions = {}): AnimationStyle {
   const { fromScale = 0, toScale = 1, easing = 'ease-out' } = options;
   const scale = fromScale + (toScale - fromScale) * progress;
   
@@ -189,7 +237,7 @@ export function createScaleAnimation(progress, options = {}) {
  * @param {object} options - Animation options
  * @returns {object} Style object
  */
-export function createSlideAnimation(progress, options = {}) {
+export function createSlideAnimation(progress: number, options: AnimationOptions = {}): AnimationStyle {
   const { direction = 'left', distance = 50, easing = 'ease-out' } = options;
   
   let x = 0;
@@ -220,11 +268,11 @@ export function createSlideAnimation(progress, options = {}) {
 /**
  * Text animation presets
  */
-export const TEXT_ANIMATION_PRESETS = {
+export const TEXT_ANIMATION_PRESETS: Record<string, TextAnimationPreset> = {
   typing: {
     name: 'Typing',
     description: 'Character-by-character typing effect',
-    apply: (text, progress, options) => applyTypingEffect(text, progress, { 
+    apply: (text: string, progress: number, options?: AnimationOptions) => applyTypingEffect(text, progress, { 
       mode: 'character', 
       ...options 
     })
@@ -233,7 +281,7 @@ export const TEXT_ANIMATION_PRESETS = {
   wordTyping: {
     name: 'Word Typing',
     description: 'Word-by-word reveal effect',
-    apply: (text, progress, options) => applyTypingEffect(text, progress, { 
+    apply: (text: string, progress: number, options?: AnimationOptions) => applyTypingEffect(text, progress, { 
       mode: 'word', 
       ...options 
     })
@@ -242,22 +290,22 @@ export const TEXT_ANIMATION_PRESETS = {
   fadeIn: {
     name: 'Fade In',
     description: 'Smooth fade-in effect',
-    apply: (text, progress, options) => text,
-    getStyle: (progress, options) => createFadeInAnimation(progress, options)
+    apply: (text: string, _progress: number, _options?: AnimationOptions) => text,
+    getStyle: (progress: number, options?: AnimationOptions) => createFadeInAnimation(progress, options)
   },
   
   scaleIn: {
     name: 'Scale In',
     description: 'Scale from small to normal',
-    apply: (text, progress, options) => text,
-    getStyle: (progress, options) => createScaleAnimation(progress, options)
+    apply: (text: string, _progress: number, _options?: AnimationOptions) => text,
+    getStyle: (progress: number, options?: AnimationOptions) => createScaleAnimation(progress, options)
   },
   
   slideIn: {
     name: 'Slide In',
     description: 'Slide from direction',
-    apply: (text, progress, options) => text,
-    getStyle: (progress, options) => createSlideAnimation(progress, options)
+    apply: (text: string, _progress: number, _options?: AnimationOptions) => text,
+    getStyle: (progress: number, options?: AnimationOptions) => createSlideAnimation(progress, options)
   }
 };
 
@@ -268,7 +316,7 @@ export const TEXT_ANIMATION_PRESETS = {
  * @param {number} baseSpeed - Base speed in ms per unit
  * @returns {number} Duration in milliseconds
  */
-export function calculateAnimationDuration(text, mode = 'character', baseSpeed = 50) {
+export function calculateAnimationDuration(text: string, mode: 'character' | 'word' = 'character', baseSpeed: number = 50): number {
   if (mode === 'character') {
     return text.length * baseSpeed;
   } else if (mode === 'word') {
