@@ -3,8 +3,69 @@
  * Defines shape types, configurations, and helper functions
  */
 
+export interface ShapeConfig {
+  shape: string;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  radius?: number;
+  radiusX?: number;
+  radiusY?: number;
+  radiuses?: number[];
+  points?: number[];
+  sides?: number;
+  numPoints?: number;
+  innerRadius?: number;
+  outerRadius?: number;
+  fill?: string | string[];
+  fills?: string[];
+  stroke?: string | string[];
+  strokes?: string[];
+  strokeWidth?: number;
+  opacity?: number;
+  rotation?: number;
+  cornerRadius?: number;
+  fillMode?: string;
+  lineCap?: string;
+  lineJoin?: string;
+  pointerLength?: number;
+  pointerWidth?: number;
+  tension?: number;
+  tailDirection?: string;
+  text?: string;
+  fontSize?: number;
+  fontFamily?: string;
+  textFill?: string;
+  backgroundColor?: string;
+  padding?: number;
+  align?: string;
+  verticalAlign?: string;
+  iconType?: string;
+  size?: number;
+  markers?: number;
+  decorativeType?: string;
+  character?: string;
+}
+
+export interface ShapeLayer {
+  id: string;
+  type: string;
+  name: string;
+  zIndex: number;
+  position: { x: number; y: number };
+  scale: number;
+  opacity: number;
+  shape_config: ShapeConfig;
+}
+
+export interface ShapeCategory {
+  label: string;
+  shapes: string[];
+}
+
 // Shape Types - Comprehensive Shape Library
-export const ShapeType = {
+export const ShapeType: Record<string, string> = {
   // Basic Shapes
   RECTANGLE: 'rectangle',
   SQUARE: 'square',
@@ -94,7 +155,7 @@ export const ShapeType = {
 };
 
 // Default shape configurations
-export const DEFAULT_SHAPE_CONFIGS = {
+export const DEFAULT_SHAPE_CONFIGS: Record<string, ShapeConfig> = {
   [ShapeType.RECTANGLE]: {
     shape: ShapeType.RECTANGLE,
     x: 400,
@@ -1019,7 +1080,7 @@ export const DEFAULT_SHAPE_CONFIGS = {
  * @param {object} customConfig - Custom configuration to override defaults
  * @returns {object} Shape layer object
  */
-export function createShapeLayer(shapeType, customConfig = {}) {
+export function createShapeLayer(shapeType: string, customConfig: Partial<ShapeConfig> = {}): ShapeLayer {
   const defaultConfig = DEFAULT_SHAPE_CONFIGS[shapeType];
   
   if (!defaultConfig) {
@@ -1046,7 +1107,7 @@ export function createShapeLayer(shapeType, customConfig = {}) {
  * @param {string} shapeType - Type of shape
  * @returns {string} Display name
  */
-export function getShapeDisplayName(shapeType) {
+export function getShapeDisplayName(shapeType: string): string {
   const names = {
     [ShapeType.RECTANGLE]: 'Rectangle',
     [ShapeType.SQUARE]: 'Square',
@@ -1136,7 +1197,7 @@ export function getShapeDisplayName(shapeType) {
  * @param {string} shapeType - Type of shape
  * @returns {string} Icon
  */
-export function getShapeIcon(shapeType) {
+export function getShapeIcon(shapeType: string): string {
   const icons = {
     [ShapeType.RECTANGLE]: '▭',
     [ShapeType.SQUARE]: '◻',
@@ -1227,8 +1288,8 @@ export function getShapeIcon(shapeType) {
  * @param {number} radius - Radius
  * @returns {array} Array of points [x1, y1, x2, y2, ...]
  */
-export function calculatePolygonPoints(sides, radius) {
-  const points = [];
+export function calculatePolygonPoints(sides: number, radius: number): number[] {
+  const points: number[] = [];
   for (let i = 0; i < sides; i++) {
     const angle = (i * 2 * Math.PI) / sides - Math.PI / 2;
     const x = radius * Math.cos(angle);
@@ -1243,7 +1304,7 @@ export function calculatePolygonPoints(sides, radius) {
  * @param {object} config - Shape configuration
  * @returns {object} Sanitized configuration
  */
-export function sanitizeShapeConfig(config) {
+export function sanitizeShapeConfig(config: ShapeConfig): ShapeConfig {
   const sanitized = { ...config };
   
   // Ensure numeric values are valid
@@ -1275,7 +1336,7 @@ export function sanitizeShapeConfig(config) {
  * Get shape categories for UI organization
  * @returns {object} Categorized shapes
  */
-export function getShapeCategories() {
+export function getShapeCategories(): Record<string, ShapeCategory> {
   return {
     basic: {
       label: 'Basic Shapes',

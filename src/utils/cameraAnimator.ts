@@ -3,12 +3,52 @@
  * Handles camera sequences, transitions, and animations
  */
 
-import { interpolate, interpolatePosition } from './easingFunctions.js';
+import { interpolate, interpolatePosition, type Position } from './easingFunctions';
+
+export interface Camera {
+  id?: string;
+  name?: string;
+  zoom: number;
+  position: Position;
+  duration: number;
+  transition_duration: number;
+  easing: string;
+  width: number;
+  height: number;
+  locked: boolean;
+  isDefault: boolean;
+  pauseDuration: number;
+  movementType: string;
+}
+
+export interface CameraState {
+  zoom: number;
+  position: Position;
+  cameraIndex: number;
+  isTransitioning?: boolean;
+}
+
+export interface LayerCamera {
+  zoom?: number;
+  position?: Position;
+}
+
+export interface Animation {
+  type?: string;
+  start_zoom?: number;
+  end_zoom?: number;
+  focus_position?: Position;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+}
 
 /**
  * Default camera configuration
  */
-export const DEFAULT_CAMERA = {
+export const DEFAULT_CAMERA: Camera = {
   zoom: 1.0,
   position: { x: 0.5, y: 0.5 },
   duration: 2.0,
@@ -27,7 +67,7 @@ export const DEFAULT_CAMERA = {
  * @param {object} overrides - Properties to override defaults
  * @returns {object} Camera configuration
  */
-export const createCamera = (overrides = {}) => {
+export const createCamera = (overrides: Partial<Camera> = {}): Camera => {
   return {
     ...DEFAULT_CAMERA,
     ...overrides,
@@ -44,8 +84,7 @@ export const createCamera = (overrides = {}) => {
  * @param {string} aspectRatio - Aspect ratio (e.g., '16:9', '4:3')
  * @returns {object} Default camera configuration
  */
-export const createDefaultCamera = (aspectRatio = '16:9') => {
-  // Calculate camera dimensions based on aspect ratio (YouTube standard sizes)
+export const createDefaultCamera = (aspectRatio: string = '16:9'): Camera => {
   let cameraWidth = 1920;
   let cameraHeight = 1080;
   
@@ -64,7 +103,7 @@ export const createDefaultCamera = (aspectRatio = '16:9') => {
     id: 'default-camera',
     name: 'Caméra Par Défaut',
     zoom: 1.0,
-    position: { x: 0.5, y: 0.5 }, // Centered
+    position: { x: 0.5, y: 0.5 },
     duration: 2.0,
     transition_duration: 0,
     easing: 'ease_out',
@@ -83,7 +122,7 @@ export const createDefaultCamera = (aspectRatio = '16:9') => {
  * @param {number} currentTime - Current time in seconds
  * @returns {object} Current camera state {zoom, position, cameraIndex}
  */
-export const getCameraAtTime = (cameras, currentTime) => {
+export const getCameraAtTime = (cameras: Camera[], currentTime: number): CameraState => {
   if (!cameras || cameras.length === 0) {
     return { ...DEFAULT_CAMERA, cameraIndex: -1 };
   }
@@ -96,7 +135,6 @@ export const getCameraAtTime = (cameras, currentTime) => {
     const transitionDuration = camera.transition_duration || 0;
     const holdDuration = camera.duration || 2.0;
 
-    // Check if we're in the transition phase
     if (currentTime < accumulatedTime + transitionDuration) {
       const transitionProgress = (currentTime - accumulatedTime) / transitionDuration;
       return {
@@ -114,7 +152,6 @@ export const getCameraAtTime = (cameras, currentTime) => {
 
     accumulatedTime += transitionDuration;
 
-    // Check if we're in the hold phase
     if (currentTime < accumulatedTime + holdDuration) {
       return {
         zoom: camera.zoom,
@@ -128,7 +165,6 @@ export const getCameraAtTime = (cameras, currentTime) => {
     previousCamera = camera;
   }
 
-  // Return last camera state if time exceeds all cameras
   const lastCamera = cameras[cameras.length - 1];
   return {
     zoom: lastCamera.zoom,
@@ -143,7 +179,7 @@ export const getCameraAtTime = (cameras, currentTime) => {
  * @param {array} cameras - Array of camera configurations
  * @returns {number} Total duration in seconds
  */
-export const getTotalCameraDuration = (cameras) => {
+export const getTotalCameraDuration = (cameras: Camera[]): number => {
   if (!cameras || cameras.length === 0) return 0;
 
   return cameras.reduce((total, camera) => {
@@ -156,7 +192,7 @@ export const getTotalCameraDuration = (cameras) => {
  * @param {object} layer - Layer object with optional camera settings
  * @returns {object} Camera transformation to apply {zoom, position}
  */
-export const getLayerCamera = (layer) => {
+export const getLayerCamera = (layer: { camera?: LayerCamera }): { zoom: number; position: Position } => {
   if (!layer.camera) {
     return { zoom: 1.0, position: { x: 0.5, y: 0.5 } };
   }
@@ -173,7 +209,7 @@ export const getLayerCamera = (layer) => {
  * @param {number} progress - Progress value between 0 and 1
  * @returns {object} Animation state {zoom, position}
  */
-export const getLayerAnimationState = (animation, progress) => {
+export const getLayerAnimationState = (animation: Animation | null, progress: number): { zoom: number; position: Position } | null => {
   if (!animation || !animation.type) {
     return null;
   }
@@ -196,8 +232,8 @@ export const getLayerAnimationState = (animation, progress) => {
  * @param {object} camera - Camera configuration to validate
  * @returns {object} Validation result {valid, errors}
  */
-export const validateCamera = (camera) => {
-  const errors = [];
+export const validateCamera = (camera: Partial<Camera>): ValidationResult => {
+  const errors: string[] = [];
 
   if (camera.zoom !== undefined && (camera.zoom < 0.1 || camera.zoom > 10)) {
     errors.push('Zoom must be between 0.1 and 10');
@@ -231,7 +267,7 @@ export const validateCamera = (camera) => {
  * @param {object} position - Position {x, y}
  * @returns {object} Normalized position {x, y}
  */
-export const normalizePosition = (position) => {
+export const normalizePosition = (position: Position): Position => {
   return {
     x: Math.max(0, Math.min(1, position.x)),
     y: Math.max(0, Math.min(1, position.y)),

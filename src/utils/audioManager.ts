@@ -5,16 +5,102 @@
 
 import { Howl } from 'howler';
 
-/**
- * Audio track types
- */
 export const AudioTrackType = {
   BACKGROUND_MUSIC: 'background_music',
   NARRATION: 'narration',
   SOUND_EFFECT: 'sound_effect',
   TYPEWRITER: 'typewriter',
   DRAWING: 'drawing',
-};
+} as const;
+
+export type AudioTrackTypeValue = typeof AudioTrackType[keyof typeof AudioTrackType];
+
+export interface AudioTrackOptions {
+  volume?: number;
+  loop?: boolean;
+  startTime?: number;
+  duration?: number | null;
+  fadeIn?: number;
+  fadeOut?: number;
+  enabled?: boolean;
+}
+
+export interface AudioTrack {
+  id: string;
+  type: AudioTrackTypeValue;
+  path: string;
+  volume: number;
+  loop: boolean;
+  startTime: number;
+  duration: number | null;
+  fadeIn: number;
+  fadeOut: number;
+  enabled: boolean;
+}
+
+export interface AudioTrackState {
+  loaded: boolean;
+  playing: boolean;
+  scheduledStart: number | null;
+}
+
+export interface AudioTrackInternal {
+  config: AudioTrack;
+  howl: Howl;
+  state: AudioTrackState;
+}
+
+export interface SceneAudioConfig {
+  backgroundMusic: AudioTrack | null;
+}
+
+export interface LayerAudioConfig {
+  narration: AudioTrack | null;
+  soundEffects: AudioTrack[];
+  typewriter: AudioTrack | null;
+  drawing: AudioTrack | null;
+}
+
+export interface AudioConfigJSON {
+  background_music?: {
+    path?: string;
+    file?: string;
+    volume?: number;
+    loop?: boolean;
+    fade_in?: number;
+    fade_out?: number;
+  };
+  voice_overs?: Array<{
+    path?: string;
+    file?: string;
+    volume?: number;
+    start_time?: number;
+    duration?: number;
+  }>;
+  narration?: Array<{
+    path?: string;
+    file?: string;
+    volume?: number;
+    start_time?: number;
+    duration?: number;
+  }>;
+  sound_effects?: Array<{
+    path?: string;
+    file?: string;
+    volume?: number;
+    start_time?: number;
+    duration?: number;
+  }>;
+  effects?: Array<{
+    path?: string;
+    file?: string;
+    volume?: number;
+    start_time?: number;
+    duration?: number;
+  }>;
+}
+
+type TimeUpdateCallback = (time: number) => void;
 
 /**
  * Create an audio track
@@ -23,7 +109,7 @@ export const AudioTrackType = {
  * @param {Object} options - Track options
  * @returns {Object} Audio track configuration
  */
-export const createAudioTrack = (type, path, options = {}) => {
+export const createAudioTrack = (type: AudioTrackTypeValue, path: string, options: AudioTrackOptions = {}): AudioTrack => {
   return {
     id: `audio-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     type,
@@ -43,12 +129,20 @@ export const createAudioTrack = (type, path, options = {}) => {
  * Handles multiple audio tracks and their synchronization
  */
 export class AudioManager {
+  private tracks: Map<string, AudioTrackInternal>;
+  private masterVolume: number;
+  private currentTime: number;
+  private isPlaying: boolean;
+  private timeUpdateCallbacks: TimeUpdateCallback[];
+  private timeTrackingInterval: NodeJS.Timeout | null;
+
   constructor() {
-    this.tracks = new Map(); // Map<trackId, { config, howl, state }>
+    this.tracks = new Map();
     this.masterVolume = 1.0;
     this.currentTime = 0.0;
     this.isPlaying = false;
     this.timeUpdateCallbacks = [];
+    this.timeTrackingInterval = null;
   }
 
   /**
@@ -56,7 +150,7 @@ export class AudioManager {
    * @param {Object} trackConfig - Track configuration
    * @returns {string} Track ID
    */
-  addTrack(trackConfig) {
+  addTrack(trackConfig: AudioTrack): string {
     const howl = new Howl({
       src: [trackConfig.path],
       loop: trackConfig.loop,
@@ -64,7 +158,7 @@ export class AudioManager {
       onload: () => {
         console.log(`Audio track ${trackConfig.id} loaded`);
       },
-      onloaderror: (id, error) => {
+      onloaderror: (_id: number, error: any) => {
         console.error(`Error loading audio track ${trackConfig.id}:`, error);
       },
     });
@@ -86,7 +180,7 @@ export class AudioManager {
    * Remove an audio track
    * @param {string} trackId - Track ID
    */
-  removeTrack(trackId) {
+  removeTrack(trackId: string): void {
     const track = this.tracks.get(trackId);
     if (track) {
       track.howl.unload();
@@ -99,17 +193,15 @@ export class AudioManager {
    * @param {string} trackId - Track ID
    * @param {Object} updates - Configuration updates
    */
-  updateTrack(trackId, updates) {
+  updateTrack(trackId: string, updates: Partial<AudioTrack>): void {
     const track = this.tracks.get(trackId);
     if (track) {
       track.config = { ...track.config, ...updates };
       
-      // Apply volume changes immediately
       if (updates.volume !== undefined) {
         track.howl.volume(updates.volume * this.masterVolume);
       }
       
-      // Apply loop changes
       if (updates.loop !== undefined) {
         track.howl.loop(updates.loop);
       }
@@ -120,10 +212,9 @@ export class AudioManager {
    * Set master volume
    * @param {number} volume - Volume level (0.0 - 1.0)
    */
-  setMasterVolume(volume) {
+  setMasterVolume(volume: number): void {
     this.masterVolume = Math.max(0, Math.min(1, volume));
     
-    // Update all track volumes
     this.tracks.forEach(track => {
       track.howl.volume(track.config.volume * this.masterVolume);
     });
@@ -133,7 +224,7 @@ export class AudioManager {
    * Play audio synchronized with timeline
    * @param {number} time - Current timeline time in seconds
    */
-  play(time = 0) {
+  play(time: number = 0): void {
     this.currentTime = time;
     this.isPlaying = true;
 
@@ -145,11 +236,9 @@ export class AudioManager {
         ? trackStartTime + track.config.duration 
         : Infinity;
 
-      // Check if track should be playing at this time
       if (time >= trackStartTime && time < trackEndTime) {
         const seekTime = time - trackStartTime;
         
-        // Apply fade in if starting from beginning
         if (seekTime < track.config.fadeIn && track.config.fadeIn > 0) {
           const fadeVolume = (seekTime / track.config.fadeIn) * track.config.volume;
           track.howl.volume(fadeVolume * this.masterVolume);
@@ -161,14 +250,13 @@ export class AudioManager {
       }
     });
 
-    // Start time tracking
     this.startTimeTracking();
   }
 
   /**
    * Pause all audio
    */
-  pause() {
+  pause(): void {
     this.isPlaying = false;
     
     this.tracks.forEach(track => {
@@ -184,7 +272,7 @@ export class AudioManager {
   /**
    * Stop all audio
    */
-  stop() {
+  stop(): void {
     this.isPlaying = false;
     this.currentTime = 0;
     
@@ -200,7 +288,7 @@ export class AudioManager {
    * Seek to specific time
    * @param {number} time - Time in seconds
    */
-  seek(time) {
+  seek(time: number): void {
     this.currentTime = time;
     
     this.tracks.forEach(track => {
@@ -224,21 +312,19 @@ export class AudioManager {
   /**
    * Start time tracking for synchronization
    */
-  startTimeTracking() {
+  private startTimeTracking(): void {
     if (this.timeTrackingInterval) {
       clearInterval(this.timeTrackingInterval);
     }
 
     this.timeTrackingInterval = setInterval(() => {
       if (this.isPlaying) {
-        this.currentTime += 0.1; // Update every 100ms
+        this.currentTime += 0.1;
         
-        // Notify callbacks
         this.timeUpdateCallbacks.forEach(callback => {
           callback(this.currentTime);
         });
 
-        // Check for track start/end times
         this.updatePlayingTracks();
       }
     }, 100);
@@ -247,7 +333,7 @@ export class AudioManager {
   /**
    * Stop time tracking
    */
-  stopTimeTracking() {
+  private stopTimeTracking(): void {
     if (this.timeTrackingInterval) {
       clearInterval(this.timeTrackingInterval);
       this.timeTrackingInterval = null;
@@ -257,7 +343,7 @@ export class AudioManager {
   /**
    * Update which tracks should be playing based on current time
    */
-  updatePlayingTracks() {
+  private updatePlayingTracks(): void {
     this.tracks.forEach(track => {
       if (!track.config.enabled) return;
 
@@ -269,18 +355,15 @@ export class AudioManager {
       const shouldBePlaying = this.currentTime >= trackStartTime && this.currentTime < trackEndTime;
 
       if (shouldBePlaying && !track.state.playing) {
-        // Start playing
         const seekTime = this.currentTime - trackStartTime;
         track.howl.seek(seekTime);
         track.howl.play();
         track.state.playing = true;
       } else if (!shouldBePlaying && track.state.playing) {
-        // Stop playing
         track.howl.stop();
         track.state.playing = false;
       }
 
-      // Handle fade out
       if (track.state.playing && track.config.fadeOut > 0) {
         const timeUntilEnd = trackEndTime - this.currentTime;
         if (timeUntilEnd <= track.config.fadeOut) {
@@ -295,7 +378,7 @@ export class AudioManager {
    * Add time update callback
    * @param {Function} callback - Callback function
    */
-  onTimeUpdate(callback) {
+  onTimeUpdate(callback: TimeUpdateCallback): void {
     this.timeUpdateCallbacks.push(callback);
   }
 
@@ -303,7 +386,7 @@ export class AudioManager {
    * Remove time update callback
    * @param {Function} callback - Callback function
    */
-  offTimeUpdate(callback) {
+  offTimeUpdate(callback: TimeUpdateCallback): void {
     this.timeUpdateCallbacks = this.timeUpdateCallbacks.filter(cb => cb !== callback);
   }
 
@@ -311,7 +394,7 @@ export class AudioManager {
    * Get all tracks
    * @returns {Array} Array of track configurations
    */
-  getTracks() {
+  getTracks(): AudioTrack[] {
     return Array.from(this.tracks.values()).map(track => track.config);
   }
 
@@ -320,14 +403,14 @@ export class AudioManager {
    * @param {string} type - Track type
    * @returns {Array} Array of track configurations
    */
-  getTracksByType(type) {
+  getTracksByType(type: AudioTrackTypeValue): AudioTrack[] {
     return this.getTracks().filter(track => track.type === type);
   }
 
   /**
    * Cleanup and unload all audio
    */
-  dispose() {
+  dispose(): void {
     this.stop();
     this.tracks.forEach(track => {
       track.howl.unload();
@@ -343,7 +426,7 @@ export class AudioManager {
  * @param {Object} options - Audio options
  * @returns {Object} Audio configuration
  */
-export const createSceneAudioConfig = (options = {}) => {
+export const createSceneAudioConfig = (options: { backgroundMusic?: AudioTrack | null } = {}): SceneAudioConfig => {
   return {
     backgroundMusic: options.backgroundMusic || null,
   };
@@ -355,7 +438,7 @@ export const createSceneAudioConfig = (options = {}) => {
  * @param {Object} options - Audio options
  * @returns {Object} Audio configuration
  */
-export const createLayerAudioConfig = (options = {}) => {
+export const createLayerAudioConfig = (options: Partial<LayerAudioConfig> = {}): LayerAudioConfig => {
   return {
     narration: options.narration || null,
     soundEffects: options.soundEffects || [],
@@ -369,15 +452,14 @@ export const createLayerAudioConfig = (options = {}) => {
  * @param {Object} audioConfig - Audio configuration from JSON
  * @returns {Array} Array of audio tracks
  */
-export const parseAudioConfig = (audioConfig) => {
-  const tracks = [];
+export const parseAudioConfig = (audioConfig: AudioConfigJSON): AudioTrack[] => {
+  const tracks: AudioTrack[] = [];
 
-  // Background music
   if (audioConfig.background_music) {
     const bg = audioConfig.background_music;
     tracks.push(createAudioTrack(
       AudioTrackType.BACKGROUND_MUSIC,
-      bg.path || bg.file,
+      bg.path || bg.file || '',
       {
         volume: bg.volume ?? 0.5,
         loop: bg.loop ?? true,
@@ -388,13 +470,12 @@ export const parseAudioConfig = (audioConfig) => {
     ));
   }
 
-  // Voice-overs/Narration
   if (audioConfig.voice_overs || audioConfig.narration) {
     const narrations = audioConfig.voice_overs || audioConfig.narration || [];
     narrations.forEach(narration => {
       tracks.push(createAudioTrack(
         AudioTrackType.NARRATION,
-        narration.path || narration.file,
+        narration.path || narration.file || '',
         {
           volume: narration.volume ?? 1.0,
           startTime: narration.start_time ?? 0.0,
@@ -404,13 +485,12 @@ export const parseAudioConfig = (audioConfig) => {
     });
   }
 
-  // Sound effects
   if (audioConfig.sound_effects || audioConfig.effects) {
     const effects = audioConfig.sound_effects || audioConfig.effects || [];
     effects.forEach(effect => {
       tracks.push(createAudioTrack(
         AudioTrackType.SOUND_EFFECT,
-        effect.path || effect.file,
+        effect.path || effect.file || '',
         {
           volume: effect.volume ?? 0.8,
           startTime: effect.start_time ?? 0.0,
