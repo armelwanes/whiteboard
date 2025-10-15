@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from './atoms/button';
+import { Button } from '../atoms';
 import { Edit, Type, Square, Image, Camera, Circle, PenTool, Undo, Redo, Library } from 'lucide-react';
 
 const Toolbar = ({ onOpenEditor, onShowHandWritingTest, onOpenShapeToolbar, onOpenAssetLibrary, onUndo, onRedo, canUndo, canRedo }) => {

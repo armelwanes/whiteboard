@@ -1,6 +1,6 @@
 import React from 'react';
 import HandWritingAnimation from '../components/HandWritingAnimation';
-import { Button } from '../components/ui/button';
+import { Button } from '../components/atoms';
 import { ArrowLeft } from 'lucide-react';
 
 /**

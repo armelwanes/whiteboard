@@ -6,7 +6,7 @@ import {
   Target, Clock, Box, Lightbulb, Frame, Underline, Heart,
   Sparkles, Zap, Hash, Type, PenTool
 } from 'lucide-react';
-import { ShapeType, createShapeLayer, getShapeDisplayName } from '../utils/shapeUtils';
+import { ShapeType, createShapeLayer, getShapeDisplayName } from '../../utils/shapeUtils';
 
 /**
  * ShapeToolbar Component

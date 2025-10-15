@@ -25,6 +25,6 @@ export const API_ENDPOINTS = {
     scene: (id) => `${prefix}/export/scene/${id}`,
     video: `${prefix}/export/video`,
   },
-} as const;
+};
 
 export default API_ENDPOINTS;

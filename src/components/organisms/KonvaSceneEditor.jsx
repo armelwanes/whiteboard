@@ -1,11 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Stage, Layer, Image as KonvaImage, Transformer, Text, Rect } from 'react-konva';
 import useImage from 'use-image';
-import { Button } from './atoms/button';
-import { Input } from './atoms/input';
-import { Label } from './atoms/label';
-import { Textarea } from './atoms/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from './atoms/card';
+import { Button, Input, Label, Textarea, Card, CardContent, CardHeader, CardTitle } from '../atoms';
 import { Upload, X, Save, RotateCw, FlipHorizontal2, FlipVertical2, Trash2 } from 'lucide-react';
 
 // Konva Image Component

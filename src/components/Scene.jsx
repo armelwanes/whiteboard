@@ -1,5 +1,5 @@
 import React from 'react';
-import LayerEditor from './LayerEditor';
+import { LayerEditor } from './organisms';
 
 const Scene = ({ 
   isActive, 
