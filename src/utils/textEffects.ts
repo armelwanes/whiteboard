@@ -3,12 +3,70 @@
  * Provides visual effects for text (shadows, outlines, glow, etc.)
  */
 
+export interface ShadowOptions {
+  offsetX?: number;
+  offsetY?: number;
+  blur?: number;
+  color?: string;
+}
+
+export interface OutlineOptions {
+  width?: number;
+  color?: string;
+}
+
+export interface GlowOptions {
+  color?: string;
+  intensity?: number;
+  layers?: number;
+}
+
+export interface Effect3DOptions {
+  depth?: number;
+  angle?: number;
+  color?: string;
+  lightColor?: string;
+}
+
+export interface NeonOptions {
+  color?: string;
+  intensity?: number;
+}
+
+export interface GradientOptions {
+  colors?: string[];
+  direction?: string;
+}
+
+export interface EmbossOptions {
+  highlightColor?: string;
+  shadowColor?: string;
+}
+
+export interface FireOptions {
+  colors?: string[];
+}
+
+export interface CSSProperties {
+  textShadow?: string;
+  background?: string;
+  WebkitBackgroundClip?: string;
+  WebkitTextFillColor?: string;
+  backgroundClip?: string;
+}
+
+export interface TextEffectPreset {
+  name: string;
+  description: string;
+  apply: (options?: any) => CSSProperties;
+}
+
 /**
  * Create drop shadow effect
  * @param {object} options - Shadow options
  * @returns {string} CSS text-shadow value
  */
-export function createDropShadow(options = {}) {
+export function createDropShadow(options: ShadowOptions = {}): string {
   const {
     offsetX = 2,
     offsetY = 2,
@@ -24,14 +82,13 @@ export function createDropShadow(options = {}) {
  * @param {object} options - Outline options
  * @returns {string} CSS text-stroke or text-shadow value
  */
-export function createTextOutline(options = {}) {
+export function createTextOutline(options: OutlineOptions = {}): string {
   const {
     width = 2,
     color = '#000000'
   } = options;
   
-  // Use multiple shadows to simulate outline
-  const shadows = [];
+  const shadows: string[] = [];
   for (let i = 0; i < 8; i++) {
     const angle = (i * Math.PI) / 4;
     const x = Math.cos(angle) * width;
@@ -47,14 +104,14 @@ export function createTextOutline(options = {}) {
  * @param {object} options - Glow options
  * @returns {string} CSS text-shadow value
  */
-export function createGlowEffect(options = {}) {
+export function createGlowEffect(options: GlowOptions = {}): string {
   const {
     color = '#ffffff',
     intensity = 10,
     layers = 3
   } = options;
   
-  const shadows = [];
+  const shadows: string[] = [];
   for (let i = 1; i <= layers; i++) {
     const blur = intensity * i;
     shadows.push(`0 0 ${blur}px ${color}`);
@@ -68,7 +125,7 @@ export function createGlowEffect(options = {}) {
  * @param {object} options - 3D effect options
  * @returns {string} CSS text-shadow value
  */
-export function create3DEffect(options = {}) {
+export function create3DEffect(options: Effect3DOptions = {}): string {
   const {
     depth = 5,
     angle = 45,
@@ -76,17 +133,15 @@ export function create3DEffect(options = {}) {
     lightColor = 'rgba(255, 255, 255, 0.3)'
   } = options;
   
-  const shadows = [];
+  const shadows: string[] = [];
   const rad = (angle * Math.PI) / 180;
   
-  // Create depth layers
   for (let i = 1; i <= depth; i++) {
     const x = Math.cos(rad) * i;
     const y = Math.sin(rad) * i;
     shadows.push(`${x}px ${y}px 0 ${color}`);
   }
   
-  // Add highlight
   shadows.push(`-1px -1px 0 ${lightColor}`);
   
   return shadows.join(', ');
@@ -97,7 +152,7 @@ export function create3DEffect(options = {}) {
  * @param {object} options - Neon effect options
  * @returns {string} CSS text-shadow value
  */
-export function createNeonEffect(options = {}) {
+export function createNeonEffect(options: NeonOptions = {}): string {
   const {
     color = '#00ffff',
     intensity = 20
@@ -115,7 +170,7 @@ export function createNeonEffect(options = {}) {
  * @param {object} options - Gradient options
  * @returns {object} CSS properties
  */
-export function createGradientText(options = {}) {
+export function createGradientText(options: GradientOptions = {}): CSSProperties {
   const {
     colors = ['#00ffff', '#ff00ff'],
     direction = 'to right'
@@ -136,7 +191,7 @@ export function createGradientText(options = {}) {
  * @param {object} options - Emboss options
  * @returns {string} CSS text-shadow value
  */
-export function createEmbossEffect(options = {}) {
+export function createEmbossEffect(options: EmbossOptions = {}): string {
   const {
     highlightColor = 'rgba(255, 255, 255, 0.5)',
     shadowColor = 'rgba(0, 0, 0, 0.5)'
@@ -153,7 +208,7 @@ export function createEmbossEffect(options = {}) {
  * @param {object} options - Fire effect options
  * @returns {string} CSS text-shadow value
  */
-export function createFireEffect(options = {}) {
+export function createFireEffect(options: FireOptions = {}): string {
   const colors = options.colors || [
     'rgba(255, 100, 0, 1)',
     'rgba(255, 150, 0, 0.8)',
@@ -161,7 +216,7 @@ export function createFireEffect(options = {}) {
     'rgba(255, 255, 0, 0.4)'
   ];
   
-  const shadows = [];
+  const shadows: string[] = [];
   colors.forEach((color, index) => {
     const blur = (index + 1) * 5;
     shadows.push(`0 0 ${blur}px ${color}`);
@@ -176,9 +231,9 @@ export function createFireEffect(options = {}) {
  * @param {object} options - Options for each effect
  * @returns {object} Combined CSS properties
  */
-export function combineEffects(effects, options = {}) {
-  const shadows = [];
-  const styles = {};
+export function combineEffects(effects: string[], options: Record<string, any> = {}): CSSProperties {
+  const shadows: string[] = [];
+  const styles: CSSProperties = {};
   
   effects.forEach(effectName => {
     const effectOptions = options[effectName] || {};
@@ -221,70 +276,70 @@ export function combineEffects(effects, options = {}) {
 /**
  * Text effect presets
  */
-export const TEXT_EFFECT_PRESETS = {
+export const TEXT_EFFECT_PRESETS: Record<string, TextEffectPreset> = {
   shadow: {
     name: 'Drop Shadow',
     description: 'Classic drop shadow',
-    apply: (options) => ({ textShadow: createDropShadow(options) })
+    apply: (options?: ShadowOptions) => ({ textShadow: createDropShadow(options) })
   },
   
   outline: {
     name: 'Outline',
     description: 'Text outline',
-    apply: (options) => ({ textShadow: createTextOutline(options) })
+    apply: (options?: OutlineOptions) => ({ textShadow: createTextOutline(options) })
   },
   
   glow: {
     name: 'Glow',
     description: 'Glowing text',
-    apply: (options) => ({ textShadow: createGlowEffect(options) })
+    apply: (options?: GlowOptions) => ({ textShadow: createGlowEffect(options) })
   },
   
   '3d': {
     name: '3D Effect',
     description: '3D depth effect',
-    apply: (options) => ({ textShadow: create3DEffect(options) })
+    apply: (options?: Effect3DOptions) => ({ textShadow: create3DEffect(options) })
   },
   
   neon: {
     name: 'Neon',
     description: 'Neon glow effect',
-    apply: (options) => ({ textShadow: createNeonEffect(options) })
+    apply: (options?: NeonOptions) => ({ textShadow: createNeonEffect(options) })
   },
   
   gradient: {
     name: 'Gradient',
     description: 'Gradient fill',
-    apply: (options) => createGradientText(options)
+    apply: (options?: GradientOptions) => createGradientText(options)
   },
   
   emboss: {
     name: 'Embossed',
     description: 'Embossed text',
-    apply: (options) => ({ textShadow: createEmbossEffect(options) })
+    apply: (options?: EmbossOptions) => ({ textShadow: createEmbossEffect(options) })
   },
   
   fire: {
     name: 'Fire',
     description: 'Fire effect',
-    apply: (options) => ({ textShadow: createFireEffect(options) })
+    apply: (options?: FireOptions) => ({ textShadow: createFireEffect(options) })
   },
   
   modern: {
     name: 'Modern',
     description: 'Modern clean look',
-    apply: (options) => combineEffects(['shadow', 'glow'], {
+    apply: (options?: any) => combineEffects(['shadow', 'glow'], {
       shadow: { offsetY: 4, blur: 8, color: 'rgba(0, 0, 0, 0.2)' },
-      glow: { color: options.color || '#4ECDC4', intensity: 5, layers: 2 }
+      glow: { color: options?.color || '#4ECDC4', intensity: 5, layers: 2 }
     })
   },
   
   retro: {
     name: 'Retro',
     description: 'Retro 80s style',
-    apply: (options) => combineEffects(['3d', 'neon'], {
+    apply: (options?: any) => combineEffects(['3d', 'neon'], {
       '3d': { depth: 8, angle: 135, color: 'rgba(0, 0, 0, 0.3)' },
-      neon: { color: options.color || '#ff00ff', intensity: 15 }
+      neon: { color: options?.color || '#ff00ff', intensity: 15 }
     })
   }
 };
