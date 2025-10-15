@@ -1,35 +1,57 @@
-// Base Service for API operations with mock implementation
 import localStorageService from '../storage/localStorage';
 
-/**
- * Base service class for CRUD operations
- * Currently uses localStorage as mock, can be replaced with real HTTP client
- */
-class BaseService {
-  constructor(storageKey, endpoints) {
+interface ListParams {
+  page?: number;
+  limit?: number;
+  filter?: string;
+}
+
+interface ListResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+interface DeleteResponse {
+  success: boolean;
+  id: string;
+}
+
+interface Endpoints {
+  base?: string;
+  list?: string;
+  create?: string;
+  detail?: (id: string) => string;
+  update?: (id: string) => string;
+  delete?: (id: string) => string;
+  [key: string]: any;
+}
+
+class BaseService<T extends { id: string }> {
+  protected storageKey: string;
+  protected endpoints: Endpoints;
+
+  constructor(storageKey: string, endpoints: Endpoints) {
     this.storageKey = storageKey;
     this.endpoints = endpoints;
   }
 
-  // Simulate API delay
-  async delay(ms = 300) {
+  async delay(ms = 300): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  // List all items
-  async list(params = {}) {
+  async list(params: ListParams = {}): Promise<ListResponse<T>> {
     await this.delay();
     const items = localStorageService.get(this.storageKey) || [];
     
-    // Basic filtering support
     let filtered = items;
     if (params.filter) {
-      filtered = items.filter(item => 
-        JSON.stringify(item).toLowerCase().includes(params.filter.toLowerCase())
+      filtered = items.filter((item: T) => 
+        JSON.stringify(item).toLowerCase().includes(params.filter!.toLowerCase())
       );
     }
 
-    // Pagination support
     const page = params.page || 1;
     const limit = params.limit || 10;
     const start = (page - 1) * limit;
@@ -43,11 +65,10 @@ class BaseService {
     };
   }
 
-  // Get single item by ID
-  async detail(id) {
+  async detail(id: string): Promise<T> {
     await this.delay();
     const items = localStorageService.get(this.storageKey) || [];
-    const item = items.find(i => i.id === id);
+    const item = items.find((i: T) => i.id === id);
     
     if (!item) {
       throw new Error(`Item with id ${id} not found`);
@@ -56,8 +77,7 @@ class BaseService {
     return item;
   }
 
-  // Create new item
-  async create(payload) {
+  async create(payload: Partial<T>): Promise<T> {
     await this.delay();
     const items = localStorageService.get(this.storageKey) || [];
     
@@ -66,7 +86,7 @@ class BaseService {
       id: payload.id || `${this.storageKey}-${Date.now()}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    };
+    } as T;
     
     items.push(newItem);
     localStorageService.set(this.storageKey, items);
@@ -74,11 +94,10 @@ class BaseService {
     return newItem;
   }
 
-  // Update existing item
-  async update(id, payload) {
+  async update(id: string, payload: Partial<T>): Promise<T> {
     await this.delay();
     const items = localStorageService.get(this.storageKey) || [];
-    const index = items.findIndex(i => i.id === id);
+    const index = items.findIndex((i: T) => i.id === id);
     
     if (index === -1) {
       throw new Error(`Item with id ${id} not found`);
@@ -87,7 +106,7 @@ class BaseService {
     items[index] = {
       ...items[index],
       ...payload,
-      id, // Preserve ID
+      id,
       updatedAt: new Date().toISOString(),
     };
     
@@ -96,11 +115,10 @@ class BaseService {
     return items[index];
   }
 
-  // Delete item
-  async delete(id) {
+  async delete(id: string): Promise<DeleteResponse> {
     await this.delay();
     const items = localStorageService.get(this.storageKey) || [];
-    const filtered = items.filter(i => i.id !== id);
+    const filtered = items.filter((i: T) => i.id !== id);
     
     if (filtered.length === items.length) {
       throw new Error(`Item with id ${id} not found`);
@@ -111,8 +129,7 @@ class BaseService {
     return { success: true, id };
   }
 
-  // Bulk update
-  async bulkUpdate(items) {
+  async bulkUpdate(items: T[]): Promise<T[]> {
     await this.delay();
     localStorageService.set(this.storageKey, items);
     return items;

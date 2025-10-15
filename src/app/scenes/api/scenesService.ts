@@ -1,18 +1,17 @@
-// Scenes API Service
 import BaseService from '../../../services/api/baseService';
 import API_ENDPOINTS from '../../../config/api';
 import { STORAGE_KEYS } from '../../../config/constants';
 import { createMultiTimeline } from '../../../utils/multiTimelineSystem';
 import { createSceneAudioConfig } from '../../../utils/audioManager';
+import { Scene, ScenePayload, Layer, Camera } from '../types';
 
-class ScenesService extends BaseService {
+class ScenesService extends BaseService<Scene> {
   constructor() {
     super(STORAGE_KEYS.SCENES, API_ENDPOINTS.scenes);
   }
 
-  // Create a new scene with defaults
-  async create(payload) {
-    const defaultScene = {
+  async create(payload: ScenePayload = {}): Promise<Scene> {
+    const defaultScene: Partial<Scene> = {
       id: `scene-${Date.now()}`,
       title: 'Nouvelle Scène',
       content: 'Ajoutez votre contenu ici...',
@@ -30,12 +29,11 @@ class ScenesService extends BaseService {
     return super.create(defaultScene);
   }
 
-  // Duplicate a scene
-  async duplicate(id) {
+  async duplicate(id: string): Promise<Scene> {
     await this.delay();
     const scene = await this.detail(id);
     
-    const duplicatedScene = {
+    const duplicatedScene: Partial<Scene> = {
       ...scene,
       id: `scene-${Date.now()}`,
       title: `${scene.title} (Copie)`,
@@ -47,22 +45,19 @@ class ScenesService extends BaseService {
     return super.create(duplicatedScene);
   }
 
-  // Reorder scenes
-  async reorder(sceneIds) {
+  async reorder(sceneIds: string[]): Promise<Scene[]> {
     await this.delay();
     const allScenes = await this.list({ page: 1, limit: 1000 });
     const scenes = allScenes.data;
     
-    // Reorder based on provided IDs
-    const reordered = sceneIds.map(id => 
-      scenes.find(scene => scene.id === id)
-    ).filter(Boolean);
+    const reordered = sceneIds
+      .map(id => scenes.find(scene => scene.id === id))
+      .filter((scene): scene is Scene => scene !== undefined);
 
     return super.bulkUpdate(reordered);
   }
 
-  // Add a layer to a scene
-  async addLayer(sceneId, layer) {
+  async addLayer(sceneId: string, layer: Layer): Promise<Scene> {
     const scene = await this.detail(sceneId);
     const updatedLayers = [...(scene.layers || []), layer];
     
@@ -72,8 +67,7 @@ class ScenesService extends BaseService {
     });
   }
 
-  // Update a layer in a scene
-  async updateLayer(sceneId, layerId, layerData) {
+  async updateLayer(sceneId: string, layerId: string, layerData: Partial<Layer>): Promise<Scene> {
     const scene = await this.detail(sceneId);
     const layers = scene.layers || [];
     const layerIndex = layers.findIndex(l => l.id === layerId);
@@ -90,8 +84,7 @@ class ScenesService extends BaseService {
     });
   }
 
-  // Delete a layer from a scene
-  async deleteLayer(sceneId, layerId) {
+  async deleteLayer(sceneId: string, layerId: string): Promise<Scene> {
     const scene = await this.detail(sceneId);
     const layers = (scene.layers || []).filter(l => l.id !== layerId);
     
@@ -101,8 +94,7 @@ class ScenesService extends BaseService {
     });
   }
 
-  // Add a camera to a scene
-  async addCamera(sceneId, camera) {
+  async addCamera(sceneId: string, camera: Camera): Promise<Scene> {
     const scene = await this.detail(sceneId);
     const updatedCameras = [...(scene.sceneCameras || []), camera];
     
