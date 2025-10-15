@@ -13,6 +13,9 @@ import ImageCropModal from './ImageCropModal';
 import AssetLibrary from './AssetLibrary';
 import EnhancedAudioManager from './EnhancedAudioManager';
 import ThumbnailMaker from './ThumbnailMaker';
+import ParticleEditor from './ParticleEditor';
+import TextAnimationEditor from './TextAnimationEditor';
+import ExportPanel from './ExportPanel';
 import { createShapeLayer } from '../utils/shapeUtils';
 import { exportDefaultCameraView, exportAllCameras, downloadImage } from '../utils/cameraExporter';
 import { exportLayerFromJSON, downloadDataUrl, validateLayerJSON } from '../utils/layerExporter';
@@ -1547,6 +1550,46 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                   </div>
                 </div>
               )}
+
+              {/* Particle Effects Editor */}
+              {selectedLayer && (
+                <ParticleEditor
+                  layer={selectedLayer}
+                  onLayerUpdate={(updatedLayer) => {
+                    setEditedScene({
+                      ...editedScene,
+                      layers: editedScene.layers.map(layer =>
+                        layer.id === updatedLayer.id ? updatedLayer : layer
+                      )
+                    });
+                  }}
+                  canvasWidth={sceneWidth}
+                  canvasHeight={sceneHeight}
+                />
+              )}
+
+              {/* Text Animation Editor */}
+              {selectedLayer && selectedLayer.type === 'text' && (
+                <TextAnimationEditor
+                  layer={selectedLayer}
+                  onLayerUpdate={(updatedLayer) => {
+                    setEditedScene({
+                      ...editedScene,
+                      layers: editedScene.layers.map(layer =>
+                        layer.id === updatedLayer.id ? updatedLayer : layer
+                      )
+                    });
+                  }}
+                />
+              )}
+
+              {/* Export Panel */}
+              <ExportPanel
+                canvas={null}
+                onExport={(result) => {
+                  console.log('Export completed:', result);
+                }}
+              />
             </div>
           </div>
 

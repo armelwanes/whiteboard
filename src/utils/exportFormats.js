@@ -3,7 +3,21 @@
  * Provides export functionality for various formats (GIF, WebM, PNG sequence)
  */
 
-import { saveAs } from 'file-saver';
+/**
+ * Simple browser-based file download
+ * @param {Blob} blob - Blob to download
+ * @param {string} filename - Name of the file
+ */
+function saveAs(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 /**
  * Social media presets for video export
