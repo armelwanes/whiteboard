@@ -11,8 +11,8 @@ import {
   getAllTags,
   getAssetStats,
   addAsset
-} from '../utils/assetManager';
-import ImageCropModal from './ImageCropModal';
+} from '../../utils/assetManager';
+import { ImageCropModal } from '../molecules';
 
 const AssetLibrary = ({ onClose, onSelectAsset }) => {
   const [assets, setAssets] = useState([]);

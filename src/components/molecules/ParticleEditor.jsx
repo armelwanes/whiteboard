@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles, Plus, Trash2, Play, Square } from 'lucide-react';
-import ParticleSystem from './ParticleSystem';
-import { PARTICLE_PRESETS } from '../utils/particlePresets';
+import ParticleSystem from '../ParticleSystem';
+import { PARTICLE_PRESETS } from '../../utils/particlePresets';
 
 /**
  * Particle Editor Component

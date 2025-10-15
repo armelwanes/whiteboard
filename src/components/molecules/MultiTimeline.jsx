@@ -11,7 +11,7 @@ import {
   removeTrackFromTimeline,
   updateTrackInTimeline,
   reorderTrack
-} from '../utils/multiTimelineSystem';
+} from '../../utils/multiTimelineSystem';
 
 const TRACK_ICONS = {
   [TrackType.VISUAL]: Eye,

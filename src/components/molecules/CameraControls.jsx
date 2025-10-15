@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Camera, Plus, Trash2, Eye, MoveUp, MoveDown } from 'lucide-react';
-import { createCamera } from '../utils/cameraAnimator';
+import { createCamera } from '../../utils/cameraAnimator';
 
 /**
  * CameraControls Component

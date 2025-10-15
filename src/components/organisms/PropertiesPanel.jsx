@@ -6,7 +6,7 @@ import {
   Layers as LayersIcon,
   Library
 } from 'lucide-react';
-import AudioManager from './audio/AudioManager';
+import AudioManager from '../audio/AudioManager';
 
 const PropertiesPanel = ({ 
   scene, 

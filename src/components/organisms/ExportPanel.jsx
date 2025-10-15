@@ -9,7 +9,7 @@ import {
   estimateFileSize,
   formatBytes,
   validateExportOptions
-} from '../utils/exportFormats';
+} from '../../utils/exportFormats';
 
 /**
  * Export Panel Component

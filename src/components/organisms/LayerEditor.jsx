@@ -5,22 +5,24 @@ import {
   Layers as LayersIcon, Type as TextIcon, Square as ShapeIcon, Download, Library,
   Music as MusicIcon, Video as VideoIcon
 } from 'lucide-react';
-import CameraControls from './CameraControls';
-import LayerAnimationControls from './LayerAnimationControls';
+import { 
+  CameraControls, 
+  LayerAnimationControls, 
+  ImageCropModal, 
+  EnhancedAudioManager,
+  ParticleEditor,
+  TextAnimationEditor 
+} from '../molecules';
 import SceneCanvas from './SceneCanvas';
 import ShapeToolbar from './ShapeToolbar';
-import ImageCropModal from './ImageCropModal';
 import AssetLibrary from './AssetLibrary';
-import EnhancedAudioManager from './EnhancedAudioManager';
 import ThumbnailMaker from './ThumbnailMaker';
-import ParticleEditor from './ParticleEditor';
-import TextAnimationEditor from './TextAnimationEditor';
 import ExportPanel from './ExportPanel';
-import { createShapeLayer } from '../utils/shapeUtils';
-import { exportDefaultCameraView, exportAllCameras, downloadImage } from '../utils/cameraExporter';
-import { exportLayerFromJSON, downloadDataUrl, validateLayerJSON } from '../utils/layerExporter';
-import { exportSceneImage, downloadSceneImage } from '../utils/sceneExporter';
-import { addAsset } from '../utils/assetManager';
+import { createShapeLayer } from '../../utils/shapeUtils';
+import { exportDefaultCameraView, exportAllCameras, downloadImage } from '../../utils/cameraExporter';
+import { exportLayerFromJSON, downloadDataUrl, validateLayerJSON } from '../../utils/layerExporter';
+import { exportSceneImage, downloadSceneImage } from '../../utils/sceneExporter';
+import { addAsset } from '../../utils/assetManager';
 
 const LayerEditor = ({ scene, onClose, onSave }) => {
   const [editedScene, setEditedScene] = useState({ 

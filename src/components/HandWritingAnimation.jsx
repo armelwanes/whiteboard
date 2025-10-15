@@ -1,8 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button, Card, CardContent, CardHeader, CardTitle } from './atoms';
 import { Upload, Play, Download, FileJson } from "lucide-react";
-import ImageCropModal from "./ImageCropModal";
+import { ImageCropModal } from "./molecules";
 
 /**
  * HandWritingFromPython.jsx

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Type, Play, Square, Settings } from 'lucide-react';
-import { TEXT_ANIMATION_PRESETS, applyTypingEffect } from '../utils/textAnimation';
-import { TEXT_EFFECT_PRESETS } from '../utils/textEffects';
+import { TEXT_ANIMATION_PRESETS, applyTypingEffect } from '../../utils/textAnimation';
+import { TEXT_EFFECT_PRESETS } from '../../utils/textEffects';
 
 /**
  * Text Animation Editor Component
