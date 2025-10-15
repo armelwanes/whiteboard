@@ -1,20 +1,52 @@
-import React, { useRef, useEffect } from 'react';
-import { 
-  Rect, 
-  Circle, 
-  Ellipse, 
-  Line, 
-  Arrow, 
-  RegularPolygon,
-  Star as KonvaStar,
-  Text,
-  Group,
-  Transformer,
-  Shape,
-  Path,
-} from 'react-konva';
-import Konva from 'konva';
+import React from 'react';
+import { Transformer } from 'react-konva';
 import { ShapeType, ShapeLayer } from '../utils/shapeUtils';
+import { useShapeTransform } from './atoms/shapes';
+import {
+  RectangleShape,
+  SquareShape,
+  CircleShape,
+  EllipseShape,
+  TriangleShape,
+  PolygonShape,
+  HexagonShape,
+  StarShape,
+  LineShape,
+  ArrowShape,
+  ArrowDoubleShape,
+  ArrowCurveShape,
+  ConnectorShape,
+  CharacterShape,
+  OrgNodeShape,
+  IconShape,
+  DecorativeShape,
+  UnderlineAnimatedShape,
+  StarShootingShape,
+  ExplosionShape,
+} from './atoms/shapes';
+import {
+  TextBoxShape,
+  CloudShape,
+  BubbleShape,
+  ThoughtBubbleShape,
+  HighlightShape,
+  BannerShape,
+  CircleConcentricShape,
+  TimelineShape,
+  FrameDoodleShape,
+  FrameRectDoodleShape,
+  FrameCircleDoodleShape,
+  FrameCloudDoodleShape,
+  ArrowDoodleShape,
+  ArrowCurveDoodleShape,
+  HighlightDoodleShape,
+  BubbleDoodleShape,
+  CloudDoodleShape,
+  RectangleDoodleShape,
+  TriangleDoodleShape,
+  CircleSketchShape,
+  LineWaveDoodleShape,
+} from './molecules/shapes';
 
 interface LayerShapeProps {
   layer: ShapeLayer;
@@ -23,20 +55,12 @@ interface LayerShapeProps {
   onChange: (layer: ShapeLayer) => void;
 }
 
-/**
- * LayerShape Component
- * Renders different types of shapes using React-Konva
- */
 const LayerShape: React.FC<LayerShapeProps> = ({ layer, isSelected, onSelect, onChange }) => {
-  const shapeRef = useRef<any>(null);
-  const transformerRef = useRef<Konva.Transformer>(null);
-
-  useEffect(() => {
-    if (isSelected && transformerRef.current && shapeRef.current) {
-      transformerRef.current.nodes([shapeRef.current]);
-      transformerRef.current.getLayer()?.batchDraw();
-    }
-  }, [isSelected]);
+  const { shapeRef, transformerRef, handleDragEnd, handleTransformEnd } = useShapeTransform(
+    isSelected,
+    layer,
+    onChange
+  );
 
   if (!layer.shape_config) {
     return null;
@@ -45,1268 +69,105 @@ const LayerShape: React.FC<LayerShapeProps> = ({ layer, isSelected, onSelect, on
   const shapeConfig = layer.shape_config;
   const shapeType = shapeConfig.shape;
 
-  // Helper function to get fill and stroke based on fillMode
-  const getFillStrokeProps = (config: any) => {
-    const fillMode = config.fillMode || 'both';
-    const props = {};
-    
-    if (fillMode === 'fill' || fillMode === 'both') {
-      props.fill = config.fill;
-    }
-    
-    if (fillMode === 'stroke' || fillMode === 'both') {
-      props.stroke = config.stroke;
-      props.strokeWidth = config.strokeWidth;
-    }
-    
-    return props;
-  };
-
-  // Common properties
   const commonProps = {
     ref: shapeRef,
     draggable: true,
     onClick: onSelect,
     onTap: onSelect,
     opacity: layer.opacity || 1.0,
-    onDragEnd: (e) => {
-      // For shapes, we update the shape_config position
-      const newConfig = {
-        ...shapeConfig,
-        x: e.target.x(),
-        y: e.target.y(),
-      };
-      onChange({
-        ...layer,
-        shape_config: newConfig,
-      });
-    },
-    onTransformEnd: () => {
-      const node = shapeRef.current;
-      const scaleX = node.scaleX();
-      const scaleY = node.scaleY();
-      const rotation = node.rotation();
-
-      // Update shape configuration based on shape type
-      let newConfig = { ...shapeConfig };
-
-      if (shapeType === ShapeType.RECTANGLE || shapeType === ShapeType.SQUARE || 
-          shapeType === ShapeType.TEXT_BOX || shapeType === ShapeType.HIGHLIGHT ||
-          shapeType === ShapeType.CLOUD || shapeType === ShapeType.BUBBLE ||
-          shapeType === ShapeType.THOUGHT_BUBBLE || shapeType === ShapeType.ORG_NODE ||
-          shapeType === ShapeType.FRAME_DOODLE) {
-        newConfig.width = Math.max(5, (shapeConfig.width || 100) * scaleX);
-        newConfig.height = Math.max(5, (shapeConfig.height || 100) * scaleY);
-        newConfig.x = node.x();
-        newConfig.y = node.y();
-        newConfig.rotation = rotation;
-      } else if (shapeType === ShapeType.CIRCLE || shapeType === ShapeType.CIRCLE_CONCENTRIC) {
-        newConfig.radius = Math.max(5, shapeConfig.radius * scaleX);
-        if (shapeType === ShapeType.CIRCLE_CONCENTRIC && shapeConfig.radiuses) {
-          newConfig.radiuses = shapeConfig.radiuses.map(r => Math.max(5, r * scaleX));
-        }
-        newConfig.x = node.x();
-        newConfig.y = node.y();
-      } else if (shapeType === ShapeType.ELLIPSE) {
-        newConfig.radiusX = Math.max(5, shapeConfig.radiusX * scaleX);
-        newConfig.radiusY = Math.max(5, shapeConfig.radiusY * scaleY);
-        newConfig.x = node.x();
-        newConfig.y = node.y();
-        newConfig.rotation = rotation;
-      } else if (shapeType === ShapeType.TRIANGLE || shapeType === ShapeType.POLYGON || 
-                 shapeType === ShapeType.HEXAGON) {
-        newConfig.radius = Math.max(5, shapeConfig.radius * scaleX);
-        newConfig.x = node.x();
-        newConfig.y = node.y();
-        newConfig.rotation = rotation;
-      } else if (shapeType === ShapeType.STAR) {
-        newConfig.innerRadius = Math.max(5, shapeConfig.innerRadius * scaleX);
-        newConfig.outerRadius = Math.max(5, shapeConfig.outerRadius * scaleX);
-        newConfig.x = node.x();
-        newConfig.y = node.y();
-        newConfig.rotation = rotation;
-      } else if (shapeType === ShapeType.BANNER || shapeType === ShapeType.TIMELINE) {
-        newConfig.width = Math.max(5, (shapeConfig.width || 100) * scaleX);
-        newConfig.height = Math.max(5, (shapeConfig.height || 60) * scaleY);
-        newConfig.x = node.x();
-        newConfig.y = node.y();
-        newConfig.rotation = rotation;
-      } else if (shapeType === ShapeType.ICON || shapeType === ShapeType.DECORATIVE_SHAPE) {
-        newConfig.size = Math.max(5, (shapeConfig.size || 80) * scaleX);
-        newConfig.x = node.x();
-        newConfig.y = node.y();
-        newConfig.rotation = rotation;
-      } else if (shapeType === ShapeType.LINE || shapeType === ShapeType.ARROW || 
-                 shapeType === ShapeType.ARROW_DOUBLE || shapeType === ShapeType.ARROW_CURVE ||
-                 shapeType === ShapeType.CONNECTOR || shapeType === ShapeType.UNDERLINE_ANIMATED) {
-        // For lines and arrows, scale the points
-        const points = shapeConfig.points || [0, 0, 100, 100];
-        newConfig.points = points.map((val, idx) => 
-          idx % 2 === 0 ? val * scaleX : val * scaleY
-        );
-        newConfig.x = node.x();
-        newConfig.y = node.y();
-        newConfig.rotation = rotation;
-      }
-
-      onChange({
-        ...layer,
-        shape_config: newConfig,
-      });
-
-      // Reset scale and rotation on node
-      node.scaleX(1);
-      node.scaleY(1);
-    },
+    onDragEnd: handleDragEnd,
+    onTransformEnd: handleTransformEnd,
   };
 
-  // Render the appropriate shape
   const renderShape = () => {
+    const shapeProps = { shapeConfig, commonProps };
+
     switch (shapeType) {
       case ShapeType.RECTANGLE:
-        return (
-          <Rect
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            width={shapeConfig.width}
-            height={shapeConfig.height}
-            {...getFillStrokeProps(shapeConfig)}
-            rotation={shapeConfig.rotation || 0}
-            cornerRadius={shapeConfig.cornerRadius || 0}
-          />
-        );
-
-      case ShapeType.CIRCLE:
-        return (
-          <Circle
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            radius={shapeConfig.radius}
-            {...getFillStrokeProps(shapeConfig)}
-          />
-        );
-
-      case ShapeType.ELLIPSE:
-        return (
-          <Ellipse
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            radiusX={shapeConfig.radiusX}
-            radiusY={shapeConfig.radiusY}
-            {...getFillStrokeProps(shapeConfig)}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
-      case ShapeType.LINE:
-        return (
-          <Line
-            {...commonProps}
-            x={shapeConfig.x || 0}
-            y={shapeConfig.y || 0}
-            points={shapeConfig.points}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
-            lineCap={shapeConfig.lineCap || 'round'}
-            lineJoin={shapeConfig.lineJoin || 'round'}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
-      case ShapeType.ARROW:
-        return (
-          <Arrow
-            {...commonProps}
-            x={shapeConfig.x || 0}
-            y={shapeConfig.y || 0}
-            points={shapeConfig.points}
-            {...getFillStrokeProps(shapeConfig)}
-            pointerLength={shapeConfig.pointerLength || 20}
-            pointerWidth={shapeConfig.pointerWidth || 20}
-            lineCap={shapeConfig.lineCap || 'round'}
-            lineJoin={shapeConfig.lineJoin || 'round'}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
-      case ShapeType.TRIANGLE:
-        return (
-          <RegularPolygon
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            sides={3}
-            radius={shapeConfig.radius}
-            {...getFillStrokeProps(shapeConfig)}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
-      case ShapeType.POLYGON:
-        return (
-          <RegularPolygon
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            sides={shapeConfig.sides || 6}
-            radius={shapeConfig.radius}
-            {...getFillStrokeProps(shapeConfig)}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
-      case ShapeType.TEXT_BOX:
-        return (
-          <Group
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            rotation={shapeConfig.rotation || 0}
-          >
-            <Rect
-              width={shapeConfig.width}
-              height={shapeConfig.height}
-              fill={shapeConfig.backgroundColor || '#F3F4F6'}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth}
-            />
-            <Text
-              x={shapeConfig.padding || 10}
-              y={shapeConfig.padding || 10}
-              width={shapeConfig.width - (shapeConfig.padding || 10) * 2}
-              height={shapeConfig.height - (shapeConfig.padding || 10) * 2}
-              text={shapeConfig.text || 'Text Box'}
-              fontSize={shapeConfig.fontSize || 24}
-              fontFamily={shapeConfig.fontFamily || 'Arial'}
-              fill={shapeConfig.fill}
-              align={shapeConfig.align || 'center'}
-              verticalAlign={shapeConfig.verticalAlign || 'middle'}
-            />
-          </Group>
-        );
-
+        return <RectangleShape {...shapeProps} />;
       case ShapeType.SQUARE:
-        return (
-          <Rect
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            width={shapeConfig.width}
-            height={shapeConfig.height}
-            fill={shapeConfig.fill}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
-            rotation={shapeConfig.rotation || 0}
-            cornerRadius={shapeConfig.cornerRadius || 0}
-          />
-        );
-
-      case ShapeType.ARROW_DOUBLE:
-        return (
-          <Group
-            {...commonProps}
-            x={shapeConfig.x || 0}
-            y={shapeConfig.y || 0}
-            rotation={shapeConfig.rotation || 0}
-          >
-            <Line
-              points={shapeConfig.points}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth}
-              lineCap={shapeConfig.lineCap || 'round'}
-              lineJoin={shapeConfig.lineJoin || 'round'}
-            />
-            {/* Left arrow head */}
-            <Arrow
-              points={[
-                shapeConfig.points[0],
-                shapeConfig.points[1],
-                shapeConfig.points[0] - (shapeConfig.pointerLength || 20),
-                shapeConfig.points[1],
-              ]}
-              stroke={shapeConfig.stroke}
-              fill={shapeConfig.fill}
-              strokeWidth={shapeConfig.strokeWidth}
-              pointerLength={shapeConfig.pointerLength || 20}
-              pointerWidth={shapeConfig.pointerWidth || 20}
-              lineCap="round"
-            />
-            {/* Right arrow head */}
-            <Arrow
-              points={[
-                shapeConfig.points[shapeConfig.points.length - 2],
-                shapeConfig.points[shapeConfig.points.length - 1],
-                shapeConfig.points[shapeConfig.points.length - 2] + (shapeConfig.pointerLength || 20),
-                shapeConfig.points[shapeConfig.points.length - 1],
-              ]}
-              stroke={shapeConfig.stroke}
-              fill={shapeConfig.fill}
-              strokeWidth={shapeConfig.strokeWidth}
-              pointerLength={shapeConfig.pointerLength || 20}
-              pointerWidth={shapeConfig.pointerWidth || 20}
-              lineCap="round"
-            />
-          </Group>
-        );
-
-      case ShapeType.ARROW_CURVE:
-        return (
-          <Line
-            {...commonProps}
-            x={shapeConfig.x || 0}
-            y={shapeConfig.y || 0}
-            points={shapeConfig.points}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
-            tension={shapeConfig.tension || 0.5}
-            bezier={true}
-            lineCap="round"
-            lineJoin="round"
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
-      case ShapeType.CONNECTOR:
-        return (
-          <Line
-            {...commonProps}
-            x={shapeConfig.x || 0}
-            y={shapeConfig.y || 0}
-            points={shapeConfig.points}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
-            lineCap={shapeConfig.lineCap || 'round'}
-            lineJoin={shapeConfig.lineJoin || 'round'}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
-      case ShapeType.STAR:
-        return (
-          <KonvaStar
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            numPoints={shapeConfig.numPoints || 5}
-            innerRadius={shapeConfig.innerRadius || 40}
-            outerRadius={shapeConfig.outerRadius || 100}
-            {...getFillStrokeProps(shapeConfig)}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
-      case ShapeType.CLOUD:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const x = shapeConfig.x || 0;
-              const y = shapeConfig.y || 0;
-              const width = shapeConfig.width || 200;
-              const height = shapeConfig.height || 120;
-              
-              context.beginPath();
-              // Draw cloud using circles
-              context.arc(x - width * 0.25, y, height * 0.3, 0, Math.PI * 2);
-              context.arc(x, y - height * 0.15, height * 0.35, 0, Math.PI * 2);
-              context.arc(x + width * 0.25, y, height * 0.3, 0, Math.PI * 2);
-              context.arc(x, y + height * 0.1, height * 0.25, 0, Math.PI * 2);
-              context.closePath();
-              context.fillStrokeShape(shape);
-            }}
-            {...getFillStrokeProps(shapeConfig)}
-          />
-        );
-
-      case ShapeType.BUBBLE:
-        return (
-          <Group
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            rotation={shapeConfig.rotation || 0}
-          >
-            <Rect
-              x={-shapeConfig.width / 2}
-              y={-shapeConfig.height / 2}
-              width={shapeConfig.width}
-              height={shapeConfig.height}
-              {...getFillStrokeProps(shapeConfig)}
-              cornerRadius={shapeConfig.cornerRadius || 10}
-            />
-            {/* Tail */}
-            <Line
-              points={[
-                -shapeConfig.width / 4,
-                shapeConfig.height / 2,
-                -shapeConfig.width / 2 - 20,
-                shapeConfig.height / 2 + 30,
-              ]}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth}
-              lineCap="round"
-            />
-          </Group>
-        );
-
-      case ShapeType.THOUGHT_BUBBLE:
-        return (
-          <Group
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            rotation={shapeConfig.rotation || 0}
-          >
-            <Ellipse
-              radiusX={shapeConfig.width / 2}
-              radiusY={shapeConfig.height / 2}
-              {...getFillStrokeProps(shapeConfig)}
-            />
-            {/* Small thought circles */}
-            <Circle
-              x={-shapeConfig.width / 3}
-              y={shapeConfig.height / 2 + 15}
-              radius={8}
-              {...getFillStrokeProps(shapeConfig)}
-            />
-            <Circle
-              x={-shapeConfig.width / 2 - 10}
-              y={shapeConfig.height / 2 + 30}
-              radius={5}
-              {...getFillStrokeProps(shapeConfig)}
-            />
-          </Group>
-        );
-
-      case ShapeType.HIGHLIGHT:
-        return (
-          <Rect
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            width={shapeConfig.width}
-            height={shapeConfig.height}
-            fill={shapeConfig.fill}
-            opacity={shapeConfig.opacity || 0.5}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
-      case ShapeType.BANNER:
-        return (
-          <Group
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            rotation={shapeConfig.rotation || 0}
-          >
-            <Shape
-              sceneFunc={(context, shape) => {
-                const width = shapeConfig.width || 300;
-                const height = shapeConfig.height || 60;
-                const notchSize = 15;
-                
-                context.beginPath();
-                context.moveTo(-width / 2, -height / 2);
-                context.lineTo(width / 2, -height / 2);
-                context.lineTo(width / 2 - notchSize, 0);
-                context.lineTo(width / 2, height / 2);
-                context.lineTo(-width / 2, height / 2);
-                context.lineTo(-width / 2 + notchSize, 0);
-                context.closePath();
-                context.fillStrokeShape(shape);
-              }}
-              fill={shapeConfig.fill}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth}
-            />
-            {shapeConfig.text && (
-              <Text
-                text={shapeConfig.text}
-                fontSize={shapeConfig.fontSize || 20}
-                fontFamily={shapeConfig.fontFamily || 'Arial'}
-                fill={shapeConfig.textFill || '#FFFFFF'}
-                align="center"
-                verticalAlign="middle"
-                width={shapeConfig.width}
-                height={shapeConfig.height}
-                offsetX={shapeConfig.width / 2}
-                offsetY={shapeConfig.height / 2}
-              />
-            )}
-          </Group>
-        );
-
+        return <SquareShape {...shapeProps} />;
+      case ShapeType.CIRCLE:
+        return <CircleShape {...shapeProps} />;
+      case ShapeType.ELLIPSE:
+        return <EllipseShape {...shapeProps} />;
+      case ShapeType.TRIANGLE:
+        return <TriangleShape {...shapeProps} />;
+      case ShapeType.POLYGON:
+        return <PolygonShape {...shapeProps} />;
       case ShapeType.HEXAGON:
-        return (
-          <RegularPolygon
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            sides={6}
-            radius={shapeConfig.radius}
-            fill={shapeConfig.fill}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
+        return <HexagonShape {...shapeProps} />;
+      case ShapeType.STAR:
+        return <StarShape {...shapeProps} />;
+      
+      case ShapeType.LINE:
+        return <LineShape {...shapeProps} />;
+      case ShapeType.ARROW:
+        return <ArrowShape {...shapeProps} />;
+      case ShapeType.ARROW_DOUBLE:
+        return <ArrowDoubleShape {...shapeProps} />;
+      case ShapeType.ARROW_CURVE:
+        return <ArrowCurveShape {...shapeProps} />;
+      case ShapeType.CONNECTOR:
+        return <ConnectorShape {...shapeProps} />;
+      
+      case ShapeType.TEXT_BOX:
+        return <TextBoxShape {...shapeProps} />;
+      case ShapeType.CLOUD:
+        return <CloudShape {...shapeProps} />;
+      case ShapeType.BUBBLE:
+        return <BubbleShape {...shapeProps} />;
+      case ShapeType.THOUGHT_BUBBLE:
+        return <ThoughtBubbleShape {...shapeProps} />;
+      case ShapeType.HIGHLIGHT:
+        return <HighlightShape {...shapeProps} />;
+      case ShapeType.BANNER:
+        return <BannerShape {...shapeProps} />;
       case ShapeType.CIRCLE_CONCENTRIC:
-        return (
-          <Group
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-          >
-            {(shapeConfig.radiuses || [40, 70, 100]).map((radius, index) => (
-              <Circle
-                key={index}
-                radius={radius}
-                fill={(shapeConfig.fills || [])[index] || '#3B82F6'}
-                stroke={(shapeConfig.strokes || [])[index] || '#1E40AF'}
-                strokeWidth={shapeConfig.strokeWidth}
-              />
-            ))}
-          </Group>
-        );
-
+        return <CircleConcentricShape {...shapeProps} />;
       case ShapeType.TIMELINE:
-        return (
-          <Group
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            rotation={shapeConfig.rotation || 0}
-          >
-            <Line
-              points={[
-                -shapeConfig.width / 2,
-                0,
-                shapeConfig.width / 2,
-                0,
-              ]}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth}
-            />
-            {Array.from({ length: shapeConfig.markers || 4 }).map((_, index) => {
-              const x = -shapeConfig.width / 2 + (index * shapeConfig.width) / (shapeConfig.markers - 1);
-              return (
-                <Group key={index}>
-                  <Circle
-                    x={x}
-                    y={0}
-                    radius={8}
-                    fill={shapeConfig.fill}
-                    stroke={shapeConfig.stroke}
-                    strokeWidth={shapeConfig.strokeWidth}
-                  />
-                  <Line
-                    points={[x, 0, x, 20]}
-                    stroke={shapeConfig.stroke}
-                    strokeWidth={2}
-                  />
-                </Group>
-              );
-            })}
-          </Group>
-        );
-
+        return <TimelineShape {...shapeProps} />;
+      
       case ShapeType.ORG_NODE:
-        return (
-          <Group
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            rotation={shapeConfig.rotation || 0}
-          >
-            <Rect
-              x={-shapeConfig.width / 2}
-              y={-shapeConfig.height / 2}
-              width={shapeConfig.width}
-              height={shapeConfig.height}
-              fill={shapeConfig.fill}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth}
-              cornerRadius={shapeConfig.cornerRadius || 8}
-            />
-            {shapeConfig.text && (
-              <Text
-                text={shapeConfig.text}
-                fontSize={shapeConfig.fontSize || 16}
-                fontFamily={shapeConfig.fontFamily || 'Arial'}
-                fill={shapeConfig.textFill || '#1F2937'}
-                align="center"
-                verticalAlign="middle"
-                width={shapeConfig.width}
-                height={shapeConfig.height}
-                offsetX={shapeConfig.width / 2}
-                offsetY={shapeConfig.height / 2}
-              />
-            )}
-          </Group>
-        );
-
+        return <OrgNodeShape {...shapeProps} />;
       case ShapeType.ICON:
-        return (
-          <Group
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            rotation={shapeConfig.rotation || 0}
-          >
-            {/* Simple lightbulb icon */}
-            <Circle
-              y={-shapeConfig.size / 4}
-              radius={shapeConfig.size / 3}
-              fill={shapeConfig.fill}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth}
-            />
-            <Rect
-              x={-shapeConfig.size / 6}
-              y={shapeConfig.size / 6}
-              width={shapeConfig.size / 3}
-              height={shapeConfig.size / 4}
-              fill={shapeConfig.fill}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth}
-            />
-          </Group>
-        );
-
-      case ShapeType.FRAME_DOODLE:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const x = shapeConfig.x || 0;
-              const y = shapeConfig.y || 0;
-              const width = shapeConfig.width || 250;
-              const height = shapeConfig.height || 180;
-              
-              context.beginPath();
-              // Draw hand-drawn style rectangle with slight variations
-              const jitter = 3;
-              context.moveTo(x - width / 2 + Math.random() * jitter, y - height / 2);
-              context.lineTo(x + width / 2 + Math.random() * jitter, y - height / 2 + Math.random() * jitter);
-              context.lineTo(x + width / 2, y + height / 2 + Math.random() * jitter);
-              context.lineTo(x - width / 2 + Math.random() * jitter, y + height / 2);
-              context.closePath();
-              context.strokeShape(shape);
-            }}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
-          />
-        );
-
-      case ShapeType.UNDERLINE_ANIMATED:
-        return (
-          <Line
-            {...commonProps}
-            x={shapeConfig.x || 0}
-            y={shapeConfig.y || 0}
-            points={shapeConfig.points}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
-            lineCap={shapeConfig.lineCap || 'round'}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
+        return <IconShape {...shapeProps} />;
       case ShapeType.DECORATIVE_SHAPE:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const x = shapeConfig.x || 0;
-              const y = shapeConfig.y || 0;
-              const size = shapeConfig.size || 100;
-              
-              // Draw a heart shape
-              context.beginPath();
-              context.moveTo(x, y + size / 4);
-              context.bezierCurveTo(
-                x, y,
-                x - size / 2, y,
-                x - size / 2, y + size / 4
-              );
-              context.bezierCurveTo(
-                x - size / 2, y + size / 2,
-                x, y + size * 0.75,
-                x, y + size
-              );
-              context.bezierCurveTo(
-                x, y + size * 0.75,
-                x + size / 2, y + size / 2,
-                x + size / 2, y + size / 4
-              );
-              context.bezierCurveTo(
-                x + size / 2, y,
-                x, y,
-                x, y + size / 4
-              );
-              context.closePath();
-              context.fillStrokeShape(shape);
-            }}
-            fill={shapeConfig.fill}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
-      // New Doodle Shapes
-      case ShapeType.FRAME_RECT_DOODLE:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const x = shapeConfig.x || 0;
-              const y = shapeConfig.y || 0;
-              const width = shapeConfig.width || 250;
-              const height = shapeConfig.height || 180;
-              
-              context.beginPath();
-              // Draw hand-drawn style rectangle with wavy lines
-              const segments = 20;
-              const jitter = 4;
-              
-              for (let i = 0; i <= segments; i++) {
-                const t = i / segments;
-                const px = x - width / 2 + width * t + (Math.random() - 0.5) * jitter;
-                const py = y - height / 2 + (Math.random() - 0.5) * jitter;
-                if (i === 0) context.moveTo(px, py);
-                else context.lineTo(px, py);
-              }
-              for (let i = 0; i <= segments; i++) {
-                const t = i / segments;
-                const px = x + width / 2 + (Math.random() - 0.5) * jitter;
-                const py = y - height / 2 + height * t + (Math.random() - 0.5) * jitter;
-                context.lineTo(px, py);
-              }
-              for (let i = segments; i >= 0; i--) {
-                const t = i / segments;
-                const px = x - width / 2 + width * t + (Math.random() - 0.5) * jitter;
-                const py = y + height / 2 + (Math.random() - 0.5) * jitter;
-                context.lineTo(px, py);
-              }
-              for (let i = segments; i >= 0; i--) {
-                const t = i / segments;
-                const px = x - width / 2 + (Math.random() - 0.5) * jitter;
-                const py = y - height / 2 + height * t + (Math.random() - 0.5) * jitter;
-                context.lineTo(px, py);
-              }
-              context.closePath();
-              context.fillStrokeShape(shape);
-            }}
-            {...getFillStrokeProps(shapeConfig)}
-          />
-        );
-
-      case ShapeType.FRAME_CIRCLE_DOODLE:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const x = shapeConfig.x || 0;
-              const y = shapeConfig.y || 0;
-              const radius = shapeConfig.radius || 100;
-              
-              context.beginPath();
-              // Draw hand-drawn circle with slight variations
-              const segments = 36;
-              const jitter = 5;
-              
-              for (let i = 0; i <= segments; i++) {
-                const angle = (i / segments) * Math.PI * 2;
-                const r = radius + (Math.random() - 0.5) * jitter;
-                const px = x + Math.cos(angle) * r;
-                const py = y + Math.sin(angle) * r;
-                if (i === 0) context.moveTo(px, py);
-                else context.lineTo(px, py);
-              }
-              context.closePath();
-              context.fillStrokeShape(shape);
-            }}
-            {...getFillStrokeProps(shapeConfig)}
-          />
-        );
-
-      case ShapeType.FRAME_CLOUD_DOODLE:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const x = shapeConfig.x || 0;
-              const y = shapeConfig.y || 0;
-              const width = shapeConfig.width || 200;
-              const height = shapeConfig.height || 120;
-              
-              context.beginPath();
-              // Draw doodle cloud using bumpy circles
-              const segments = 24;
-              for (let i = 0; i <= segments; i++) {
-                const t = i / segments;
-                const angle = t * Math.PI * 2;
-                const bumpiness = Math.sin(angle * 4) * 0.2 + 1;
-                const px = x + Math.cos(angle) * width * 0.5 * bumpiness;
-                const py = y + Math.sin(angle) * height * 0.5 * bumpiness;
-                if (i === 0) context.moveTo(px, py);
-                else context.lineTo(px, py);
-              }
-              context.closePath();
-              context.fillStrokeShape(shape);
-            }}
-            {...getFillStrokeProps(shapeConfig)}
-          />
-        );
-
-      case ShapeType.ARROW_DOODLE:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const points = shapeConfig.points || [100, 100, 400, 100];
-              const x1 = points[0];
-              const y1 = points[1];
-              const x2 = points[points.length - 2];
-              const y2 = points[points.length - 1];
-              
-              // Draw wavy line
-              context.beginPath();
-              const segments = 20;
-              const jitter = 3;
-              for (let i = 0; i <= segments; i++) {
-                const t = i / segments;
-                const px = x1 + (x2 - x1) * t + (Math.random() - 0.5) * jitter;
-                const py = y1 + (y2 - y1) * t + (Math.random() - 0.5) * jitter;
-                if (i === 0) context.moveTo(px, py);
-                else context.lineTo(px, py);
-              }
-              
-              // Draw arrow head
-              const angle = Math.atan2(y2 - y1, x2 - x1);
-              const headLength = 20;
-              context.lineTo(
-                x2 - headLength * Math.cos(angle - Math.PI / 6),
-                y2 - headLength * Math.sin(angle - Math.PI / 6)
-              );
-              context.moveTo(x2, y2);
-              context.lineTo(
-                x2 - headLength * Math.cos(angle + Math.PI / 6),
-                y2 - headLength * Math.sin(angle + Math.PI / 6)
-              );
-              
-              context.strokeShape(shape);
-            }}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
-          />
-        );
-
-      case ShapeType.LINE_WAVE_DOODLE:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const points = shapeConfig.points || [100, 100, 400, 100];
-              const x1 = points[0];
-              const y1 = points[1];
-              const x2 = points[points.length - 2];
-              const y2 = points[points.length - 1];
-              
-              context.beginPath();
-              const segments = 30;
-              const waveHeight = 10;
-              
-              for (let i = 0; i <= segments; i++) {
-                const t = i / segments;
-                const wave = Math.sin(t * Math.PI * 4) * waveHeight;
-                const angle = Math.atan2(y2 - y1, x2 - x1);
-                const px = x1 + (x2 - x1) * t - Math.sin(angle) * wave;
-                const py = y1 + (y2 - y1) * t + Math.cos(angle) * wave;
-                if (i === 0) context.moveTo(px, py);
-                else context.lineTo(px, py);
-              }
-              
-              context.strokeShape(shape);
-            }}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
-          />
-        );
-
+        return <DecorativeShape {...shapeProps} />;
+      case ShapeType.UNDERLINE_ANIMATED:
+        return <UnderlineAnimatedShape {...shapeProps} />;
       case ShapeType.STAR_SHOOTING:
-        return (
-          <Group
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            rotation={shapeConfig.rotation || 0}
-          >
-            <KonvaStar
-              numPoints={5}
-              innerRadius={shapeConfig.size * 0.3}
-              outerRadius={shapeConfig.size * 0.5}
-              {...getFillStrokeProps(shapeConfig)}
-            />
-            {/* Trail */}
-            <Line
-              points={[-shapeConfig.size * 0.5, 0, -shapeConfig.size * 1.5, shapeConfig.size * 0.3]}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth * 0.5}
-              lineCap="round"
-            />
-            <Line
-              points={[-shapeConfig.size * 0.5, 0, -shapeConfig.size * 1.3, -shapeConfig.size * 0.2]}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth * 0.5}
-              lineCap="round"
-            />
-          </Group>
-        );
-
+        return <StarShootingShape {...shapeProps} />;
       case ShapeType.EXPLOSION_SHAPE:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const x = shapeConfig.x || 0;
-              const y = shapeConfig.y || 0;
-              const size = shapeConfig.size || 100;
-              
-              context.beginPath();
-              const points = 12;
-              for (let i = 0; i < points; i++) {
-                const angle = (i / points) * Math.PI * 2;
-                const radius = i % 2 === 0 ? size * 0.8 : size * 0.3;
-                const px = x + Math.cos(angle) * radius;
-                const py = y + Math.sin(angle) * radius;
-                if (i === 0) context.moveTo(px, py);
-                else context.lineTo(px, py);
-              }
-              context.closePath();
-              context.fillStrokeShape(shape);
-            }}
-            {...getFillStrokeProps(shapeConfig)}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
-      case ShapeType.CIRCLE_SKETCH:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const x = shapeConfig.x || 0;
-              const y = shapeConfig.y || 0;
-              const radius = shapeConfig.radius || 100;
-              
-              // Draw multiple overlapping circles for sketch effect
-              for (let j = 0; j < 3; j++) {
-                context.beginPath();
-                const segments = 36;
-                const jitter = 3;
-                
-                for (let i = 0; i <= segments; i++) {
-                  const angle = (i / segments) * Math.PI * 2;
-                  const r = radius + (Math.random() - 0.5) * jitter;
-                  const px = x + Math.cos(angle) * r;
-                  const py = y + Math.sin(angle) * r;
-                  if (i === 0) context.moveTo(px, py);
-                  else context.lineTo(px, py);
-                }
-                context.closePath();
-              }
-              context.fillStrokeShape(shape);
-            }}
-            {...getFillStrokeProps(shapeConfig)}
-          />
-        );
-
-      case ShapeType.TRIANGLE_DOODLE:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const x = shapeConfig.x || 0;
-              const y = shapeConfig.y || 0;
-              const radius = shapeConfig.radius || 100;
-              
-              context.beginPath();
-              const jitter = 4;
-              const angles = [-Math.PI / 2, Math.PI / 6, Math.PI * 5 / 6];
-              
-              for (let i = 0; i < angles.length; i++) {
-                const angle = angles[i];
-                const r = radius + (Math.random() - 0.5) * jitter;
-                const px = x + Math.cos(angle) * r;
-                const py = y + Math.sin(angle) * r;
-                
-                if (i === 0) {
-                  context.moveTo(px, py);
-                } else {
-                  // Draw wavy line between points
-                  const prevAngle = angles[i - 1];
-                  const prevX = x + Math.cos(prevAngle) * radius;
-                  const prevY = y + Math.sin(prevAngle) * radius;
-                  
-                  const segments = 10;
-                  for (let j = 1; j <= segments; j++) {
-                    const t = j / segments;
-                    const lx = prevX + (px - prevX) * t + (Math.random() - 0.5) * jitter;
-                    const ly = prevY + (py - prevY) * t + (Math.random() - 0.5) * jitter;
-                    context.lineTo(lx, ly);
-                  }
-                }
-              }
-              context.closePath();
-              context.fillStrokeShape(shape);
-            }}
-            {...getFillStrokeProps(shapeConfig)}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
-      case ShapeType.RECTANGLE_DOODLE:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const x = shapeConfig.x || 0;
-              const y = shapeConfig.y || 0;
-              const width = shapeConfig.width || 200;
-              const height = shapeConfig.height || 150;
-              
-              context.beginPath();
-              const jitter = 4;
-              const segments = 15;
-              
-              // Top edge
-              for (let i = 0; i <= segments; i++) {
-                const t = i / segments;
-                const px = x - width / 2 + width * t + (Math.random() - 0.5) * jitter;
-                const py = y - height / 2 + (Math.random() - 0.5) * jitter;
-                if (i === 0) context.moveTo(px, py);
-                else context.lineTo(px, py);
-              }
-              // Right edge
-              for (let i = 0; i <= segments; i++) {
-                const t = i / segments;
-                const px = x + width / 2 + (Math.random() - 0.5) * jitter;
-                const py = y - height / 2 + height * t + (Math.random() - 0.5) * jitter;
-                context.lineTo(px, py);
-              }
-              // Bottom edge
-              for (let i = segments; i >= 0; i--) {
-                const t = i / segments;
-                const px = x - width / 2 + width * t + (Math.random() - 0.5) * jitter;
-                const py = y + height / 2 + (Math.random() - 0.5) * jitter;
-                context.lineTo(px, py);
-              }
-              // Left edge
-              for (let i = segments; i >= 0; i--) {
-                const t = i / segments;
-                const px = x - width / 2 + (Math.random() - 0.5) * jitter;
-                const py = y - height / 2 + height * t + (Math.random() - 0.5) * jitter;
-                context.lineTo(px, py);
-              }
-              context.closePath();
-              context.fillStrokeShape(shape);
-            }}
-            {...getFillStrokeProps(shapeConfig)}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
+        return <ExplosionShape {...shapeProps} />;
+      
+      case ShapeType.FRAME_DOODLE:
+        return <FrameDoodleShape {...shapeProps} />;
+      case ShapeType.FRAME_RECT_DOODLE:
+        return <FrameRectDoodleShape {...shapeProps} />;
+      case ShapeType.FRAME_CIRCLE_DOODLE:
+        return <FrameCircleDoodleShape {...shapeProps} />;
+      case ShapeType.FRAME_CLOUD_DOODLE:
+        return <FrameCloudDoodleShape {...shapeProps} />;
+      case ShapeType.ARROW_DOODLE:
+        return <ArrowDoodleShape {...shapeProps} />;
       case ShapeType.ARROW_CURVE_DOODLE:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const points = shapeConfig.points || [100, 100, 200, 50, 300, 100, 400, 100];
-              
-              context.beginPath();
-              const segments = 30;
-              const jitter = 2;
-              
-              // Draw curved line through control points with jitter
-              for (let i = 0; i <= segments; i++) {
-                const t = i / segments;
-                const index = Math.floor(t * (points.length / 2 - 1)) * 2;
-                const localT = (t * (points.length / 2 - 1)) % 1;
-                
-                let px, py;
-                if (index + 2 < points.length) {
-                  px = points[index] + (points[index + 2] - points[index]) * localT + (Math.random() - 0.5) * jitter;
-                  py = points[index + 1] + (points[index + 3] - points[index + 1]) * localT + (Math.random() - 0.5) * jitter;
-                } else {
-                  px = points[points.length - 2];
-                  py = points[points.length - 1];
-                }
-                
-                if (i === 0) context.moveTo(px, py);
-                else context.lineTo(px, py);
-              }
-              
-              // Draw arrow head
-              const x2 = points[points.length - 2];
-              const y2 = points[points.length - 1];
-              const x1 = points[points.length - 4];
-              const y1 = points[points.length - 3];
-              const angle = Math.atan2(y2 - y1, x2 - x1);
-              const headLength = 20;
-              
-              context.lineTo(
-                x2 - headLength * Math.cos(angle - Math.PI / 6),
-                y2 - headLength * Math.sin(angle - Math.PI / 6)
-              );
-              context.moveTo(x2, y2);
-              context.lineTo(
-                x2 - headLength * Math.cos(angle + Math.PI / 6),
-                y2 - headLength * Math.sin(angle + Math.PI / 6)
-              );
-              
-              context.strokeShape(shape);
-            }}
-            stroke={shapeConfig.stroke}
-            strokeWidth={shapeConfig.strokeWidth}
-          />
-        );
-
+        return <ArrowCurveDoodleShape {...shapeProps} />;
       case ShapeType.HIGHLIGHT_DOODLE:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const x = shapeConfig.x || 0;
-              const y = shapeConfig.y || 0;
-              const width = shapeConfig.width || 200;
-              const height = shapeConfig.height || 40;
-              
-              context.beginPath();
-              const segments = 20;
-              const jitter = 3;
-              
-              // Top wavy edge
-              for (let i = 0; i <= segments; i++) {
-                const t = i / segments;
-                const px = x + width * t + (Math.random() - 0.5) * jitter;
-                const py = y + (Math.random() - 0.5) * jitter;
-                if (i === 0) context.moveTo(px, py);
-                else context.lineTo(px, py);
-              }
-              // Right edge
-              context.lineTo(x + width + (Math.random() - 0.5) * jitter, y + height);
-              // Bottom wavy edge
-              for (let i = segments; i >= 0; i--) {
-                const t = i / segments;
-                const px = x + width * t + (Math.random() - 0.5) * jitter;
-                const py = y + height + (Math.random() - 0.5) * jitter;
-                context.lineTo(px, py);
-              }
-              // Left edge
-              context.closePath();
-              context.fillStrokeShape(shape);
-            }}
-            {...getFillStrokeProps(shapeConfig)}
-            rotation={shapeConfig.rotation || 0}
-          />
-        );
-
+        return <HighlightDoodleShape {...shapeProps} />;
       case ShapeType.BUBBLE_DOODLE:
-        return (
-          <Group
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            rotation={shapeConfig.rotation || 0}
-          >
-            <Shape
-              sceneFunc={(context, shape) => {
-                const width = shapeConfig.width || 200;
-                const height = shapeConfig.height || 120;
-                
-                context.beginPath();
-                const segments = 30;
-                const jitter = 4;
-                
-                // Draw rounded rectangle with jitter
-                for (let i = 0; i <= segments; i++) {
-                  const t = i / segments;
-                  const angle = t * Math.PI * 2;
-                  const rx = width / 2 - 10;
-                  const ry = height / 2 - 10;
-                  const px = Math.cos(angle) * rx + (Math.random() - 0.5) * jitter;
-                  const py = Math.sin(angle) * ry + (Math.random() - 0.5) * jitter;
-                  if (i === 0) context.moveTo(px, py);
-                  else context.lineTo(px, py);
-                }
-                context.closePath();
-                context.fillStrokeShape(shape);
-              }}
-              {...getFillStrokeProps(shapeConfig)}
-            />
-            {/* Tail with wavy line */}
-            <Line
-              points={[
-                -shapeConfig.width / 4,
-                shapeConfig.height / 2,
-                -shapeConfig.width / 3,
-                shapeConfig.height / 2 + 15,
-                -shapeConfig.width / 2 - 20,
-                shapeConfig.height / 2 + 30,
-              ]}
-              stroke={shapeConfig.stroke}
-              strokeWidth={shapeConfig.strokeWidth}
-              lineCap="round"
-              tension={0.3}
-            />
-          </Group>
-        );
-
+        return <BubbleDoodleShape {...shapeProps} />;
       case ShapeType.CLOUD_DOODLE:
-        return (
-          <Shape
-            {...commonProps}
-            sceneFunc={(context, shape) => {
-              const x = shapeConfig.x || 0;
-              const y = shapeConfig.y || 0;
-              const width = shapeConfig.width || 200;
-              const height = shapeConfig.height || 120;
-              
-              context.beginPath();
-              const segments = 40;
-              const jitter = 4;
-              
-              // Draw cloud shape with bumpy outline
-              for (let i = 0; i <= segments; i++) {
-                const t = i / segments;
-                const angle = t * Math.PI * 2;
-                
-                // Create bumpy cloud shape
-                const bumpiness = Math.sin(angle * 6) * 0.15 + 1;
-                const rx = (width / 2) * bumpiness + (Math.random() - 0.5) * jitter;
-                const ry = (height / 2) * bumpiness + (Math.random() - 0.5) * jitter;
-                
-                const px = x + Math.cos(angle) * rx;
-                const py = y + Math.sin(angle) * ry;
-                
-                if (i === 0) context.moveTo(px, py);
-                else context.lineTo(px, py);
-              }
-              context.closePath();
-              context.fillStrokeShape(shape);
-            }}
-            {...getFillStrokeProps(shapeConfig)}
-          />
-        );
-
-      // Number and Letter Shapes - use Text rendering
+        return <CloudDoodleShape {...shapeProps} />;
+      case ShapeType.RECTANGLE_DOODLE:
+        return <RectangleDoodleShape {...shapeProps} />;
+      case ShapeType.TRIANGLE_DOODLE:
+        return <TriangleDoodleShape {...shapeProps} />;
+      case ShapeType.CIRCLE_SKETCH:
+        return <CircleSketchShape {...shapeProps} />;
+      case ShapeType.LINE_WAVE_DOODLE:
+        return <LineWaveDoodleShape {...shapeProps} />;
+      
       case ShapeType.NUMBER_0:
       case ShapeType.NUMBER_1:
       case ShapeType.NUMBER_2:
@@ -1344,34 +205,7 @@ const LayerShape: React.FC<LayerShapeProps> = ({ layer, isSelected, onSelect, on
       case ShapeType.LETTER_X:
       case ShapeType.LETTER_Y:
       case ShapeType.LETTER_Z:
-        return (
-          <Group
-            {...commonProps}
-            x={shapeConfig.x}
-            y={shapeConfig.y}
-            rotation={shapeConfig.rotation || 0}
-          >
-            {/* Background circle/shape for the character */}
-            <Circle
-              radius={shapeConfig.size * 0.6}
-              {...getFillStrokeProps(shapeConfig)}
-            />
-            {/* Character text */}
-            <Text
-              text={shapeConfig.character || '?'}
-              fontSize={shapeConfig.size * 0.7}
-              fontFamily="Arial"
-              fontStyle="bold"
-              fill={shapeConfig.fillMode === 'stroke' ? shapeConfig.stroke : '#FFFFFF'}
-              align="center"
-              verticalAlign="middle"
-              width={shapeConfig.size * 1.2}
-              height={shapeConfig.size * 1.2}
-              offsetX={shapeConfig.size * 0.6}
-              offsetY={shapeConfig.size * 0.6}
-            />
-          </Group>
-        );
+        return <CharacterShape {...shapeProps} />;
 
       default:
         return null;
@@ -1385,7 +219,6 @@ const LayerShape: React.FC<LayerShapeProps> = ({ layer, isSelected, onSelect, on
         <Transformer
           ref={transformerRef}
           boundBoxFunc={(oldBox, newBox) => {
-            // Minimum size limit
             if (newBox.width < 5 || newBox.height < 5) {
               return oldBox;
             }
