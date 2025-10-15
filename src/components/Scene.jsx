@@ -5,11 +5,6 @@ const Scene = ({
   isActive, 
   backgroundImage,
   scene,
-  title,
-  content,
-  selectedSceneIndex,
-  isEditing = false,
-  updateScene,
 }) => {
   // Render layers if they exist
   const renderLayers = () => {
