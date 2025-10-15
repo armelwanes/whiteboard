@@ -166,16 +166,16 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
 
   // Get file size estimate
   const sizeEstimate = estimateFileSize(
-    canvas?.width || customWidth,
-    canvas?.height || customHeight,
+    canvas?.width || 1920,
+    canvas?.height || 1080,
     selectedFormat,
     1
   );
 
   // Validate options
   const validation = validateExportOptions({
-    width: canvas?.width || customWidth,
-    height: canvas?.height || customHeight,
+    width: canvas?.width || 1920,
+    height: canvas?.height || 1080,
     format: selectedFormat,
     quality
   });
