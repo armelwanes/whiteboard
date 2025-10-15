@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Type, Play, Square, Settings } from 'lucide-react';
 import { TEXT_ANIMATION_PRESETS, applyTypingEffect } from '../../utils/textAnimation';
 import { TEXT_EFFECT_PRESETS } from '../../utils/textEffects';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 /**
  * Text Animation Editor Component
@@ -305,17 +312,21 @@ const TextAnimationEditor = ({
                 <label className="block text-xs text-gray-400 mb-1">
                   Mode
                 </label>
-                <select
+                <Select
                   value={animationOptions.mode}
-                  onChange={(e) => setAnimationOptions({
+                  onValueChange={(value) => setAnimationOptions({
                     ...animationOptions,
-                    mode: e.target.value
+                    mode: value
                   })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
                 >
-                  <option value="character">Caractère par caractère</option>
-                  <option value="word">Mot par mot</option>
-                </select>
+                  <SelectTrigger className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm">
+                    <SelectValue placeholder="Sélectionner un mode" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="character">Caractère par caractère</SelectItem>
+                    <SelectItem value="word">Mot par mot</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex items-center gap-2">
@@ -359,19 +370,23 @@ const TextAnimationEditor = ({
               <label className="block text-xs text-gray-400 mb-1">
                 Direction
               </label>
-              <select
+              <Select
                 value={animationOptions.direction}
-                onChange={(e) => setAnimationOptions({
+                onValueChange={(value) => setAnimationOptions({
                   ...animationOptions,
-                  direction: e.target.value
+                  direction: value
                 })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
               >
-                <option value="left">De la gauche</option>
-                <option value="right">De la droite</option>
-                <option value="up">Du haut</option>
-                <option value="down">Du bas</option>
-              </select>
+                <SelectTrigger className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm">
+                  <SelectValue placeholder="Sélectionner une direction" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="left">De la gauche</SelectItem>
+                  <SelectItem value="right">De la droite</SelectItem>
+                  <SelectItem value="up">Du haut</SelectItem>
+                  <SelectItem value="down">Du bas</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           )}
 

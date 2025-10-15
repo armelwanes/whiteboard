@@ -10,6 +10,13 @@ import {
   formatBytes,
   validateExportOptions
 } from '../../utils/exportFormats';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 /**
  * Export Panel Component
@@ -290,18 +297,22 @@ const ExportPanel = ({
           <label className="block text-sm font-medium text-gray-300">
             Préréglages réseaux sociaux
           </label>
-          <select
+          <Select
             value={selectedPreset}
-            onChange={(e) => setSelectedPreset(e.target.value)}
+            onValueChange={(value) => setSelectedPreset(value)}
             disabled={isExporting}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white text-sm"
           >
-            {Object.entries(SOCIAL_MEDIA_PRESETS).map(([key, preset]) => (
-              <option key={key} value={key}>
-                {preset.name} - {preset.width}×{preset.height} ({preset.description})
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white text-sm">
+              <SelectValue placeholder="Sélectionner un préréglage" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(SOCIAL_MEDIA_PRESETS).map(([key, preset]) => (
+                <SelectItem key={key} value={key}>
+                  {preset.name} - {preset.width}×{preset.height} ({preset.description})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <button
             onClick={handlePresetExport}

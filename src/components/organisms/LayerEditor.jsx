@@ -23,6 +23,13 @@ import { exportDefaultCameraView, exportAllCameras, downloadImage } from '../../
 import { exportLayerFromJSON, downloadDataUrl, validateLayerJSON } from '../../utils/layerExporter';
 import { exportSceneImage, downloadSceneImage } from '../../utils/sceneExporter';
 import { addAsset } from '../../utils/assetManager';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const LayerEditor = ({ scene, onClose, onSave }) => {
   const [editedScene, setEditedScene] = useState({ 
@@ -835,15 +842,19 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                   <label className="block text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
                     Animation Type
                   </label>
-                  <select
+                  <Select
                     value={editedScene.animation}
-                    onChange={(e) => handleChange('animation', e.target.value)}
-                    className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onValueChange={(value) => handleChange('animation', value)}
                   >
-                    <option value="fade">Fade</option>
-                    <option value="slide">Slide</option>
-                    <option value="scale">Scale</option>
-                  </select>
+                    <SelectTrigger className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <SelectValue placeholder="Sélectionner une animation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fade">Fade</SelectItem>
+                      <SelectItem value="slide">Slide</SelectItem>
+                      <SelectItem value="scale">Scale</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Old Background Music - Keeping for backwards compatibility */}
@@ -1015,15 +1026,19 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                     <label className="block text-gray-300 text-xs mb-1.5">
                       Mode de dessin
                     </label>
-                    <select
+                    <Select
                       value={selectedLayer.mode || 'draw'}
-                      onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'mode', e.target.value)}
-                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      onValueChange={(value) => handleLayerPropertyChange(selectedLayer.id, 'mode', value)}
                     >
-                      <option value="draw">Draw (Dessin progressif)</option>
-                      <option value="eraser">Eraser (Gomme)</option>
-                      <option value="static">Static (Statique)</option>
-                    </select>
+                      <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <SelectValue placeholder="Sélectionner un mode" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draw">Draw (Dessin progressif)</SelectItem>
+                        <SelectItem value="eraser">Eraser (Gomme)</SelectItem>
+                        <SelectItem value="static">Static (Statique)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Type */}
@@ -1031,10 +1046,9 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                     <label className="block text-gray-300 text-xs mb-1.5">
                       Type
                     </label>
-                    <select
+                    <Select
                       value={selectedLayer.type || 'image'}
-                      onChange={(e) => {
-                        const newType = e.target.value;
+                      onValueChange={(newType) => {
                         const updates = { type: newType };
                         
                         // Initialize text_config when changing to text type
@@ -1057,12 +1071,16 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                           )
                         });
                       }}
-                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="image">Image</option>
-                      <option value="text">Texte</option>
-                      <option value="shape">Forme</option>
-                    </select>
+                      <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <SelectValue placeholder="Sélectionner un type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="image">Image</SelectItem>
+                        <SelectItem value="text">Texte</SelectItem>
+                        <SelectItem value="shape">Forme</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               )}
@@ -1100,23 +1118,27 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                       <label className="block text-gray-300 text-xs mb-1.5">
                         Police
                       </label>
-                      <select
+                      <Select
                         value={selectedLayer.text_config?.font || 'Arial'}
-                        onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'text_config', {
+                        onValueChange={(value) => handleLayerPropertyChange(selectedLayer.id, 'text_config', {
                           ...(selectedLayer.text_config || {}),
-                          font: e.target.value
+                          font: value
                         })}
-                        className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="Arial">Arial</option>
-                        <option value="DejaVuSans">DejaVu Sans</option>
-                        <option value="Helvetica">Helvetica</option>
-                        <option value="Times New Roman">Times New Roman</option>
-                        <option value="Courier New">Courier New</option>
-                        <option value="Verdana">Verdana</option>
-                        <option value="Georgia">Georgia</option>
-                        <option value="Comic Sans MS">Comic Sans MS</option>
-                      </select>
+                        <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <SelectValue placeholder="Sélectionner une police" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Arial">Arial</SelectItem>
+                          <SelectItem value="DejaVuSans">DejaVu Sans</SelectItem>
+                          <SelectItem value="Helvetica">Helvetica</SelectItem>
+                          <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                          <SelectItem value="Courier New">Courier New</SelectItem>
+                          <SelectItem value="Verdana">Verdana</SelectItem>
+                          <SelectItem value="Georgia">Georgia</SelectItem>
+                          <SelectItem value="Comic Sans MS">Comic Sans MS</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div>
                       <label className="block text-gray-300 text-xs mb-1.5">
@@ -1191,19 +1213,23 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                     <label className="block text-gray-300 text-xs mb-1.5">
                       Style
                     </label>
-                    <select
+                    <Select
                       value={selectedLayer.text_config?.style || 'normal'}
-                      onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'text_config', {
+                      onValueChange={(value) => handleLayerPropertyChange(selectedLayer.id, 'text_config', {
                         ...(selectedLayer.text_config || {}),
-                        style: e.target.value
+                        style: value
                       })}
-                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="normal">Normal</option>
-                      <option value="bold">Gras</option>
-                      <option value="italic">Italique</option>
-                      <option value="bold_italic">Gras Italique</option>
-                    </select>
+                      <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <SelectValue placeholder="Sélectionner un style" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="normal">Normal</SelectItem>
+                        <SelectItem value="bold">Gras</SelectItem>
+                        <SelectItem value="italic">Italique</SelectItem>
+                        <SelectItem value="bold_italic">Gras Italique</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Line Height and Alignment */}
@@ -1229,18 +1255,22 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                       <label className="block text-gray-300 text-xs mb-1.5">
                         Alignement
                       </label>
-                      <select
+                      <Select
                         value={selectedLayer.text_config?.align || 'left'}
-                        onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'text_config', {
+                        onValueChange={(value) => handleLayerPropertyChange(selectedLayer.id, 'text_config', {
                           ...(selectedLayer.text_config || {}),
-                          align: e.target.value
+                          align: value
                         })}
-                        className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="left">Gauche</option>
-                        <option value="center">Centre</option>
-                        <option value="right">Droite</option>
-                      </select>
+                        <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <SelectValue placeholder="Sélectionner un alignement" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="left">Gauche</SelectItem>
+                          <SelectItem value="center">Centre</SelectItem>
+                          <SelectItem value="right">Droite</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>
@@ -1345,18 +1375,22 @@ const LayerEditor = ({ scene, onClose, onSave }) => {
                     <label className="block text-gray-300 text-xs mb-1.5">
                       Mode de remplissage
                     </label>
-                    <select
+                    <Select
                       value={selectedLayer.shape_config.fillMode || 'both'}
-                      onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'shape_config', {
+                      onValueChange={(value) => handleLayerPropertyChange(selectedLayer.id, 'shape_config', {
                         ...(selectedLayer.shape_config || {}),
-                        fillMode: e.target.value
+                        fillMode: value
                       })}
-                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="both">Rempli et Contour</option>
-                      <option value="fill">Rempli uniquement</option>
-                      <option value="stroke">Contour uniquement</option>
-                    </select>
+                      <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <SelectValue placeholder="Sélectionner un mode" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="both">Rempli et Contour</SelectItem>
+                        <SelectItem value="fill">Rempli uniquement</SelectItem>
+                        <SelectItem value="stroke">Contour uniquement</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <p className="text-xs text-gray-400 mt-1">
                       Contrôle si la forme est remplie, contournée, ou les deux
                     </p>
