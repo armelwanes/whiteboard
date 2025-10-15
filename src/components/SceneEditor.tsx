@@ -2,13 +2,8 @@ import React, { useState, useRef } from 'react';
 import Scene from './Scene';
 import EnhancedAudioManager from './EnhancedAudioManager';
 import ThumbnailMaker from './ThumbnailMaker';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { ScenePropertiesForm } from './molecules/scene/ScenePropertiesForm';
+import { ObjectsList } from './molecules/scene/ObjectsList';
 
 interface SceneEditorProps {
   scene: any;
@@ -168,138 +163,17 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ scene, onClose, onSave }) => 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6">
             <div className="space-y-5">
-              {/* Title */}
-              <div>
-                <label className="block text-white font-semibold mb-2 text-sm">
-                  Titre de la scène
-                </label>
-                <input
-                  type="text"
-                  value={editedScene.title}
-                  onChange={(e) => handleChange('title', e.target.value)}
-                  className="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  placeholder="Entrez le titre..."
-                />
-              </div>
+              <ScenePropertiesForm 
+                scene={editedScene}
+                onChange={handleChange}
+              />
 
-              {/* Content */}
-              <div>
-                <label className="block text-white font-semibold mb-2 text-sm">
-                  Contenu
-                </label>
-                <textarea
-                  value={editedScene.content}
-                  onChange={(e) => handleChange('content', e.target.value)}
-                  className="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 h-28 resize-none transition-all"
-                  placeholder="Entrez le contenu..."
-                />
-              </div>
-
-              {/* Duration */}
-              <div>
-                <label className="block text-white font-semibold mb-2 text-sm">
-                  Durée (secondes)
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="60"
-                  value={editedScene.duration}
-                  onChange={(e) => handleChange('duration', parseInt(e.target.value) || 5)}
-                  className="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                />
-              </div>
-
-              {/* Background Image */}
-              <div>
-                <label className="block text-white font-semibold mb-2 text-sm">
-                  Image de fond (URL)
-                </label>
-                <input
-                  type="text"
-                  value={editedScene.backgroundImage || ''}
-                  onChange={(e) => handleChange('backgroundImage', e.target.value || null)}
-                  className="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  placeholder="https://example.com/image.jpg"
-                />
-                {editedScene.backgroundImage && (
-                  <div className="mt-3">
-                    <img
-                      src={editedScene.backgroundImage}
-                      alt="Preview"
-                      className="w-full h-32 object-cover rounded-lg"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Animation Type */}
-              <div>
-                <label className="block text-white font-semibold mb-2 text-sm">
-                  Type d'animation
-                </label>
-                <Select
-                  value={editedScene.animation}
-                  onValueChange={(value) => handleChange('animation', value)}
-                >
-                  <SelectTrigger className="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                    <SelectValue placeholder="Sélectionner une animation" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="fade">Fade</SelectItem>
-                    <SelectItem value="slide">Slide</SelectItem>
-                    <SelectItem value="scale">Scale</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Objects List */}
-              <div>
-                <label className="block text-white font-semibold mb-2 text-sm">
-                  Objets dans la scène ({editedScene.objects.length})
-                </label>
-                <div className="space-y-2">
-                  {editedScene.objects.length === 0 ? (
-                    <p className="text-gray-400 text-xs italic">Aucun objet pour le moment</p>
-                  ) : (
-                    editedScene.objects.map((obj) => (
-                      <div
-                        key={obj.id}
-                        className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
-                          selectedObjectId === obj.id
-                            ? 'bg-blue-600 bg-opacity-20 border border-blue-500'
-                            : 'bg-gray-800 hover:bg-gray-750 border border-gray-700'
-                        }`}
-                        onClick={() => setSelectedObjectId(obj.id)}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">🖼️</span>
-                          <div>
-                            <p className="text-white text-sm font-medium truncate max-w-[150px]">
-                              {obj.name || 'Image'}
-                            </p>
-                            <p className="text-gray-400 text-xs">
-                              {Math.round(obj.width)} × {Math.round(obj.height)}
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteObject(obj.id);
-                          }}
-                          className="text-red-400 hover:text-red-300 text-sm"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
+              <ObjectsList
+                objects={editedScene.objects}
+                selectedObjectId={selectedObjectId}
+                onSelectObject={setSelectedObjectId}
+                onDeleteObject={handleDeleteObject}
+              />
 
               {/* Enhanced Audio Manager */}
               <div>
