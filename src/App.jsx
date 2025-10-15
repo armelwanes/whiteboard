@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react'
-import AnimationContainer from './components/AnimationContainer'
-import ScenePanel from './components/ScenePanel'
-import PropertiesPanel from './components/PropertiesPanel'
-import Toolbar from './components/Toolbar'
+import { AnimationContainer, ScenePanel, ShapeToolbar, AssetLibrary } from './components/organisms'
 import HandWritingTest from './pages/HandWritingTest'
-import ShapeToolbar from './components/ShapeToolbar'
-import AssetLibrary from './components/AssetLibrary'
-import sampleStory from './data/scenes'
-import { createMultiTimeline } from './utils/multiTimelineSystem'
-import { createSceneAudioConfig } from './utils/audioManager'
+import { useScenes } from './app/scenes'
+import { MAX_HISTORY_STATES } from './config/constants'
 
 function App() {
-  const [scenes, setScenes] = useState(() => {
-    const saved = localStorage.getItem('whiteboard-scenes')
-    return saved ? JSON.parse(saved) : sampleStory
-  })
+  const {
+    scenes,
+    loading,
+    updateScene: updateSceneService,
+    deleteScene: deleteSceneService,
+    duplicateScene: duplicateSceneService,
+    moveScene: moveSceneService,
+    createScene: createSceneService,
+  } = useScenes()
+
   const [selectedSceneIndex, setSelectedSceneIndex] = useState(0)
   const [showHandWritingTest, setShowHandWritingTest] = useState(false)
   const [showShapeToolbar, setShowShapeToolbar] = useState(false)
@@ -25,16 +25,13 @@ function App() {
   const [historyIndex, setHistoryIndex] = useState(-1)
   const isUndoRedoAction = useRef(false)
 
-  // Save scenes to localStorage whenever they change
+  // Add to history stack whenever scenes change
   useEffect(() => {
-    localStorage.setItem('whiteboard-scenes', JSON.stringify(scenes))
-    
-    // Add to history stack (but not for undo/redo actions themselves)
-    if (!isUndoRedoAction.current) {
+    if (!isUndoRedoAction.current && scenes.length > 0) {
       const newHistory = history.slice(0, historyIndex + 1)
       newHistory.push(JSON.parse(JSON.stringify(scenes)))
-      // Keep only last 50 states to prevent memory issues
-      if (newHistory.length > 50) {
+      
+      if (newHistory.length > MAX_HISTORY_STATES) {
         newHistory.shift()
       } else {
         setHistoryIndex(historyIndex + 1)
@@ -83,58 +80,62 @@ function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [historyIndex, history])
 
-  const addScene = () => {
-    const newScene = {
-      id: `scene-${Date.now()}`,
-      title: 'Nouvelle Scène',
-      content: 'Ajoutez votre contenu ici...',
-      duration: 5,
-      backgroundImage: null,
-      animation: 'fade',
-      layers: [],
-      cameras: [],
-      sceneCameras: [],
-      multiTimeline: createMultiTimeline(5),
-      audio: createSceneAudioConfig()
-    }
-    setScenes([...scenes, newScene])
-    setSelectedSceneIndex(scenes.length)
-  }
-
-  const deleteScene = (index) => {
-    if (scenes.length <= 1) {
-      alert('Vous devez avoir au moins une scène')
-      return
-    }
-    const newScenes = scenes.filter((_, i) => i !== index)
-    setScenes(newScenes)
-    if (selectedSceneIndex >= newScenes.length) {
-      setSelectedSceneIndex(newScenes.length - 1)
+  const addScene = async () => {
+    try {
+      await createSceneService()
+      setSelectedSceneIndex(scenes.length)
+    } catch (error) {
+      alert('Erreur lors de la création de la scène: ' + error.message)
     }
   }
 
-  const duplicateScene = (index) => {
-    const sceneToDuplicate = scenes[index]
-    const duplicatedScene = {
-      ...sceneToDuplicate,
-      id: `scene-${Date.now()}`,
-      title: `${sceneToDuplicate.title} (Copie)`,
-      multiTimeline: sceneToDuplicate.multiTimeline || createMultiTimeline(sceneToDuplicate.duration)
+  const deleteScene = async (index) => {
+    const sceneId = scenes[index]?.id
+    if (!sceneId) return
+
+    try {
+      await deleteSceneService(sceneId)
+      if (selectedSceneIndex >= scenes.length - 1) {
+        setSelectedSceneIndex(Math.max(0, scenes.length - 2))
+      }
+    } catch (error) {
+      alert(error.message)
     }
-    const newScenes = [...scenes]
-    newScenes.splice(index + 1, 0, duplicatedScene)
-    setScenes(newScenes)
   }
 
-  const updateScene = (index, updatedScene) => {
-    const newScenes = [...scenes]
-    newScenes[index] = { ...newScenes[index], ...updatedScene }
-    setScenes(newScenes)
+  const duplicateScene = async (index) => {
+    const sceneId = scenes[index]?.id
+    if (!sceneId) return
+
+    try {
+      await duplicateSceneService(sceneId)
+    } catch (error) {
+      alert('Erreur lors de la duplication: ' + error.message)
+    }
+  }
+
+  const updateScene = async (index, updatedScene) => {
+    const sceneId = scenes[index]?.id
+    if (!sceneId) return
+
+    try {
+      await updateSceneService(sceneId, updatedScene)
+    } catch (error) {
+      console.error('Error updating scene:', error)
+    }
+  }
+
+  const moveScene = (index, direction) => {
+    moveSceneService(index, direction)
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    setSelectedSceneIndex(targetIndex)
   }
 
 
   const handleSelectAssetFromLibrary = (asset) => {
     const currentScene = scenes[selectedSceneIndex]
+    if (!currentScene) return
+
     const newLayer = {
       id: `layer-${Date.now()}`,
       image_path: asset.dataUrl,
@@ -155,26 +156,13 @@ function App() {
 
   const handleAddShape = (shapeLayer) => {
     const currentScene = scenes[selectedSceneIndex]
+    if (!currentScene) return
+
     updateScene(selectedSceneIndex, {
       ...currentScene,
       layers: [...(currentScene.layers || []), shapeLayer]
     })
     setShowShapeToolbar(false)
-  }
-
-
-  const moveScene = (index, direction) => {
-    if (
-      (direction === 'up' && index === 0) ||
-      (direction === 'down' && index === scenes.length - 1)
-    ) {
-      return
-    }
-    const newScenes = [...scenes]
-    const targetIndex = direction === 'up' ? index - 1 : index + 1
-    ;[newScenes[index], newScenes[targetIndex]] = [newScenes[targetIndex], newScenes[index]]
-    setScenes(newScenes)
-    setSelectedSceneIndex(targetIndex)
   }
 
   // Export scenes configuration to JSON with camera images
@@ -268,6 +256,18 @@ function App() {
   // Show hand writing test if toggled
   if (showHandWritingTest) {
     return <HandWritingTest onBack={() => setShowHandWritingTest(false)} />
+  }
+
+  // Show loading state
+  if (loading && scenes.length === 0) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-white mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Chargement des scènes...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

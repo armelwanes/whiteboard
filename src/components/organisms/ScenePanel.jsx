@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
+import { Button } from './atoms/button';
+import { Card } from './atoms/card';
 import { Plus, ArrowUp, ArrowDown, Copy, Trash2, Download, Upload } from 'lucide-react';
 
 const ScenePanel = ({

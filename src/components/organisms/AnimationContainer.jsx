@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Scene from './Scene';
-import LayersList from './LayersList';
+import Scene from '../Scene';
+import { LayersList } from '../molecules';
 import LayerEditor from './LayerEditor';
-import { createTimeline } from '../utils/timelineSystem';
+import { createTimeline } from '../../utils/timelineSystem';
 
 const AnimationContainer = ({ scenes = [], updateScene, selectedSceneIndex = 0 }) => {
   const [currentTime, setCurrentTime] = useState(0);

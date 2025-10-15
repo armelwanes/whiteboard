@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
-import { Button } from './ui/button';
+import { Button } from './atoms/button';
 import { X, Check, Crop, Eraser } from 'lucide-react';
 import { removeBackground } from '@imgly/background-removal';
 
