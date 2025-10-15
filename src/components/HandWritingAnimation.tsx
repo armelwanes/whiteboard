@@ -809,7 +809,7 @@ const HandWritingAnimation = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-900 min-h-screen">
+    <div className="p-6 bg-white min-h-screen">
       {/* Image Crop Modal */}
       {showCropModal && pendingImageUrl && (
         <ImageCropModal
@@ -819,16 +819,16 @@ const HandWritingAnimation = () => {
         />
       )}
       
-      <Card className="max-w-4xl mx-auto bg-gray-800 border-gray-700">
+      <Card className="max-w-4xl mx-auto bg-secondary/30 border-border">
         <CardHeader>
           <CardTitle className="text-white">Handwriting Animation Generator</CardTitle>
-          <p className="text-gray-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             Générez des animations à partir d&apos;images ou rejouez des animations JSON (exportées depuis Python)
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Mode Selector */}
-          <div className="flex gap-2 p-2 bg-gray-700 rounded-lg">
+          <div className="flex gap-2 p-2 bg-secondary rounded-lg">
             <Button
               variant={mode === "image" ? "default" : "outline"}
               onClick={() => setMode("image")}
@@ -906,7 +906,7 @@ const HandWritingAnimation = () => {
               </div>
               
               {animationData && (
-                <div className="bg-gray-700 p-3 rounded text-sm text-gray-300">
+                <div className="bg-secondary p-3 rounded text-sm text-foreground">
                   <p><strong>Animation chargée:</strong></p>
                   <p>• Résolution: {animationData.metadata.width}x{animationData.metadata.height}</p>
                   <p>• FPS: {animationData.metadata.frame_rate}</p>
@@ -918,29 +918,29 @@ const HandWritingAnimation = () => {
           )}
 
           {isGenerating && (
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
+            <div className="w-full bg-secondary rounded-full h-2">
+              <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
             </div>
           )}
-          <p className="text-xs text-gray-400">Progress: {progress}%</p>
+          <p className="text-xs text-muted-foreground">Progress: {progress}%</p>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <h3 className="text-white text-sm mb-2">Source Preview</h3>
-              <canvas ref={sourceCanvasRef} width={variablesDefault.resizeWd} height={variablesDefault.resizeHt} className="border border-gray-600 bg-white w-full" />
+              <canvas ref={sourceCanvasRef} width={variablesDefault.resizeWd} height={variablesDefault.resizeHt} className="border border-border bg-white w-full" />
             </div>
             <div>
               <h3 className="text-white text-sm mb-2">Recorded Canvas (video frames)</h3>
-              <canvas ref={drawCanvasRef} width={variablesDefault.resizeWd} height={variablesDefault.resizeHt} className="border border-gray-600 bg-white w-full" />
+              <canvas ref={drawCanvasRef} width={variablesDefault.resizeWd} height={variablesDefault.resizeHt} className="border border-border bg-white w-full" />
             </div>
           </div>
 
-          <div className="text-sm text-gray-400">
+          <div className="text-sm text-muted-foreground">
             <p>Hand Image: {handImage ? "✓ Loaded" : "⏳ Loading..."}</p>
             <p>Hand Mask: {handMask ? "✓ Loaded" : "⏳ Loading..."}</p>
             {videoUrl && (
               <p className="mt-2">
-                Vidéo générée : <a href={videoUrl} target="_blank" rel="noreferrer" className="text-blue-400 underline">Voir</a>
+                Vidéo générée : <a href={videoUrl} target="_blank" rel="noreferrer" className="text-primary underline">Voir</a>
               </p>
             )}
           </div>

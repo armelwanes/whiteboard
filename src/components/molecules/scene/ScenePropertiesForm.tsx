@@ -24,7 +24,7 @@ export const ScenePropertiesForm: React.FC<ScenePropertiesFormProps> = ({ scene,
           type="text"
           value={scene.title}
           onChange={(e) => onChange('title', e.target.value)}
-          className="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          className="w-full bg-secondary/30 text-white border border-border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
           placeholder="Entrez le titre..."
         />
       </div>
@@ -37,7 +37,7 @@ export const ScenePropertiesForm: React.FC<ScenePropertiesFormProps> = ({ scene,
         <textarea
           value={scene.content}
           onChange={(e) => onChange('content', e.target.value)}
-          className="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 h-28 resize-none transition-all"
+          className="w-full bg-secondary/30 text-white border border-border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary h-28 resize-none transition-all"
           placeholder="Entrez le contenu..."
         />
       </div>
@@ -53,7 +53,7 @@ export const ScenePropertiesForm: React.FC<ScenePropertiesFormProps> = ({ scene,
           max="60"
           value={scene.duration}
           onChange={(e) => onChange('duration', parseInt(e.target.value) || 5)}
-          className="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          className="w-full bg-secondary/30 text-white border border-border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
         />
       </div>
 
@@ -66,7 +66,7 @@ export const ScenePropertiesForm: React.FC<ScenePropertiesFormProps> = ({ scene,
           type="text"
           value={scene.backgroundImage || ''}
           onChange={(e) => onChange('backgroundImage', e.target.value || null)}
-          className="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          className="w-full bg-secondary/30 text-white border border-border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
           placeholder="https://example.com/image.jpg"
         />
         {scene.backgroundImage && (
@@ -92,7 +92,7 @@ export const ScenePropertiesForm: React.FC<ScenePropertiesFormProps> = ({ scene,
           value={scene.animation}
           onValueChange={(value) => onChange('animation', value)}
         >
-          <SelectTrigger className="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+          <SelectTrigger className="w-full bg-secondary/30 text-white border border-border rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary transition-all">
             <SelectValue placeholder="Sélectionner une animation" />
           </SelectTrigger>
           <SelectContent>

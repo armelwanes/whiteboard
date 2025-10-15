@@ -196,14 +196,14 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
       )}
       
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-gray-900 rounded-lg shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col border border-gray-700">
+        <div className="bg-white rounded-lg shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col border border-border">
         {/* Header */}
-        <div className="bg-gray-800 px-6 py-4 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
+        <div className="bg-secondary/30 px-6 py-4 border-b border-border flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
             <ImageIcon className="w-6 h-6 text-blue-500" />
             <h2 className="text-2xl font-bold text-white">Bibliothèque d'Assets</h2>
             {stats && (
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-muted-foreground">
                 ({stats.totalCount} assets • {stats.totalSizeMB} MB)
               </span>
             )}
@@ -211,7 +211,7 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
           <div className="flex items-center gap-2">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 transition-colors"
+              className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded flex items-center gap-2 transition-colors"
             >
               <Upload className="w-4 h-4" />
               <span>Ajouter</span>
@@ -225,7 +225,7 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
             />
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-muted-foreground hover:text-white transition-colors"
             >
               <X className="w-6 h-6" />
             </button>
@@ -234,7 +234,7 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
 
         <div className="flex-1 flex overflow-hidden">
           {/* Left Sidebar - Filters */}
-          <div className="w-64 bg-gray-850 border-r border-gray-700 p-4 overflow-y-auto flex-shrink-0">
+          <div className="w-64 bg-gray-850 border-r border-border p-4 overflow-y-auto flex-shrink-0">
             {/* View Mode */}
             <div className="mb-6">
               <h3 className="text-white font-semibold mb-3 text-sm flex items-center gap-2">
@@ -246,8 +246,8 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
                   onClick={() => setViewMode('all')}
                   className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
                     viewMode === 'all'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-750'
+                      ? 'bg-primary text-white'
+                      : 'bg-secondary/30 text-foreground hover:bg-secondary/80'
                   }`}
                 >
                   Tous les assets
@@ -256,8 +256,8 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
                   onClick={() => setViewMode('cached')}
                   className={`w-full text-left px-3 py-2 rounded text-sm transition-colors flex items-center gap-2 ${
                     viewMode === 'cached'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-750'
+                      ? 'bg-primary text-white'
+                      : 'bg-secondary/30 text-foreground hover:bg-secondary/80'
                   }`}
                 >
                   <TrendingUp className="w-4 h-4" />
@@ -267,8 +267,8 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
                   onClick={() => setViewMode('recent')}
                   className={`w-full text-left px-3 py-2 rounded text-sm transition-colors flex items-center gap-2 ${
                     viewMode === 'recent'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-750'
+                      ? 'bg-primary text-white'
+                      : 'bg-secondary/30 text-foreground hover:bg-secondary/80'
                   }`}
                 >
                   <Clock className="w-4 h-4" />
@@ -284,7 +284,7 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
                 value={sortBy}
                 onValueChange={(value) => setSortBy(value)}
               >
-                <SelectTrigger className="w-full bg-gray-800 text-white border border-gray-700 rounded px-3 py-2 text-sm">
+                <SelectTrigger className="w-full bg-secondary/30 text-white border border-border rounded px-3 py-2 text-sm">
                   <SelectValue placeholder="Sélectionner un tri" />
                 </SelectTrigger>
                 <SelectContent>
@@ -300,8 +300,8 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
                   onClick={() => setSortOrder('asc')}
                   className={`flex-1 px-3 py-1 rounded text-xs ${
                     sortOrder === 'asc'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-800 text-gray-400'
+                      ? 'bg-primary text-white'
+                      : 'bg-secondary/30 text-muted-foreground'
                   }`}
                 >
                   ↑ Croissant
@@ -310,8 +310,8 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
                   onClick={() => setSortOrder('desc')}
                   className={`flex-1 px-3 py-1 rounded text-xs ${
                     sortOrder === 'desc'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-800 text-gray-400'
+                      ? 'bg-primary text-white'
+                      : 'bg-secondary/30 text-muted-foreground'
                   }`}
                 >
                   ↓ Décroissant
@@ -335,8 +335,8 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
                       onClick={() => toggleTag(tag)}
                       className={`w-full text-left px-3 py-1.5 rounded text-xs transition-colors ${
                         selectedTags.includes(tag)
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-800 text-gray-300 hover:bg-gray-750'
+                          ? 'bg-primary text-white'
+                          : 'bg-secondary/30 text-foreground hover:bg-secondary/80'
                       }`}
                     >
                       # {tag}
@@ -347,7 +347,7 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
               {selectedTags.length > 0 && (
                 <button
                   onClick={() => setSelectedTags([])}
-                  className="w-full mt-2 text-xs text-blue-400 hover:text-blue-300"
+                  className="w-full mt-2 text-xs text-primary hover:text-blue-300"
                 >
                   Effacer les filtres
                 </button>
@@ -358,7 +358,7 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Search Bar */}
-            <div className="bg-gray-850 p-4 border-b border-gray-700 flex-shrink-0">
+            <div className="bg-gray-850 p-4 border-b border-border flex-shrink-0">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                 <input
@@ -366,13 +366,13 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Rechercher par nom..."
-                  className="w-full bg-gray-800 text-white border border-gray-700 rounded pl-10 pr-4 py-2"
+                  className="w-full bg-secondary/30 text-white border border-border rounded pl-10 pr-4 py-2"
                 />
               </div>
               {(searchQuery || selectedTags.length > 0) && (
                 <div className="mt-2 flex items-center gap-2 flex-wrap">
                   {searchQuery && (
-                    <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">
+                    <span className="text-xs bg-primary text-white px-2 py-1 rounded">
                       Recherche: "{searchQuery}"
                     </span>
                   )}
@@ -386,7 +386,7 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
             </div>
 
             {/* Assets Grid */}
-            <div className="flex-1 overflow-y-auto p-6 bg-gray-900">
+            <div className="flex-1 overflow-y-auto p-6 bg-white">
               {assets.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-500">
                   <ImageIcon className="w-16 h-16 mb-4 opacity-50" />
@@ -399,14 +399,14 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
                     <div
                       key={asset.id}
                       onClick={() => handleSelectAsset(asset)}
-                      className={`bg-gray-800 rounded-lg overflow-hidden border-2 transition-all cursor-pointer hover:shadow-lg ${
+                      className={`bg-secondary/30 rounded-lg overflow-hidden border-2 transition-all cursor-pointer hover:shadow-lg ${
                         selectedAsset?.id === asset.id
-                          ? 'border-blue-500 shadow-xl'
-                          : 'border-gray-700 hover:border-gray-600'
+                          ? 'border-primary shadow-xl'
+                          : 'border-border hover:border-border'
                       }`}
                     >
                       {/* Image Thumbnail */}
-                      <div className="aspect-square bg-gray-900 flex items-center justify-center overflow-hidden">
+                      <div className="aspect-square bg-white flex items-center justify-center overflow-hidden">
                         <img
                           src={asset.dataUrl}
                           alt={asset.name}
@@ -422,14 +422,14 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
                               type="text"
                               value={editName}
                               onChange={(e) => setEditName(e.target.value)}
-                              className="w-full bg-gray-700 text-white text-sm px-2 py-1 rounded border border-gray-600"
+                              className="w-full bg-secondary text-white text-sm px-2 py-1 rounded border border-border"
                               placeholder="Nom"
                             />
                             <input
                               type="text"
                               value={editTags}
                               onChange={(e) => setEditTags(e.target.value)}
-                              className="w-full bg-gray-700 text-white text-xs px-2 py-1 rounded border border-gray-600"
+                              className="w-full bg-secondary text-white text-xs px-2 py-1 rounded border border-border"
                               placeholder="Tags (séparés par virgule)"
                             />
                             <div className="flex gap-1">
@@ -441,7 +441,7 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
                               </button>
                               <button
                                 onClick={handleCancelEdit}
-                                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 rounded text-xs"
+                                className="flex-1 bg-gray-600 hover:bg-secondary text-white px-2 py-1 rounded text-xs"
                               >
                                 <X className="w-3 h-3 mx-auto" />
                               </button>
@@ -452,7 +452,7 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
                             <p className="text-white text-sm font-medium truncate mb-1">
                               {asset.name}
                             </p>
-                            <p className="text-gray-400 text-xs mb-2">
+                            <p className="text-muted-foreground text-xs mb-2">
                               {asset.width} × {asset.height} • {formatSize(asset.size)}
                             </p>
                             {asset.tags.length > 0 && (
@@ -481,7 +481,7 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
                             <div className="flex gap-1">
                               <button
                                 onClick={(e) => handleEditAsset(asset, e)}
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs flex items-center justify-center gap-1"
+                                className="flex-1 bg-primary hover:bg-primary/90 text-white px-2 py-1 rounded text-xs flex items-center justify-center gap-1"
                               >
                                 <Edit2 className="w-3 h-3" />
                               </button>

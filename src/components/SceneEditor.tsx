@@ -92,9 +92,9 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ scene, onClose, onSave }) => 
         />
       )}
       
-      <div className="bg-gray-900 rounded-lg shadow-xl w-full max-w-6xl max-h-[95vh] overflow-hidden flex">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[95vh] overflow-hidden flex">
         {/* Left Side - Scene Preview */}
-        <div className="flex-1 bg-gray-950 relative">
+        <div className="flex-1 bg-secondary relative">
           <div className="absolute inset-0 overflow-hidden">
             <Scene
               {...editedScene}
@@ -119,7 +119,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ scene, onClose, onSave }) => 
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-colors flex items-center gap-2"
+              className="bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-colors flex items-center gap-2"
             >
               <span className="text-xl">🖼️</span>
               <span>Importer une image</span>
@@ -127,7 +127,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ scene, onClose, onSave }) => 
           </div>
 
           {/* Instructions */}
-          <div className="absolute bottom-4 left-4 bg-gray-800 bg-opacity-90 rounded-lg px-4 py-3 text-sm text-gray-300 max-w-md">
+          <div className="absolute bottom-4 left-4 bg-secondary/30 bg-opacity-90 rounded-lg px-4 py-3 text-sm text-foreground max-w-md">
             <p className="font-semibold mb-2">💡 Aide:</p>
             <ul className="space-y-1 text-xs">
               <li>• Cliquez sur "Importer une image" pour ajouter une image</li>
@@ -139,9 +139,9 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ scene, onClose, onSave }) => 
         </div>
 
         {/* Right Side - Properties Panel */}
-        <div className="w-96 bg-gray-900 flex flex-col border-l border-gray-700">
+        <div className="w-96 bg-white flex flex-col border-l border-border">
           {/* Header */}
-          <div className="bg-gray-800 px-6 py-4 border-b border-gray-700 flex items-center justify-between">
+          <div className="bg-secondary/30 px-6 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-3">
               <h2 className="text-xl font-bold text-white">Propriétés</h2>
               <button
@@ -154,7 +154,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ scene, onClose, onSave }) => 
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white text-2xl leading-none"
+              className="text-muted-foreground hover:text-white text-2xl leading-none"
             >
               ×
             </button>
@@ -186,16 +186,16 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ scene, onClose, onSave }) => 
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-800 px-6 py-4 border-t border-gray-700 flex justify-end gap-3">
+          <div className="bg-secondary/30 px-6 py-4 border-t border-border flex justify-end gap-3">
             <button
               onClick={onClose}
-              className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors"
+              className="bg-secondary hover:bg-secondary/80 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors"
             >
               Annuler
             </button>
             <button
               onClick={handleSave}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors shadow-lg"
+              className="bg-primary hover:bg-primary/90 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors shadow-lg"
             >
               Enregistrer
             </button>

@@ -690,9 +690,9 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
         />
       )}
       
-      <div className="bg-white dark:bg-gray-900 shadow-2xl w-full max-w-full max-h-[70vh] flex overflow-hidden border border-gray-200 dark:border-gray-700 rounded-lg">
+      <div className="bg-white dark:bg-white shadow-2xl w-full max-w-full max-h-[70vh] flex overflow-hidden border border-gray-200 dark:border-border rounded-lg">
         {/* Left Side - Canvas Preview with Camera Viewports */}
-        <div className="bg-gray-100 dark:bg-gray-950 flex flex-col flex-1 min-w-0">
+        <div className="bg-secondary/20 dark:bg-secondary flex flex-col flex-1 min-w-0">
           <SceneCanvas
             scene={editedScene}
             onUpdateScene={(updates) => setEditedScene({ ...editedScene, ...updates })}
@@ -704,9 +704,9 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
         </div>
 
         {/* Right Side - Properties Panel */}
-        <div className="w-80 bg-white dark:bg-gray-900 flex flex-col border-l border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="w-80 bg-white dark:bg-white flex flex-col border-l border-gray-200 dark:border-border overflow-hidden">
           {/* Header */}
-          <div className="bg-gray-50 dark:bg-gray-800 px-5 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
+          <div className="bg-gray-50 dark:bg-secondary/30 px-5 py-3 border-b border-gray-200 dark:border-border flex items-center justify-between flex-shrink-0">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Properties</h2>
             <div className="flex items-center gap-2">
               <button
@@ -725,7 +725,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
               </button>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm shadow-sm"
+                className="bg-primary hover:bg-primary/90 text-white font-medium py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm shadow-sm"
                 title="Add Image"
               >
                 <Upload className="w-3.5 h-3.5" />
@@ -746,7 +746,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
               </button>
               <button
                 onClick={onClose}
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-2xl leading-none"
+                className="text-gray-500 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-white text-2xl leading-none"
               >
                 ×
               </button>
@@ -764,7 +764,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
           <div className="flex-1 overflow-y-auto p-4">
             <div className="space-y-4">
               {/* Scene Properties */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <div className="bg-gray-50 dark:bg-secondary/30 rounded-lg p-4 border border-gray-200 dark:border-border">
                 <h3 className="text-gray-900 dark:text-white font-semibold mb-3 text-sm flex items-center gap-2">
                   <ImageIcon className="w-4 h-4" />
                   Scene Properties
@@ -772,34 +772,34 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                 
                 {/* Title */}
                 <div className="mb-3">
-                  <label className="block text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
+                  <label className="block text-gray-700 dark:text-foreground text-xs mb-1.5 font-medium">
                     Scene Title
                   </label>
                   <input
                     type="text"
                     value={editedScene.title}
                     onChange={(e) => handleChange('title', e.target.value)}
-                    className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-secondary text-gray-900 dark:text-white border border-gray-300 dark:border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="Enter title..."
                   />
                 </div>
 
                 {/* Content */}
                 <div className="mb-3">
-                  <label className="block text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
+                  <label className="block text-gray-700 dark:text-foreground text-xs mb-1.5 font-medium">
                     Content
                   </label>
                   <textarea
                     value={editedScene.content}
                     onChange={(e) => handleChange('content', e.target.value)}
-                    className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm h-20 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 whiteboard-text"
+                    className="w-full bg-white dark:bg-secondary text-gray-900 dark:text-white border border-gray-300 dark:border-border rounded px-3 py-2 text-sm h-20 resize-none focus:outline-none focus:ring-2 focus:ring-primary whiteboard-text"
                     placeholder="Enter content..."
                   />
                 </div>
 
                 {/* Duration */}
                 <div className="mb-3">
-                  <label className="block text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
+                  <label className="block text-gray-700 dark:text-foreground text-xs mb-1.5 font-medium">
                     Duration (seconds)
                   </label>
                   <input
@@ -808,19 +808,19 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                     max="60"
                     value={editedScene.duration}
                     onChange={(e) => handleChange('duration', parseInt(e.target.value) || 5)}
-                    className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-white dark:bg-secondary text-gray-900 dark:text-white border border-gray-300 dark:border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
                 {/* Background Image */}
                 <div>
-                  <label className="block text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
+                  <label className="block text-gray-700 dark:text-foreground text-xs mb-1.5 font-medium">
                     Background Image
                   </label>
                   <div className="flex gap-2">
                     <button
                       onClick={() => backgroundImageInputRef.current?.click()}
-                      className="flex-1 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
+                      className="flex-1 bg-white dark:bg-secondary hover:bg-gray-50 dark:hover:bg-secondary/80 text-gray-900 dark:text-white border border-gray-300 dark:border-border rounded px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary text-left"
                     >
                       {editedScene.backgroundImage ? 'Change Background' : 'Upload Background'}
                     </button>
@@ -845,14 +845,14 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
 
                 {/* Animation Type */}
                 <div className="mt-3">
-                  <label className="block text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
+                  <label className="block text-gray-700 dark:text-foreground text-xs mb-1.5 font-medium">
                     Animation Type
                   </label>
                   <Select
                     value={editedScene.animation}
                     onValueChange={(value) => handleChange('animation', value)}
                   >
-                    <SelectTrigger className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <SelectTrigger className="w-full bg-white dark:bg-secondary text-gray-900 dark:text-white border border-gray-300 dark:border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                       <SelectValue placeholder="Sélectionner une animation" />
                     </SelectTrigger>
                     <SelectContent>
@@ -865,13 +865,13 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
 
                 {/* Old Background Music - Keeping for backwards compatibility */}
                 <div className="mt-3 hidden">
-                  <label className="block text-gray-700 dark:text-gray-300 text-xs mb-1.5 font-medium">
+                  <label className="block text-gray-700 dark:text-foreground text-xs mb-1.5 font-medium">
                     Background Music (Legacy)
                   </label>
                   <div className="flex gap-2">
                     <button
                       onClick={() => backgroundMusicInputRef.current?.click()}
-                      className="flex-1 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 text-left"
+                      className="flex-1 bg-white dark:bg-secondary hover:bg-gray-50 dark:hover:bg-secondary/80 text-gray-900 dark:text-white border border-gray-300 dark:border-border rounded px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary text-left"
                     >
                       {editedScene.backgroundMusic ? 'Change Music' : 'Upload Music'}
                     </button>
@@ -912,21 +912,21 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
               />
               {/* Selected Layer Properties */}
               {selectedLayer && (
-                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div className="bg-secondary/30 rounded-lg p-4 border border-border">
                   <h3 className="text-white font-semibold mb-3 text-sm">
                     Propriétés de la Couche Sélectionnée
                   </h3>
 
                   {/* Layer Name */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Nom
                     </label>
                     <input
                       type="text"
                       value={selectedLayer.name || ''}
                       onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'name', e.target.value)}
-                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="Nom de la couche"
                     />
                   </div>
@@ -934,7 +934,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                   {/* Position */}
                   <div className="mb-3 grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-gray-300 text-xs mb-1.5">
+                      <label className="block text-foreground text-xs mb-1.5">
                         Position X
                       </label>
                       <input
@@ -944,11 +944,11 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                           ...selectedLayer.position,
                           x: parseInt(e.target.value) || 0
                         })}
-                        className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-gray-300 text-xs mb-1.5">
+                      <label className="block text-foreground text-xs mb-1.5">
                         Position Y
                       </label>
                       <input
@@ -958,14 +958,14 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                           ...selectedLayer.position,
                           y: parseInt(e.target.value) || 0
                         })}
-                        className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   </div>
 
                   {/* Z-Index */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Z-Index (Ordre)
                     </label>
                     <input
@@ -973,13 +973,13 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                       min="0"
                       value={selectedLayer.z_index || 0}
                       onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'z_index', parseInt(e.target.value) || 0)}
-                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   {/* Scale */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Échelle: {(selectedLayer.scale || 1.0).toFixed(2)}
                     </label>
                     <input
@@ -995,7 +995,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
 
                   {/* Opacity */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Opacité: {Math.round((selectedLayer.opacity || 1.0) * 100)}%
                     </label>
                     <input
@@ -1011,7 +1011,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
 
                   {/* Skip Rate */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Skip Rate (Vitesse de dessin)
                     </label>
                     <input
@@ -1020,7 +1020,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                       max="50"
                       value={selectedLayer.skip_rate || 10}
                       onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'skip_rate', parseInt(e.target.value) || 10)}
-                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                     <p className="text-gray-500 text-xs mt-1">
                       Plus élevé = dessin plus rapide
@@ -1029,14 +1029,14 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
 
                   {/* Mode */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Mode de dessin
                     </label>
                     <Select
                       value={selectedLayer.mode || 'draw'}
                       onValueChange={(value) => handleLayerPropertyChange(selectedLayer.id, 'mode', value)}
                     >
-                      <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <SelectTrigger className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                         <SelectValue placeholder="Sélectionner un mode" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1049,7 +1049,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
 
                   {/* Type */}
                   <div>
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Type
                     </label>
                     <Select
@@ -1078,7 +1078,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                         });
                       }}
                     >
-                      <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <SelectTrigger className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                         <SelectValue placeholder="Sélectionner un type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1093,14 +1093,14 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
 
               {/* Text Configuration (only for text layers) */}
               {selectedLayer && selectedLayer.type === 'text' && (
-                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div className="bg-secondary/30 rounded-lg p-4 border border-border">
                   <h3 className="text-white font-semibold mb-3 text-sm">
                     Configuration du Texte
                   </h3>
 
                   {/* Text Content */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Contenu du texte
                     </label>
                     <textarea
@@ -1109,7 +1109,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                         ...(selectedLayer.text_config || {}),
                         text: e.target.value
                       })}
-                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="Votre texte ici&#10;Utilisez Entrée pour les sauts de ligne"
                       rows="4"
                     />
@@ -1121,7 +1121,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                   {/* Font and Size */}
                   <div className="mb-3 grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-gray-300 text-xs mb-1.5">
+                      <label className="block text-foreground text-xs mb-1.5">
                         Police
                       </label>
                       <Select
@@ -1131,7 +1131,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                           font: value
                         })}
                       >
-                        <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <SelectTrigger className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                           <SelectValue placeholder="Sélectionner une police" />
                         </SelectTrigger>
                         <SelectContent>
@@ -1147,7 +1147,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                       </Select>
                     </div>
                     <div>
-                      <label className="block text-gray-300 text-xs mb-1.5">
+                      <label className="block text-foreground text-xs mb-1.5">
                         Taille
                       </label>
                       <input
@@ -1159,14 +1159,14 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                           ...(selectedLayer.text_config || {}),
                           size: parseInt(e.target.value) || 48
                         })}
-                        className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   </div>
 
                   {/* Color */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Couleur
                     </label>
                     <div className="flex gap-2">
@@ -1187,7 +1187,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                             color: [r, g, b]
                           });
                         }}
-                        className="h-10 w-16 bg-gray-700 border border-gray-600 rounded cursor-pointer"
+                        className="h-10 w-16 bg-secondary border border-border rounded cursor-pointer"
                       />
                       <input
                         type="text"
@@ -1209,14 +1209,14 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                           }
                         }}
                         placeholder="#000000"
-                        className="flex-1 bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   </div>
 
                   {/* Style */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Style
                     </label>
                     <Select
@@ -1226,7 +1226,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                         style: value
                       })}
                     >
-                      <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <SelectTrigger className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                         <SelectValue placeholder="Sélectionner un style" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1241,7 +1241,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                   {/* Line Height and Alignment */}
                   <div className="mb-3 grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-gray-300 text-xs mb-1.5">
+                      <label className="block text-foreground text-xs mb-1.5">
                         Hauteur ligne
                       </label>
                       <input
@@ -1254,11 +1254,11 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                           ...(selectedLayer.text_config || {}),
                           line_height: parseFloat(e.target.value) || 1.2
                         })}
-                        className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                     <div>
-                      <label className="block text-gray-300 text-xs mb-1.5">
+                      <label className="block text-foreground text-xs mb-1.5">
                         Alignement
                       </label>
                       <Select
@@ -1268,7 +1268,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                           align: value
                         })}
                       >
-                        <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <SelectTrigger className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                           <SelectValue placeholder="Sélectionner un alignement" />
                         </SelectTrigger>
                         <SelectContent>
@@ -1284,17 +1284,17 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
 
               {/* Shape Configuration (only for shape layers) */}
               {selectedLayer && selectedLayer.type === 'shape' && selectedLayer.shape_config && (
-                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div className="bg-secondary/30 rounded-lg p-4 border border-border">
                   <h3 className="text-white font-semibold mb-3 text-sm">
                     Configuration de la Forme
                   </h3>
 
                   {/* Shape Type Display */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Type de forme
                     </label>
-                    <div className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm">
+                    <div className="bg-secondary text-white border border-border rounded px-3 py-2 text-sm">
                       {selectedLayer.shape_config.shape}
                     </div>
                   </div>
@@ -1302,7 +1302,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                   {/* Fill Color */}
                   {selectedLayer.shape_config.fill !== undefined && (
                     <div className="mb-3">
-                      <label className="block text-gray-300 text-xs mb-1.5">
+                      <label className="block text-foreground text-xs mb-1.5">
                         Couleur de remplissage
                       </label>
                       <div className="flex gap-2 items-center">
@@ -1313,7 +1313,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                             ...(selectedLayer.shape_config || {}),
                             fill: e.target.value
                           })}
-                          className="w-12 h-10 rounded border border-gray-600 cursor-pointer"
+                          className="w-12 h-10 rounded border border-border cursor-pointer"
                         />
                         <input
                           type="text"
@@ -1323,7 +1323,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                             fill: e.target.value
                           })}
                           placeholder="#3B82F6"
-                          className="flex-1 bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="flex-1 bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                       </div>
                     </div>
@@ -1331,7 +1331,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
 
                   {/* Stroke Color */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Couleur de contour
                     </label>
                     <div className="flex gap-2 items-center">
@@ -1342,7 +1342,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                           ...(selectedLayer.shape_config || {}),
                           stroke: e.target.value
                         })}
-                        className="w-12 h-10 rounded border border-gray-600 cursor-pointer"
+                        className="w-12 h-10 rounded border border-border cursor-pointer"
                       />
                       <input
                         type="text"
@@ -1352,14 +1352,14 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                           stroke: e.target.value
                         })}
                         placeholder="#1E40AF"
-                        className="flex-1 bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   </div>
 
                   {/* Stroke Width */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Épaisseur du contour: {selectedLayer.shape_config.strokeWidth || 2}px
                     </label>
                     <input
@@ -1378,7 +1378,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
 
                   {/* Fill Mode */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Mode de remplissage
                     </label>
                     <Select
@@ -1388,7 +1388,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                         fillMode: value
                       })}
                     >
-                      <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <SelectTrigger className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                         <SelectValue placeholder="Sélectionner un mode" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1397,7 +1397,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                         <SelectItem value="stroke">Contour uniquement</SelectItem>
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Contrôle si la forme est remplie, contournée, ou les deux
                     </p>
                   </div>
@@ -1405,7 +1405,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                   {/* Corner Radius (for rectangles) */}
                   {selectedLayer.shape_config.shape === 'rectangle' && (
                     <div className="mb-3">
-                      <label className="block text-gray-300 text-xs mb-1.5">
+                      <label className="block text-foreground text-xs mb-1.5">
                         Rayon des coins: {selectedLayer.shape_config.cornerRadius || 0}px
                       </label>
                       <input
@@ -1426,7 +1426,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                   {/* Sides (for polygons) */}
                   {selectedLayer.shape_config.shape === 'polygon' && (
                     <div className="mb-3">
-                      <label className="block text-gray-300 text-xs mb-1.5">
+                      <label className="block text-foreground text-xs mb-1.5">
                         Nombre de côtés
                       </label>
                       <input
@@ -1438,7 +1438,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                           ...(selectedLayer.shape_config || {}),
                           sides: parseInt(e.target.value) || 6
                         })}
-                        className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   )}
@@ -1447,7 +1447,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                   {selectedLayer.shape_config.shape === 'text_box' && (
                     <>
                       <div className="mb-3">
-                        <label className="block text-gray-300 text-xs mb-1.5">
+                        <label className="block text-foreground text-xs mb-1.5">
                           Texte
                         </label>
                         <textarea
@@ -1456,12 +1456,12 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                             ...(selectedLayer.shape_config || {}),
                             text: e.target.value
                           })}
-                          className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                           rows="3"
                         />
                       </div>
                       <div className="mb-3">
-                        <label className="block text-gray-300 text-xs mb-1.5">
+                        <label className="block text-foreground text-xs mb-1.5">
                           Taille de police
                         </label>
                         <input
@@ -1473,11 +1473,11 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                             ...(selectedLayer.shape_config || {}),
                             fontSize: parseInt(e.target.value) || 24
                           })}
-                          className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                       </div>
                       <div className="mb-3">
-                        <label className="block text-gray-300 text-xs mb-1.5">
+                        <label className="block text-foreground text-xs mb-1.5">
                           Couleur de fond
                         </label>
                         <div className="flex gap-2 items-center">
@@ -1488,7 +1488,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                               ...(selectedLayer.shape_config || {}),
                               backgroundColor: e.target.value
                             })}
-                            className="w-12 h-10 rounded border border-gray-600 cursor-pointer"
+                            className="w-12 h-10 rounded border border-border cursor-pointer"
                           />
                           <input
                             type="text"
@@ -1498,7 +1498,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                               backgroundColor: e.target.value
                             })}
                             placeholder="#F3F4F6"
-                            className="flex-1 bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="flex-1 bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                           />
                         </div>
                       </div>
@@ -1531,18 +1531,18 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
 
               {/* Layer Audio Configuration */}
               {selectedLayer && (
-                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div className="bg-secondary/30 rounded-lg p-4 border border-border">
                   <h3 className="text-white font-semibold mb-3 text-sm">
                     Audio de la Couche
                   </h3>
                   
-                  <p className="text-gray-400 text-xs mb-3">
+                  <p className="text-muted-foreground text-xs mb-3">
                     L'audio pour voix-off, effets sonores, etc. est configuré par couche
                   </p>
 
                   {/* Narration */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Narration / Voix-off (URL)
                     </label>
                     <input
@@ -1552,14 +1552,14 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                         ...(selectedLayer.audio || {}),
                         narration: e.target.value || null
                       })}
-                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="https://example.com/narration.mp3"
                     />
                   </div>
 
                   {/* Typewriter Sound */}
                   <div className="mb-3">
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Son de machine à écrire (URL)
                     </label>
                     <input
@@ -1569,14 +1569,14 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                         ...(selectedLayer.audio || {}),
                         typewriter: e.target.value || null
                       })}
-                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="https://example.com/typewriter.mp3"
                     />
                   </div>
 
                   {/* Drawing Sound */}
                   <div>
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Son de dessin (URL)
                     </label>
                     <input
@@ -1586,7 +1586,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
                         ...(selectedLayer.audio || {}),
                         drawing: e.target.value || null
                       })}
-                      className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="https://example.com/drawing.mp3"
                     />
                   </div>
@@ -1636,16 +1636,16 @@ const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => 
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-800 px-5 py-3 border-t border-gray-700 flex justify-end gap-2 flex-shrink-0">
+          <div className="bg-secondary/30 px-5 py-3 border-t border-border flex justify-end gap-2 flex-shrink-0">
             <button
               onClick={onClose}
-              className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm"
+              className="bg-secondary hover:bg-secondary/80 text-white font-semibold py-2 px-5 rounded-lg transition-colors text-sm"
             >
               Annuler
             </button>
             <button
               onClick={handleSave}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors shadow-lg flex items-center gap-2 text-sm"
+              className="bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-5 rounded-lg transition-colors shadow-lg flex items-center gap-2 text-sm"
             >
               <Save className="w-3.5 h-3.5" />
               Enregistrer

@@ -82,7 +82,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           </button>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="bg-blue-600 hover:bg-blue-700 text-foreground font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
+            className="bg-primary hover:bg-primary/90 text-foreground font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
             title="Ajouter une image"
           >
             <Upload className="w-4 h-4" />
@@ -116,7 +116,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 type="text"
                 value={scene.title || ''}
                 onChange={(e) => handleSceneChange('title', e.target.value)}
-                className="w-full bg-gray-700 text-foreground border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Entrez le titre..."
               />
             </div>
@@ -129,7 +129,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               <textarea
                 value={scene.content || ''}
                 onChange={(e) => handleSceneChange('content', e.target.value)}
-                className="w-full bg-gray-700 text-foreground border border-gray-600 rounded px-3 py-2 text-sm h-20 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm h-20 resize-none focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Entrez le contenu..."
               />
             </div>
@@ -145,7 +145,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 max="60"
                 value={scene.duration || 5}
                 onChange={(e) => handleSceneChange('duration', parseInt(e.target.value) || 5)}
-                className="w-full bg-gray-700 text-foreground border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -158,7 +158,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 type="text"
                 value={scene.backgroundImage || ''}
                 onChange={(e) => handleSceneChange('backgroundImage', e.target.value || null)}
-                className="w-full bg-gray-700 text-foreground border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="https://example.com/image.jpg"
               />
             </div>
@@ -172,7 +172,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 value={scene.animation || 'fade'}
                 onValueChange={(value) => handleSceneChange('animation', value)}
               >
-                <SelectTrigger className="w-full bg-gray-700 text-foreground border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <SelectTrigger className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                   <SelectValue placeholder="Sélectionner une animation" />
                 </SelectTrigger>
                 <SelectContent>
@@ -203,8 +203,8 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     key={layer.id}
                     className={`p-3 rounded-lg cursor-pointer transition-all border ${
                       selectedLayerId === layer.id
-                        ? 'bg-blue-600 bg-opacity-20 border-blue-500'
-                        : 'bg-gray-700 hover:bg-gray-650 border-gray-600'
+                        ? 'bg-primary bg-opacity-20 border-primary'
+                        : 'bg-secondary hover:bg-gray-650 border-border'
                     }`}
                     onClick={() => onSelectLayer(layer.id)}
                   >
@@ -227,7 +227,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                             onMoveLayer(layer.id, 'up');
                           }}
                           disabled={index === 0}
-                          className="p-1 hover:bg-gray-600 rounded disabled:opacity-30"
+                          className="p-1 hover:bg-secondary/80 rounded disabled:opacity-30"
                           title="Déplacer vers le haut"
                         >
                           <MoveUp className="w-3 h-3 text-foreground" />
@@ -238,7 +238,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                             onMoveLayer(layer.id, 'down');
                           }}
                           disabled={index === scene.layers.length - 1}
-                          className="p-1 hover:bg-gray-600 rounded disabled:opacity-30"
+                          className="p-1 hover:bg-secondary/80 rounded disabled:opacity-30"
                           title="Déplacer vers le bas"
                         >
                           <MoveDown className="w-3 h-3 text-foreground" />
@@ -248,7 +248,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                             e.stopPropagation();
                             onDuplicateLayer(layer.id);
                           }}
-                          className="p-1 hover:bg-gray-600 rounded"
+                          className="p-1 hover:bg-secondary/80 rounded"
                           title="Dupliquer"
                         >
                           <Copy className="w-3 h-3 text-foreground" />
@@ -287,7 +287,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   type="text"
                   value={selectedLayer.name || ''}
                   onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'name', e.target.value)}
-                  className="w-full bg-gray-700 text-foreground border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Nom de la couche"
                 />
               </div>
@@ -305,7 +305,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       ...selectedLayer.position,
                       x: parseInt(e.target.value) || 0
                     })}
-                    className="w-full bg-gray-700 text-foreground border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 <div>
@@ -319,7 +319,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       ...selectedLayer.position,
                       y: parseInt(e.target.value) || 0
                     })}
-                    className="w-full bg-gray-700 text-foreground border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -367,7 +367,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   max="50"
                   value={selectedLayer.skip_rate || 10}
                   onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'skip_rate', parseInt(e.target.value) || 10)}
-                  className="w-full bg-gray-700 text-foreground border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <p className="text-gray-500 text-xs mt-1">
                   Plus élevé = dessin plus rapide
@@ -382,7 +382,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 <select
                   value={selectedLayer.mode || 'draw'}
                   onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'mode', e.target.value)}
-                  className="w-full bg-gray-700 text-foreground border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="draw">Draw (Dessin progressif)</option>
                   <option value="eraser">Eraser (Gomme)</option>

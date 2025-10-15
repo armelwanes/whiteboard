@@ -108,7 +108,7 @@ const ParticleEditor: React.FC<ParticleEditorProps> = ({
       </div>
 
       {/* Preview Canvas */}
-      <div className="relative bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-700">
+      <div className="relative bg-secondary/30 rounded-lg overflow-hidden border-2 border-border">
         <div 
           className="relative cursor-crosshair"
           onClick={handleCanvasClick}
@@ -140,7 +140,7 @@ const ParticleEditor: React.FC<ParticleEditorProps> = ({
 
       {/* Effect Type Selection */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-300">
+        <label className="block text-sm font-medium text-foreground">
           Type d'effet
         </label>
         <div className="grid grid-cols-3 gap-2">
@@ -151,23 +151,23 @@ const ParticleEditor: React.FC<ParticleEditorProps> = ({
               className={`p-3 rounded-lg border-2 transition-all ${
                 selectedEffect === type.id
                   ? 'border-purple-500 bg-purple-500/20'
-                  : 'border-gray-700 bg-gray-800 hover:border-purple-400'
+                  : 'border-border bg-secondary/30 hover:border-purple-400'
               }`}
             >
               <div className="text-2xl mb-1">{type.icon}</div>
-              <div className="text-xs font-medium text-gray-300">{type.name}</div>
+              <div className="text-xs font-medium text-foreground">{type.name}</div>
             </button>
           ))}
         </div>
       </div>
 
       {/* Effect Options */}
-      <div className="space-y-3 p-4 bg-gray-800 rounded-lg">
-        <h4 className="text-sm font-medium text-gray-300">Options</h4>
+      <div className="space-y-3 p-4 bg-secondary/30 rounded-lg">
+        <h4 className="text-sm font-medium text-foreground">Options</h4>
         
         {/* Duration */}
         <div>
-          <label className="block text-xs text-gray-400 mb-1">
+          <label className="block text-xs text-muted-foreground mb-1">
             Durée (secondes)
           </label>
           <input
@@ -180,13 +180,13 @@ const ParticleEditor: React.FC<ParticleEditorProps> = ({
               ...effectOptions,
               duration: parseFloat(e.target.value)
             })}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+            className="w-full px-3 py-2 bg-secondary border border-border rounded text-white text-sm"
           />
         </div>
 
         {/* Rate */}
         <div>
-          <label className="block text-xs text-gray-400 mb-1">
+          <label className="block text-xs text-muted-foreground mb-1">
             Taux d'émission
           </label>
           <input
@@ -205,7 +205,7 @@ const ParticleEditor: React.FC<ParticleEditorProps> = ({
 
         {/* Max Particles */}
         <div>
-          <label className="block text-xs text-gray-400 mb-1">
+          <label className="block text-xs text-muted-foreground mb-1">
             Nombre maximum de particules
           </label>
           <input
@@ -226,7 +226,7 @@ const ParticleEditor: React.FC<ParticleEditorProps> = ({
         {/* Color */}
         {['explosion', 'sparkles', 'smoke', 'magic', 'rain', 'snow', 'hearts'].includes(selectedEffect) && (
           <div>
-            <label className="block text-xs text-gray-400 mb-1">
+            <label className="block text-xs text-muted-foreground mb-1">
               Couleur
             </label>
             <div className="flex gap-2">
@@ -246,7 +246,7 @@ const ParticleEditor: React.FC<ParticleEditorProps> = ({
                   ...effectOptions,
                   color: e.target.value
                 })}
-                className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                className="flex-1 px-3 py-2 bg-secondary border border-border rounded text-white text-sm"
               />
             </div>
           </div>
@@ -288,19 +288,19 @@ const ParticleEditor: React.FC<ParticleEditorProps> = ({
       {/* Effects List */}
       {effects.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-300">Effets ajoutés</h4>
+          <h4 className="text-sm font-medium text-foreground">Effets ajoutés</h4>
           <div className="space-y-2">
             {effects.map(effect => {
               const effectType = effectTypes.find(t => t.id === effect.type);
               return (
                 <div
                   key={effect.id}
-                  className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg border border-gray-700"
+                  className="flex items-center gap-3 p-3 bg-secondary/30 rounded-lg border border-border"
                 >
                   <div className="text-2xl">{effectType?.icon}</div>
                   <div className="flex-1">
                     <div className="text-sm font-medium text-white">{effectType?.name}</div>
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-muted-foreground">
                       Position: ({effect.x}, {effect.y}) • 
                       Durée: {effect.options.duration}s
                     </div>

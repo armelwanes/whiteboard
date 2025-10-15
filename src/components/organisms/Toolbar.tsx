@@ -127,7 +127,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ onOpenEditor, onShowHandWritingTest, 
 
       {/* Info */}
       <div className="flex items-center gap-3">
-        <div className="text-gray-400 text-sm font-medium">
+        <div className="text-muted-foreground text-sm font-medium">
           Whiteboard Animation
         </div>
         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>

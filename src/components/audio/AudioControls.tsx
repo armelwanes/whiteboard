@@ -24,7 +24,7 @@ const AudioControls: React.FC<AudioControlsProps> = ({
     <div className={`flex items-center gap-3 ${className}`}>
       <button
         onClick={onMuteToggle}
-        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        className="p-2 hover:bg-secondary/20 rounded-lg transition-colors"
         title={muted ? 'Unmute' : 'Mute'}
       >
         {muted ? (

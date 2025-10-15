@@ -96,7 +96,7 @@ const LayersList: React.FC<LayersListProps> = ({
                 {/* Visibility Badge */}
                 <div className="absolute top-2 right-2">
                   {layer.visible === false ? (
-                    <EyeOff className="w-4 h-4 text-gray-400" />
+                    <EyeOff className="w-4 h-4 text-muted-foreground" />
                   ) : (
                     <Eye className="w-4 h-4 text-green-400" />
                   )}
@@ -109,12 +109,12 @@ const LayersList: React.FC<LayersListProps> = ({
                   <span className="text-xs font-medium text-foreground truncate flex-1">
                     {layer.name || `Couche ${index + 1}`}
                   </span>
-                  <span className="text-xs text-gray-400 ml-2">
+                  <span className="text-xs text-muted-foreground ml-2">
                     z: {layer.z_index || index + 1}
                   </span>
                 </div>
                 
-                <div className="text-xs text-gray-400 mb-2">
+                <div className="text-xs text-muted-foreground mb-2">
                   {layer.type === 'image' ? '🖼️ Image' : 
                    layer.type === 'text' ? '📝 Texte' : 
                    layer.type === 'shape' ? '⬛ Forme' : '❓'}
@@ -128,7 +128,7 @@ const LayersList: React.FC<LayersListProps> = ({
                       if (index > 0) onMoveLayer(layer.id, 'up');
                     }}
                     disabled={index === 0}
-                    className="p-1 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="p-1 rounded bg-secondary hover:bg-secondary/80 disabled:opacity-30 disabled:cursor-not-allowed"
                     title="Monter"
                   >
                     <MoveUp className="w-3 h-3" />
@@ -140,7 +140,7 @@ const LayersList: React.FC<LayersListProps> = ({
                       if (index < sortedLayers.length - 1) onMoveLayer(layer.id, 'down');
                     }}
                     disabled={index === sortedLayers.length - 1}
-                    className="p-1 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="p-1 rounded bg-secondary hover:bg-secondary/80 disabled:opacity-30 disabled:cursor-not-allowed"
                     title="Descendre"
                   >
                     <MoveDown className="w-3 h-3" />
@@ -151,7 +151,7 @@ const LayersList: React.FC<LayersListProps> = ({
                       e.stopPropagation();
                       onDuplicateLayer(layer.id);
                     }}
-                    className="p-1 rounded bg-gray-700 hover:bg-gray-600"
+                    className="p-1 rounded bg-secondary hover:bg-secondary/80"
                     title="Dupliquer"
                   >
                     <Copy className="w-3 h-3" />

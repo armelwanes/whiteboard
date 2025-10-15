@@ -226,7 +226,7 @@ const AudioManager: React.FC<AudioManagerProps> = ({ scene, onSceneUpdate, curre
       case AudioTrackType.SOUND_EFFECT:
         return 'bg-purple-100 text-purple-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-secondary/20 text-gray-800';
     }
   };
 
@@ -242,7 +242,7 @@ const AudioManager: React.FC<AudioManagerProps> = ({ scene, onSceneUpdate, curre
           <h3 className="font-semibold text-gray-900">Audio Manager</h3>
           <span className="text-sm text-gray-500">({tracks.length} tracks)</span>
         </div>
-        <button className="text-gray-400 hover:text-gray-600">
+        <button className="text-muted-foreground hover:text-gray-600">
           {expanded ? '▼' : '▶'}
         </button>
       </div>
@@ -255,7 +255,7 @@ const AudioManager: React.FC<AudioManagerProps> = ({ scene, onSceneUpdate, curre
             {masterVolume > 0 ? (
               <Volume2 className="w-5 h-5 text-gray-600" />
             ) : (
-              <VolumeX className="w-5 h-5 text-gray-400" />
+              <VolumeX className="w-5 h-5 text-muted-foreground" />
             )}
             <label className="text-sm font-medium text-gray-700 w-32">Master Volume</label>
             <input
@@ -346,7 +346,7 @@ const AudioManager: React.FC<AudioManagerProps> = ({ scene, onSceneUpdate, curre
                     </div>
                     
                     <div className="flex items-center gap-2">
-                      <Volume2 className="w-3 h-3 text-gray-400" />
+                      <Volume2 className="w-3 h-3 text-muted-foreground" />
                       <input
                         type="range"
                         min="0"
@@ -373,7 +373,7 @@ const AudioManager: React.FC<AudioManagerProps> = ({ scene, onSceneUpdate, curre
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-400">
+            <div className="text-center py-8 text-muted-foreground">
               <Upload className="w-12 h-12 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No audio tracks yet. Add tracks to get started.</p>
             </div>

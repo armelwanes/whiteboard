@@ -147,13 +147,13 @@ const ShapeToolbar: React.FC<ShapeToolbarProps> = ({ onAddShape, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-lg shadow-2xl border border-gray-700 w-[600px] max-h-[80vh] overflow-hidden">
+      <div className="bg-secondary/30 rounded-lg shadow-2xl border border-border w-[600px] max-h-[80vh] overflow-hidden">
         {/* Header */}
-        <div className="bg-gray-900 px-6 py-4 border-b border-gray-700 flex items-center justify-between">
+        <div className="bg-white px-6 py-4 border-b border-border flex items-center justify-between">
           <h2 className="text-xl font-bold text-white">Add Shape</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-muted-foreground hover:text-white transition-colors"
             title="Close"
           >
             <X className="w-5 h-5" />
@@ -161,15 +161,15 @@ const ShapeToolbar: React.FC<ShapeToolbarProps> = ({ onAddShape, onClose }) => {
         </div>
 
         {/* Category Tabs */}
-        <div className="bg-gray-900 px-6 border-b border-gray-700 flex gap-2 overflow-x-auto">
+        <div className="bg-white px-6 border-b border-border flex gap-2 overflow-x-auto">
           {Object.entries(shapeCategories).map(([key, category]) => (
             <button
               key={key}
               onClick={() => setSelectedCategory(key)}
               className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
                 selectedCategory === key
-                  ? 'text-blue-400 border-blue-400'
-                  : 'text-gray-400 border-transparent hover:text-white'
+                  ? 'text-primary border-blue-400'
+                  : 'text-muted-foreground border-transparent hover:text-white'
               }`}
             >
               {category.label}
@@ -188,11 +188,11 @@ const ShapeToolbar: React.FC<ShapeToolbarProps> = ({ onAddShape, onClose }) => {
               <button
                 key={type}
                 onClick={() => handleShapeClick(type)}
-                className="flex flex-col items-center justify-center gap-3 p-6 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors border-2 border-transparent hover:border-blue-500 group"
+                className="flex flex-col items-center justify-center gap-3 p-6 bg-secondary hover:bg-secondary/80 rounded-lg transition-colors border-2 border-transparent hover:border-primary group"
                 title={`Add ${getShapeDisplayName(type)}`}
               >
-                <Icon className="w-10 h-10 text-gray-300 group-hover:text-blue-400 transition-colors" />
-                <span className="text-xs text-gray-300 group-hover:text-white font-medium">
+                <Icon className="w-10 h-10 text-foreground group-hover:text-primary transition-colors" />
+                <span className="text-xs text-foreground group-hover:text-white font-medium">
                   {getShapeDisplayName(type)}
                 </span>
               </button>
@@ -201,13 +201,13 @@ const ShapeToolbar: React.FC<ShapeToolbarProps> = ({ onAddShape, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-900 px-6 py-4 border-t border-gray-700 flex justify-between items-center">
-          <p className="text-sm text-gray-400">
+        <div className="bg-white px-6 py-4 border-t border-border flex justify-between items-center">
+          <p className="text-sm text-muted-foreground">
             Click on a shape to add it to the scene
           </p>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors text-sm"
+            className="px-4 py-2 bg-secondary hover:bg-secondary/80 text-white rounded transition-colors text-sm"
           >
             Cancel
           </button>
