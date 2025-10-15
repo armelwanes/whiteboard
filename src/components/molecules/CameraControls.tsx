@@ -9,13 +9,28 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface CameraConfig {
+  zoom: number;
+  position: { x: number; y: number };
+  duration: number;
+  transition_duration: number;
+  easing: string;
+  [key: string]: any;
+}
+
+interface CameraControlsProps {
+  cameras?: CameraConfig[];
+  onChange: (cameras: CameraConfig[]) => void;
+  type?: 'scene' | 'layer';
+}
+
 /**
  * CameraControls Component
  * Provides UI controls for managing camera sequences at the scene level
  * and camera settings at the layer level
  */
-const CameraControls = ({ cameras = [], onChange, type = 'scene' }) => {
-  const [expandedIndex, setExpandedIndex] = useState(null);
+const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange, type = 'scene' }) => {
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   const handleAddCamera = () => {
     const newCamera = createCamera({
@@ -29,7 +44,7 @@ const CameraControls = ({ cameras = [], onChange, type = 'scene' }) => {
     setExpandedIndex(cameras.length);
   };
 
-  const handleRemoveCamera = (index) => {
+  const handleRemoveCamera = (index: number) => {
     const newCameras = cameras.filter((_, i) => i !== index);
     onChange(newCameras);
     if (expandedIndex === index) {
@@ -37,13 +52,13 @@ const CameraControls = ({ cameras = [], onChange, type = 'scene' }) => {
     }
   };
 
-  const handleUpdateCamera = (index, updates) => {
+  const handleUpdateCamera = (index: number, updates: Partial<CameraConfig>) => {
     const newCameras = [...cameras];
     newCameras[index] = { ...newCameras[index], ...updates };
     onChange(newCameras);
   };
 
-  const handleMoveCamera = (index, direction) => {
+  const handleMoveCamera = (index: number, direction: 'up' | 'down') => {
     if (
       (direction === 'up' && index === 0) ||
       (direction === 'down' && index === cameras.length - 1)

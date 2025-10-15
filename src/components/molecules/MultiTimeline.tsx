@@ -13,7 +13,15 @@ import {
   reorderTrack
 } from '../../utils/multiTimelineSystem';
 
-const TRACK_ICONS = {
+interface MultiTimelineProps {
+  timeline: any;
+  onUpdateTimeline: (timeline: any) => void;
+  currentTime?: number;
+  totalDuration?: number;
+  [key: string]: any;
+}
+
+const TRACK_ICONS: Record<string, any> = {
   [TrackType.VISUAL]: Eye,
   [TrackType.AUDIO]: Music,
   [TrackType.CAMERA]: Camera,

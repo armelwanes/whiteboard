@@ -4,19 +4,24 @@ import {
   Plus, ChevronDown, ChevronUp, Mic, Disc, Headphones
 } from 'lucide-react';
 
+interface EnhancedAudioManagerProps {
+  scene: any;
+  onSceneUpdate: (updates: any) => void;
+}
+
 /**
  * Enhanced Audio Manager Component
  * Modern, elegant UI for managing background music, voice-overs, and sound effects
  */
-const EnhancedAudioManager = ({ scene, onSceneUpdate }) => {
+const EnhancedAudioManager: React.FC<EnhancedAudioManagerProps> = ({ scene, onSceneUpdate }) => {
   const [expanded, setExpanded] = useState(false);
   const [masterVolume, setMasterVolume] = useState(1.0);
-  const [playingTrackId, setPlayingTrackId] = useState(null);
-  const audioRefs = useRef({});
+  const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
+  const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
   
-  const backgroundMusicRef = useRef(null);
-  const narrationRef = useRef(null);
-  const soundEffectRef = useRef(null);
+  const backgroundMusicRef = useRef<HTMLInputElement>(null);
+  const narrationRef = useRef<HTMLInputElement>(null);
+  const soundEffectRef = useRef<HTMLInputElement>(null);
 
   // Initialize audio refs
   useEffect(() => {

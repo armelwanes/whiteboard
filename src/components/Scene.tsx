@@ -1,7 +1,13 @@
 import React from 'react';
 import { LayerEditor } from './organisms';
 
-const Scene = ({ 
+interface SceneProps {
+  isActive: boolean;
+  backgroundImage?: string;
+  scene: any;
+}
+
+const Scene: React.FC<SceneProps> = ({ 
   isActive, 
   backgroundImage,
   scene,

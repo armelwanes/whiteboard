@@ -1,7 +1,30 @@
 import React, { useState } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Plus, Trash2 } from 'lucide-react';
 
-const Timeline = ({ 
+interface TimelineMarker {
+  time: number;
+  label: string;
+  color: string;
+  metadata: any;
+}
+
+interface TimelineData {
+  markers?: TimelineMarker[];
+  [key: string]: any;
+}
+
+interface TimelineProps {
+  currentTime: number;
+  totalDuration: number;
+  isPlaying: boolean;
+  onPlayPause: () => void;
+  onSeek: (time: number) => void;
+  scenes?: any[];
+  timeline?: TimelineData | null;
+  onUpdateTimeline?: ((timeline: TimelineData) => void) | null;
+}
+
+const Timeline: React.FC<TimelineProps> = ({ 
   currentTime, 
   totalDuration, 
   isPlaying, 
@@ -13,16 +36,16 @@ const Timeline = ({
 }) => {
   const [showKeyframes, setShowKeyframes] = useState(true);
   const [showMarkers, setShowMarkers] = useState(true);
-  const [selectedTrack, setSelectedTrack] = useState(null);
+  const [selectedTrack, setSelectedTrack] = useState<string | null>(null);
 
-  const formatTime = (seconds) => {
+  const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     const ms = Math.floor((seconds % 1) * 10);
     return `${mins}:${secs.toString().padStart(2, '0')}.${ms}`;
   };
 
-  const handleSeek = (e) => {
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const percentage = x / rect.width;
@@ -56,7 +79,7 @@ const Timeline = ({
     onUpdateTimeline(updatedTimeline);
   };
 
-  const deleteMarker = (index) => {
+  const deleteMarker = (index: number) => {
     if (!timeline || !onUpdateTimeline) return;
     
     const updatedTimeline = {

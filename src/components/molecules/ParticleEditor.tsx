@@ -3,11 +3,18 @@ import { Sparkles, Plus, Trash2, Play, Square } from 'lucide-react';
 import ParticleSystem from '../ParticleSystem';
 import { PARTICLE_PRESETS } from '../../utils/particlePresets';
 
+interface ParticleEditorProps {
+  layer: any;
+  onLayerUpdate: (updates: any) => void;
+  canvasWidth?: number;
+  canvasHeight?: number;
+}
+
 /**
  * Particle Editor Component
  * UI for creating and configuring particle effects
  */
-const ParticleEditor = ({ 
+const ParticleEditor: React.FC<ParticleEditorProps> = ({ 
   layer, 
   onLayerUpdate,
   canvasWidth = 800,
