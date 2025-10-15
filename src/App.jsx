@@ -47,7 +47,8 @@ function App() {
     if (historyIndex > 0) {
       isUndoRedoAction.current = true
       setHistoryIndex(historyIndex - 1)
-      setScenes(JSON.parse(JSON.stringify(history[historyIndex - 1])))
+      // TODO: Restore scenes from history using the service
+      console.log('Undo not yet implemented with new architecture')
     }
   }
 
@@ -56,7 +57,8 @@ function App() {
     if (historyIndex < history.length - 1) {
       isUndoRedoAction.current = true
       setHistoryIndex(historyIndex + 1)
-      setScenes(JSON.parse(JSON.stringify(history[historyIndex + 1])))
+      // TODO: Restore scenes from history using the service
+      console.log('Redo not yet implemented with new architecture')
     }
   }
 
@@ -231,18 +233,20 @@ function App() {
   }
 
   // Import scenes configuration from JSON
-  const handleImportConfig = (e) => {
+  const handleImportConfig = async (e) => {
     const file = e.target.files[0]
     if (!file) return
 
     const reader = new FileReader()
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const config = JSON.parse(event.target.result)
         if (config.scenes && Array.isArray(config.scenes)) {
-          setScenes(config.scenes)
-          setSelectedSceneIndex(0)
-          alert('Configuration importée avec succès!')
+          // Use the service to bulk update scenes
+          const scenesService = (await import('./app/scenes')).scenesService
+          await scenesService.bulkUpdate(config.scenes)
+          // Reload scenes
+          window.location.reload() // Simple approach for now
         } else {
           alert('Format de fichier invalide. Le fichier doit contenir un tableau "scenes".')
         }
