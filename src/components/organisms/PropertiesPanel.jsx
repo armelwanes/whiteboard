@@ -7,6 +7,13 @@ import {
   Library
 } from 'lucide-react';
 import AudioManager from '../audio/AudioManager';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const PropertiesPanel = ({ 
   scene, 
@@ -150,15 +157,19 @@ const PropertiesPanel = ({
               <label className="block text-gray-300 text-xs mb-1.5">
                 Type d'animation
               </label>
-              <select
+              <Select
                 value={scene.animation || 'fade'}
-                onChange={(e) => handleSceneChange('animation', e.target.value)}
-                className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onValueChange={(value) => handleSceneChange('animation', value)}
               >
-                <option value="fade">Fade</option>
-                <option value="slide">Slide</option>
-                <option value="scale">Scale</option>
-              </select>
+                <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <SelectValue placeholder="Sélectionner une animation" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fade">Fade</SelectItem>
+                  <SelectItem value="slide">Slide</SelectItem>
+                  <SelectItem value="scale">Scale</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

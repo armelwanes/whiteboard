@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
 import { Film, Plus, Trash2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 /**
  * LayerAnimationControls Component
@@ -68,14 +75,18 @@ const LayerAnimationControls = ({ animation, onChange }) => {
             <label className="block text-gray-300 text-xs mb-1.5">
               Type d'animation
             </label>
-            <select
+            <Select
               value={animation.type}
-              onChange={(e) => handleUpdateAnimation({ type: e.target.value })}
-              className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onValueChange={(value) => handleUpdateAnimation({ type: value })}
             >
-              <option value="zoom_in">Zoom In</option>
-              <option value="zoom_out">Zoom Out</option>
-            </select>
+              <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <SelectValue placeholder="Sélectionner un type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="zoom_in">Zoom In</SelectItem>
+                <SelectItem value="zoom_out">Zoom Out</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Duration */}

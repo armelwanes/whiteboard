@@ -13,6 +13,13 @@ import {
   addAsset
 } from '../../utils/assetManager';
 import { ImageCropModal } from '../molecules';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const AssetLibrary = ({ onClose, onSelectAsset }) => {
   const [assets, setAssets] = useState([]);
@@ -268,17 +275,21 @@ const AssetLibrary = ({ onClose, onSelectAsset }) => {
             {/* Sort Options */}
             <div className="mb-6">
               <h3 className="text-white font-semibold mb-3 text-sm">Trier par</h3>
-              <select
+              <Select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full bg-gray-800 text-white border border-gray-700 rounded px-3 py-2 text-sm"
+                onValueChange={(value) => setSortBy(value)}
               >
-                <option value="uploadDate">Date d'upload</option>
-                <option value="lastUsed">Dernière utilisation</option>
-                <option value="usageCount">Utilisation</option>
-                <option value="name">Nom</option>
-                <option value="size">Taille</option>
-              </select>
+                <SelectTrigger className="w-full bg-gray-800 text-white border border-gray-700 rounded px-3 py-2 text-sm">
+                  <SelectValue placeholder="Sélectionner un tri" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="uploadDate">Date d'upload</SelectItem>
+                  <SelectItem value="lastUsed">Dernière utilisation</SelectItem>
+                  <SelectItem value="usageCount">Utilisation</SelectItem>
+                  <SelectItem value="name">Nom</SelectItem>
+                  <SelectItem value="size">Taille</SelectItem>
+                </SelectContent>
+              </Select>
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => setSortOrder('asc')}

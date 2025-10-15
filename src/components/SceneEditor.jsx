@@ -2,6 +2,13 @@ import React, { useState, useRef } from 'react';
 import Scene from './Scene';
 import EnhancedAudioManager from './EnhancedAudioManager';
 import ThumbnailMaker from './ThumbnailMaker';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const SceneEditor = ({ scene, onClose, onSave }) => {
   const [editedScene, setEditedScene] = useState({ 
@@ -228,15 +235,19 @@ const SceneEditor = ({ scene, onClose, onSave }) => {
                 <label className="block text-white font-semibold mb-2 text-sm">
                   Type d'animation
                 </label>
-                <select
+                <Select
                   value={editedScene.animation}
-                  onChange={(e) => handleChange('animation', e.target.value)}
-                  className="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  onValueChange={(value) => handleChange('animation', value)}
                 >
-                  <option value="fade">Fade</option>
-                  <option value="slide">Slide</option>
-                  <option value="scale">Scale</option>
-                </select>
+                  <SelectTrigger className="w-full bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    <SelectValue placeholder="Sélectionner une animation" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fade">Fade</SelectItem>
+                    <SelectItem value="slide">Slide</SelectItem>
+                    <SelectItem value="scale">Scale</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Objects List */}

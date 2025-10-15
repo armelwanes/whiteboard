@@ -1,5 +1,12 @@
 import React from 'react';
 import { Settings, Clock, Zap } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 /**
  * CameraSettingsPanel Component
@@ -116,18 +123,22 @@ const CameraSettingsPanel = ({ camera, onUpdate }) => {
             <Zap className="w-4 h-4 inline mr-1" />
             Type de mouvement
           </label>
-          <select
+          <Select
             value={camera.movementType || 'ease_out'}
-            onChange={(e) => handleChange('movementType', e.target.value)}
-            className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+            onValueChange={(value) => handleChange('movementType', value)}
           >
-            <option value="linear">Linéaire</option>
-            <option value="ease_in">Ease In</option>
-            <option value="ease_out">Ease Out</option>
-            <option value="ease_in_out">Ease In Out</option>
-            <option value="ease_in_cubic">Ease In Cubic</option>
-            <option value="ease_out_cubic">Ease Out Cubic</option>
-          </select>
+            <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+              <SelectValue placeholder="Sélectionner un type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="linear">Linéaire</SelectItem>
+              <SelectItem value="ease_in">Ease In</SelectItem>
+              <SelectItem value="ease_out">Ease Out</SelectItem>
+              <SelectItem value="ease_in_out">Ease In Out</SelectItem>
+              <SelectItem value="ease_in_cubic">Ease In Cubic</SelectItem>
+              <SelectItem value="ease_out_cubic">Ease Out Cubic</SelectItem>
+            </SelectContent>
+          </Select>
           <p className="text-xs text-gray-500 mt-1">
             Style d'animation pour la transition
           </p>

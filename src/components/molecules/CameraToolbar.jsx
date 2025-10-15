@@ -1,5 +1,12 @@
 import React from 'react';
 import { Camera, Plus, ZoomIn, ZoomOut, Maximize2, Lock, Unlock } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 /**
  * CameraToolbar Component
@@ -30,19 +37,22 @@ const CameraToolbar = ({
 
         {/* Camera Selector */}
         {cameras.length > 0 && (
-          <select
+          <Select
             value={selectedCameraId || ''}
-            onChange={(e) => onSelectCamera(e.target.value || null)}
-            className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 max-w-xs"
-            style={{ maxHeight: '300px' }}
+            onValueChange={(value) => onSelectCamera(value || null)}
           >
-            <option value="">Aucune sélection</option>
-            {cameras.map((camera, index) => (
-              <option key={camera.id} value={camera.id}>
-                {index + 1}. {camera.name || `Camera ${camera.id}`} ({camera.zoom.toFixed(1)}x)
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 max-w-xs">
+              <SelectValue placeholder="Aucune sélection" />
+            </SelectTrigger>
+            <SelectContent style={{ maxHeight: '300px' }}>
+              <SelectItem value="">Aucune sélection</SelectItem>
+              {cameras.map((camera, index) => (
+                <SelectItem key={camera.id} value={camera.id}>
+                  {index + 1}. {camera.name || `Camera ${camera.id}`} ({camera.zoom.toFixed(1)}x)
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
 
         {/* Add Camera Button */}

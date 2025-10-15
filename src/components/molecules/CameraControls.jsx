@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { Camera, Plus, Trash2, Eye, MoveUp, MoveDown } from 'lucide-react';
 import { createCamera } from '../../utils/cameraAnimator';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 /**
  * CameraControls Component
@@ -265,20 +272,24 @@ const CameraControls = ({ cameras = [], onChange, type = 'scene' }) => {
                         <label className="block text-gray-300 text-xs mb-1.5">
                           Fonction d'Easing
                         </label>
-                        <select
+                        <Select
                           value={camera.easing || 'ease_out'}
-                          onChange={(e) =>
-                            handleUpdateCamera(index, { easing: e.target.value })
+                          onValueChange={(value) =>
+                            handleUpdateCamera(index, { easing: value })
                           }
-                          className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                          <option value="linear">Linear</option>
-                          <option value="ease_in">Ease In</option>
-                          <option value="ease_out">Ease Out (recommandé)</option>
-                          <option value="ease_in_out">Ease In Out</option>
-                          <option value="ease_in_cubic">Ease In Cubic</option>
-                          <option value="ease_out_cubic">Ease Out Cubic</option>
-                        </select>
+                          <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <SelectValue placeholder="Sélectionner un easing" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="linear">Linear</SelectItem>
+                            <SelectItem value="ease_in">Ease In</SelectItem>
+                            <SelectItem value="ease_out">Ease Out (recommandé)</SelectItem>
+                            <SelectItem value="ease_in_out">Ease In Out</SelectItem>
+                            <SelectItem value="ease_in_cubic">Ease In Cubic</SelectItem>
+                            <SelectItem value="ease_out_cubic">Ease Out Cubic</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <p className="text-gray-500 text-xs mt-1">
                           {camera.easing === 'ease_out' && 'Mouvement naturel de caméra'}
                           {camera.easing === 'linear' && 'Vitesse constante'}
