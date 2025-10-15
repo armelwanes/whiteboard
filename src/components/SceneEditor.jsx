@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import Scene from './Scene';
-import AudioManager from './audio/AudioManager';
+import EnhancedAudioManager from './EnhancedAudioManager';
+import ThumbnailMaker from './ThumbnailMaker';
 
 const SceneEditor = ({ scene, onClose, onSave }) => {
   const [editedScene, setEditedScene] = useState({ 
@@ -8,6 +9,7 @@ const SceneEditor = ({ scene, onClose, onSave }) => {
     objects: scene.objects || []
   });
   const [selectedObjectId, setSelectedObjectId] = useState(null);
+  const [showThumbnailMaker, setShowThumbnailMaker] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleChange = (field, value) => {
@@ -70,6 +72,18 @@ const SceneEditor = ({ scene, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      {/* Thumbnail Maker Modal */}
+      {showThumbnailMaker && (
+        <ThumbnailMaker
+          scene={editedScene}
+          onClose={() => setShowThumbnailMaker(false)}
+          onSave={(thumbnail) => {
+            setEditedScene({ ...editedScene, thumbnail });
+            setShowThumbnailMaker(false);
+          }}
+        />
+      )}
+      
       <div className="bg-gray-900 rounded-lg shadow-xl w-full max-w-6xl max-h-[95vh] overflow-hidden flex">
         {/* Left Side - Scene Preview */}
         <div className="flex-1 bg-gray-950 relative">
@@ -120,7 +134,16 @@ const SceneEditor = ({ scene, onClose, onSave }) => {
         <div className="w-96 bg-gray-900 flex flex-col border-l border-gray-700">
           {/* Header */}
           <div className="bg-gray-800 px-6 py-4 border-b border-gray-700 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white">Propriétés</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-bold text-white">Propriétés</h2>
+              <button
+                onClick={() => setShowThumbnailMaker(true)}
+                className="bg-red-600 hover:bg-red-700 text-white font-medium py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-sm shadow-sm"
+                title="Créer Miniature"
+              >
+                <span className="text-base">📹</span>
+              </button>
+            </div>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-white text-2xl leading-none"
@@ -261,13 +284,11 @@ const SceneEditor = ({ scene, onClose, onSave }) => {
                 </div>
               </div>
 
-              {/* Audio Manager */}
+              {/* Enhanced Audio Manager */}
               <div>
-                <AudioManager 
+                <EnhancedAudioManager 
                   scene={editedScene}
                   onSceneUpdate={setEditedScene}
-                  currentTime={0}
-                  isPlaying={false}
                 />
               </div>
             </div>
