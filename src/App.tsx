@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimationContainer, ScenePanel, ShapeToolbar, AssetLibrary } from './components/organisms';
 import HandWritingTest from './pages/HandWritingTest';
+import ShadcnDemo from './components/ShadcnDemo';
 import { useScenes, useScenesActions, Scene, Layer } from './app/scenes';
 import { MAX_HISTORY_STATES } from './config/constants';
 
@@ -21,6 +22,7 @@ function App() {
 
   const [selectedSceneIndex, setSelectedSceneIndex] = useState(0);
   const [showHandWritingTest, setShowHandWritingTest] = useState(false);
+  const [showShadcnDemo, setShowShadcnDemo] = useState(false);
   const [showShapeToolbar, setShowShapeToolbar] = useState(false);
   const [showAssetLibrary, setShowAssetLibrary] = useState(false);
   const [history, setHistory] = useState<Scene[][]>([]);
@@ -68,11 +70,15 @@ function App() {
         e.preventDefault();
         handleRedo();
       }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
+        e.preventDefault();
+        setShowShadcnDemo(!showShadcnDemo);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [historyIndex, history]);
+  }, [historyIndex, history, showShadcnDemo]);
 
   const addScene = async () => {
     try {
@@ -254,6 +260,20 @@ function App() {
     return <HandWritingTest onBack={() => setShowHandWritingTest(false)} />;
   }
 
+  if (showShadcnDemo) {
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setShowShadcnDemo(false)}
+          className="fixed top-4 right-4 z-50 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg"
+        >
+          ← Retour à l'application
+        </button>
+        <ShadcnDemo />
+      </div>
+    );
+  }
+
   if (loading && scenes.length === 0) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
@@ -267,6 +287,19 @@ function App() {
 
   return (
     <div className="app flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
+      {/* Floating Demo Button */}
+      <button
+        onClick={() => setShowShadcnDemo(true)}
+        className="fixed bottom-4 right-4 z-50 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 transition-all hover:scale-105"
+        title="Voir la démo shadcn/ui (Ctrl+Shift+D)"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+        <span className="font-medium">Démo UI</span>
+      </button>
+
       {showShapeToolbar && (
         <ShapeToolbar
           onAddShape={handleAddShape}
