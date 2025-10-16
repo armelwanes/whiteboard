@@ -9,13 +9,11 @@ import { ImageCropModal } from '../molecules';
 import { createTimeline } from '../../utils/timelineSystem';
 import ScenePanel from './ScenePanel';
 import { addAsset } from '../../utils/assetManager';
+import { useSceneStore } from '../../app/scenes';
 
 interface AnimationContainerProps {
   scenes?: any[];
   updateScene: (sceneIndex: number, updates: any) => void;
-  selectedSceneIndex?: number;
-  setSelectedSceneIndex: (index: number) => void;
-  onSelectScene: (index: number) => void;
   onAddScene: () => void;
   onDeleteScene: (index: number) => void;
   onDuplicateScene: (index: number) => void;
@@ -24,15 +22,33 @@ interface AnimationContainerProps {
   onImportConfig: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], updateScene, selectedSceneIndex = 0, setSelectedSceneIndex, onSelectScene, onAddScene, onDeleteScene, onDuplicateScene, onMoveScene, onExportConfig, onImportConfig }) => {
+const AnimationContainer: React.FC<AnimationContainerProps> = ({ 
+  scenes = [], 
+  updateScene, 
+  onAddScene, 
+  onDeleteScene, 
+  onDuplicateScene, 
+  onMoveScene, 
+  onExportConfig, 
+  onImportConfig 
+}) => {
+  // Get state from Zustand store
+  const selectedSceneIndex = useSceneStore((state) => state.selectedSceneIndex);
+  const setSelectedSceneIndex = useSceneStore((state) => state.setSelectedSceneIndex);
+  const selectedLayerId = useSceneStore((state) => state.selectedLayerId);
+  const setSelectedLayerId = useSceneStore((state) => state.setSelectedLayerId);
+  const showAssetLibrary = useSceneStore((state) => state.showAssetLibrary);
+  const setShowAssetLibrary = useSceneStore((state) => state.setShowAssetLibrary);
+  const showShapeToolbar = useSceneStore((state) => state.showShapeToolbar);
+  const setShowShapeToolbar = useSceneStore((state) => state.setShowShapeToolbar);
+  const showCropModal = useSceneStore((state) => state.showCropModal);
+  const setShowCropModal = useSceneStore((state) => state.setShowCropModal);
+  const pendingImageData = useSceneStore((state) => state.pendingImageData);
+  const setPendingImageData = useSceneStore((state) => state.setPendingImageData);
+
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
-  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
-  const [showAssetLibrary, setShowAssetLibrary] = useState(false);
-  const [showShapeToolbar, setShowShapeToolbar] = useState(false);
-  const [showCropModal, setShowCropModal] = useState(false);
-  const [pendingImageData, setPendingImageData] = useState<any>(null);
   const [globalTimeline, setGlobalTimeline] = useState(() => {
     // Initialize with empty timeline
     const totalDuration = scenes.reduce((sum, scene) => sum + scene.duration, 0);
