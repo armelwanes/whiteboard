@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
-  X, Search, Tag, Trash2, Edit2, Check, 
-  Image as ImageIcon, Clock, TrendingUp, Upload
+  Image as ImageIcon
 } from 'lucide-react';
 import {
   getCachedAssets,
@@ -14,12 +13,13 @@ import {
 } from '../../utils/assetManager';
 import { ImageCropModal } from '../molecules';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  AssetLibraryHeader,
+  AssetSearchBar,
+  AssetViewModeSelector,
+  AssetSortControls,
+  AssetTagsFilter,
+  AssetCard
+} from '../molecules/asset-library';
 
 interface AssetLibraryProps {
   onClose: () => void;
@@ -197,193 +197,44 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
       
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col border border-border">
-        {/* Header */}
-        <div className="bg-secondary/30 px-6 py-4 border-b border-border flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <ImageIcon className="w-6 h-6 text-blue-500" />
-            <h2 className="text-2xl font-bold text-white">Bibliothèque d'Assets</h2>
-            {stats && (
-              <span className="text-sm text-muted-foreground">
-                ({stats.totalCount} assets • {stats.totalSizeMB} MB)
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded flex items-center gap-2 transition-colors"
-            >
-              <Upload className="w-4 h-4" />
-              <span>Ajouter</span>
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-            <button
-              onClick={onClose}
-              className="text-muted-foreground hover:text-white transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-        </div>
+        <AssetLibraryHeader
+          stats={stats}
+          onClose={onClose}
+          onAddAsset={() => fileInputRef.current?.click()}
+          fileInputRef={fileInputRef}
+          onImageUpload={handleImageUpload}
+        />
 
         <div className="flex-1 flex overflow-hidden">
           {/* Left Sidebar - Filters */}
           <div className="w-64 bg-gray-850 border-r border-border p-4 overflow-y-auto flex-shrink-0">
-            {/* View Mode */}
-            <div className="mb-6">
-              <h3 className="text-white font-semibold mb-3 text-sm flex items-center gap-2">
-                <ImageIcon className="w-4 h-4" />
-                Affichage
-              </h3>
-              <div className="space-y-2">
-                <button
-                  onClick={() => setViewMode('all')}
-                  className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
-                    viewMode === 'all'
-                      ? 'bg-primary text-white'
-                      : 'bg-secondary/30 text-foreground hover:bg-secondary/80'
-                  }`}
-                >
-                  Tous les assets
-                </button>
-                <button
-                  onClick={() => setViewMode('cached')}
-                  className={`w-full text-left px-3 py-2 rounded text-sm transition-colors flex items-center gap-2 ${
-                    viewMode === 'cached'
-                      ? 'bg-primary text-white'
-                      : 'bg-secondary/30 text-foreground hover:bg-secondary/80'
-                  }`}
-                >
-                  <TrendingUp className="w-4 h-4" />
-                  Plus utilisés
-                </button>
-                <button
-                  onClick={() => setViewMode('recent')}
-                  className={`w-full text-left px-3 py-2 rounded text-sm transition-colors flex items-center gap-2 ${
-                    viewMode === 'recent'
-                      ? 'bg-primary text-white'
-                      : 'bg-secondary/30 text-foreground hover:bg-secondary/80'
-                  }`}
-                >
-                  <Clock className="w-4 h-4" />
-                  Récents
-                </button>
-              </div>
-            </div>
+            <AssetViewModeSelector
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+            />
 
-            {/* Sort Options */}
-            <div className="mb-6">
-              <h3 className="text-white font-semibold mb-3 text-sm">Trier par</h3>
-              <Select
-                value={sortBy}
-                onValueChange={(value) => setSortBy(value)}
-              >
-                <SelectTrigger className="w-full bg-secondary/30 text-white border border-border rounded px-3 py-2 text-sm">
-                  <SelectValue placeholder="Sélectionner un tri" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="uploadDate">Date d'upload</SelectItem>
-                  <SelectItem value="lastUsed">Dernière utilisation</SelectItem>
-                  <SelectItem value="usageCount">Utilisation</SelectItem>
-                  <SelectItem value="name">Nom</SelectItem>
-                  <SelectItem value="size">Taille</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="flex gap-2 mt-2">
-                <button
-                  onClick={() => setSortOrder('asc')}
-                  className={`flex-1 px-3 py-1 rounded text-xs ${
-                    sortOrder === 'asc'
-                      ? 'bg-primary text-white'
-                      : 'bg-secondary/30 text-muted-foreground'
-                  }`}
-                >
-                  ↑ Croissant
-                </button>
-                <button
-                  onClick={() => setSortOrder('desc')}
-                  className={`flex-1 px-3 py-1 rounded text-xs ${
-                    sortOrder === 'desc'
-                      ? 'bg-primary text-white'
-                      : 'bg-secondary/30 text-muted-foreground'
-                  }`}
-                >
-                  ↓ Décroissant
-                </button>
-              </div>
-            </div>
+            <AssetSortControls
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSortByChange={setSortBy}
+              onSortOrderChange={setSortOrder}
+            />
 
-            {/* Tags Filter */}
-            <div>
-              <h3 className="text-white font-semibold mb-3 text-sm flex items-center gap-2">
-                <Tag className="w-4 h-4" />
-                Tags ({allTags.length})
-              </h3>
-              <div className="space-y-1 max-h-64 overflow-y-auto">
-                {allTags.length === 0 ? (
-                  <p className="text-gray-500 text-xs italic">Aucun tag disponible</p>
-                ) : (
-                  allTags.map(tag => (
-                    <button
-                      key={tag}
-                      onClick={() => toggleTag(tag)}
-                      className={`w-full text-left px-3 py-1.5 rounded text-xs transition-colors ${
-                        selectedTags.includes(tag)
-                          ? 'bg-primary text-white'
-                          : 'bg-secondary/30 text-foreground hover:bg-secondary/80'
-                      }`}
-                    >
-                      # {tag}
-                    </button>
-                  ))
-                )}
-              </div>
-              {selectedTags.length > 0 && (
-                <button
-                  onClick={() => setSelectedTags([])}
-                  className="w-full mt-2 text-xs text-primary hover:text-blue-300"
-                >
-                  Effacer les filtres
-                </button>
-              )}
-            </div>
+            <AssetTagsFilter
+              allTags={allTags}
+              selectedTags={selectedTags}
+              onToggleTag={toggleTag}
+              onClearTags={() => setSelectedTags([])}
+            />
           </div>
 
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Search Bar */}
-            <div className="bg-gray-850 p-4 border-b border-border flex-shrink-0">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Rechercher par nom..."
-                  className="w-full bg-secondary/30 text-white border border-border rounded pl-10 pr-4 py-2"
-                />
-              </div>
-              {(searchQuery || selectedTags.length > 0) && (
-                <div className="mt-2 flex items-center gap-2 flex-wrap">
-                  {searchQuery && (
-                    <span className="text-xs bg-primary text-white px-2 py-1 rounded">
-                      Recherche: "{searchQuery}"
-                    </span>
-                  )}
-                  {selectedTags.map(tag => (
-                    <span key={tag} className="text-xs bg-purple-600 text-white px-2 py-1 rounded">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
+            <AssetSearchBar
+              searchQuery={searchQuery}
+              selectedTags={selectedTags}
+              onSearchChange={setSearchQuery}
+            />
 
             {/* Assets Grid */}
             <div className="flex-1 overflow-y-auto p-2 bg-white">
