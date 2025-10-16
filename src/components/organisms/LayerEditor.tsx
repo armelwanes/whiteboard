@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Upload, X, Save, Trash2, Eye, EyeOff, 
   MoveUp, MoveDown, Copy, Image as ImageIcon,
@@ -70,6 +70,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const backgroundImageInputRef = useRef<HTMLInputElement>(null);
   const backgroundMusicInputRef = useRef<HTMLInputElement>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const sceneWidth = 1920;
   const sceneHeight = 1080;
@@ -84,6 +85,28 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
     setSelectedLayerId(null); // Reset selection when scene changes
     setSelectedCamera(null); // Reset camera selection when scene changes
   }, [scene]);
+
+  // Auto-save functionality with debouncing
+  useEffect(() => {
+    // Clear any existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Set a new timeout to auto-save after 500ms of inactivity
+    saveTimeoutRef.current = setTimeout(() => {
+      if (onSave && editedScene) {
+        onSave(editedScene);
+      }
+    }, 500);
+
+    // Cleanup on unmount
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [editedScene, onSave]);
 
   const handleChange = (field, value) => {
     setEditedScene({ ...editedScene, [field]: value });
