@@ -70,7 +70,6 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const backgroundImageInputRef = useRef<HTMLInputElement>(null);
   const backgroundMusicInputRef = useRef<HTMLInputElement>(null);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const sceneWidth = 1920;
   const sceneHeight = 1080;
@@ -85,28 +84,6 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
     setSelectedLayerId(null); // Reset selection when scene changes
     setSelectedCamera(null); // Reset camera selection when scene changes
   }, [scene]);
-
-  // Auto-save functionality with debouncing
-  useEffect(() => {
-    // Clear any existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    // Set a new timeout to auto-save after 500ms of inactivity
-    saveTimeoutRef.current = setTimeout(() => {
-      if (onSave && editedScene) {
-        onSave(editedScene);
-      }
-    }, 500);
-
-    // Cleanup on unmount
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [editedScene, onSave]);
 
   const handleChange = (field, value) => {
     setEditedScene({ ...editedScene, [field]: value });
@@ -747,7 +724,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
       )}
       
       {/* Canvas Only - Properties Panel moved to AnimationContainer */}
-      <div className="bg-secondary/20 dark:bg-secondary flex flex-col flex-1 w-full h-full min-w-0">
+      <div className="bg-secondary/20 dark:bg-secondary flex flex-col flex-1 w-full h-full min-w-0 relative">
         <SceneCanvas
           scene={editedScene}
           onUpdateScene={(updates) => setEditedScene({ ...editedScene, ...updates })}
@@ -756,6 +733,16 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
           onSelectLayer={setSelectedLayerId}
           onSelectCamera={setSelectedCamera}
         />
+        
+        {/* Save Button - Floating Action Button */}
+        <button
+          onClick={handleSave}
+          className="absolute bottom-6 right-6 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-lg flex items-center gap-2 shadow-lg transition-all hover:shadow-xl z-10"
+          title="Sauvegarder les modifications"
+        >
+          <Save className="w-5 h-5" />
+          <span>Sauvegarder</span>
+        </button>
       </div>
     </div>
   );
