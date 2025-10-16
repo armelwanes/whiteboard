@@ -1,158 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Stage, Layer as KonvaLayer, Image as KonvaImage, Transformer, Text as KonvaText, Rect } from 'react-konva';
-import Konva from 'konva';
-import useImage from 'use-image';
+import { Stage, Layer as KonvaLayer, Rect } from 'react-konva';
 import { 
   Image as ImageIcon, Type, Download, Eye, Upload, 
   Palette, Trash2, Layers, X, Plus
 } from 'lucide-react';
-
-interface ImageLayerProps {
-  layer: any;
-  isSelected: boolean;
-  onSelect: () => void;
-  onChange: (updates: any) => void;
-}
-
-/**
- * Konva Image Layer Component
- */
-const ImageLayer: React.FC<ImageLayerProps> = ({ layer, isSelected, onSelect, onChange }) => {
-  const [img] = useImage(layer.src);
-  const imageRef = useRef<Konva.Image>(null);
-  const transformerRef = useRef<Konva.Transformer>(null);
-
-  useEffect(() => {
-    if (isSelected && transformerRef.current && imageRef.current && img) {
-      transformerRef.current.nodes([imageRef.current]);
-      transformerRef.current.getLayer().batchDraw();
-    }
-  }, [isSelected, img]);
-
-  if (!img) return null;
-
-  return (
-    <>
-      <KonvaImage
-        image={img}
-        x={layer.x}
-        y={layer.y}
-        scaleX={layer.scaleX}
-        scaleY={layer.scaleY}
-        rotation={layer.rotation || 0}
-        draggable
-        onClick={onSelect}
-        onTap={onSelect}
-        ref={imageRef}
-        onDragEnd={(e) => {
-          onChange({
-            ...layer,
-            x: e.target.x(),
-            y: e.target.y(),
-          });
-        }}
-        onTransformEnd={() => {
-          const node = imageRef.current;
-          const scaleX = node.scaleX();
-          const scaleY = node.scaleY();
-          
-          onChange({
-            ...layer,
-            x: node.x(),
-            y: node.y(),
-            rotation: node.rotation(),
-            scaleX,
-            scaleY,
-          });
-        }}
-      />
-      {isSelected && (
-        <Transformer
-          ref={transformerRef}
-          rotateEnabled={true}
-          keepRatio={false}
-          boundBoxFunc={(oldBox, newBox) => {
-            // Limit minimum size
-            if (newBox.width < 50 || newBox.height < 50) {
-              return oldBox;
-            }
-            return newBox;
-          }}
-        />
-      )}
-    </>
-  );
-};
-
-/**
- * Konva Text Layer Component
- */
-const TextLayer = ({ layer, isSelected, onSelect, onChange }) => {
-  const textRef = useRef();
-  const transformerRef = useRef();
-
-  useEffect(() => {
-    if (isSelected && transformerRef.current && textRef.current) {
-      transformerRef.current.nodes([textRef.current]);
-      transformerRef.current.getLayer().batchDraw();
-    }
-  }, [isSelected]);
-
-  return (
-    <>
-      <KonvaText
-        text={layer.text}
-        x={layer.x}
-        y={layer.y}
-        fontSize={layer.fontSize}
-        fontFamily={layer.fontFamily}
-        fontStyle={layer.fontStyle}
-        fill={layer.fill}
-        stroke={layer.stroke}
-        strokeWidth={layer.strokeWidth}
-        shadowColor={layer.shadowEnabled ? 'rgba(0, 0, 0, 0.8)' : 'transparent'}
-        shadowBlur={layer.shadowEnabled ? 15 : 0}
-        shadowOffsetX={layer.shadowEnabled ? 4 : 0}
-        shadowOffsetY={layer.shadowEnabled ? 4 : 0}
-        align={layer.align}
-        offsetX={layer.align === 'center' ? 0 : 0} // Center text on x position
-        offsetY={layer.fontSize / 2} // Center text vertically
-        draggable
-        onClick={onSelect}
-        onTap={onSelect}
-        ref={textRef}
-        onDragEnd={(e) => {
-          onChange({
-            ...layer,
-            x: e.target.x(),
-            y: e.target.y(),
-          });
-        }}
-        onTransformEnd={() => {
-          const node = textRef.current;
-          const scaleX = node.scaleX();
-          
-          onChange({
-            ...layer,
-            x: node.x(),
-            y: node.y(),
-            fontSize: Math.max(5, layer.fontSize * scaleX),
-          });
-          
-          node.scaleX(1);
-          node.scaleY(1);
-        }}
-      />
-      {isSelected && (
-        <Transformer
-          ref={transformerRef}
-          rotateEnabled={false}
-          enabledAnchors={['middle-left', 'middle-right']}
-        />
-      )}
-    </>
-  );
-};
+import { ThumbnailImageLayer, ThumbnailTextLayer } from '../molecules';
 
 /**
  * Thumbnail Maker Component
@@ -398,7 +250,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
                       {layers.map(layer => {
                         if (layer.type === 'image') {
                           return (
-                            <ImageLayer
+                            <ThumbnailImageLayer
                               key={layer.id}
                               layer={layer}
                               isSelected={layer.id === selectedLayerId}
@@ -408,7 +260,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
                           );
                         } else if (layer.type === 'text') {
                           return (
-                            <TextLayer
+                            <ThumbnailTextLayer
                               key={layer.id}
                               layer={layer}
                               isSelected={layer.id === selectedLayerId}

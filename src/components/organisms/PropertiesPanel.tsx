@@ -1,13 +1,4 @@
 import React from 'react';
-import { 
-  Upload, Save, Trash2, 
-  MoveUp, MoveDown, Copy,
-  Image as ImageIcon,
-  Layers as LayersIcon,
-  Library,
-  Type as TextIcon,
-  Square as ShapeIcon
-} from 'lucide-react';
 import AudioManager from '../audio/AudioManager';
 import {
   Select,
@@ -16,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { LayersListPanel, LayerPropertiesForm, ToolbarActions } from '../molecules';
 
 interface PropertiesPanelProps {
   scene: any;
@@ -78,46 +70,12 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       {/* Header */}
       <div className="bg-secondary/30 px-6 py-4 border-b border-border flex items-center justify-between flex-shrink-0">
         <h2 className="text-xl font-bold text-foreground">Propriétés</h2>
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={onOpenAssetLibrary}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
-            title="Bibliothèque d'assets"
-          >
-            <Library className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
-            title="Ajouter une image"
-          >
-            <Upload className="w-4 h-4" />
-          </button>
-          {onAddText && (
-            <button
-              onClick={onAddText}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
-              title="Ajouter du texte"
-            >
-              <TextIcon className="w-4 h-4" />
-            </button>
-          )}
-          {onAddShape && (
-            <button
-              onClick={onAddShape}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
-              title="Ajouter une forme"
-            >
-              <ShapeIcon className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={onImageUpload}
-          className="hidden"
+        <ToolbarActions
+          fileInputRef={fileInputRef}
+          onOpenAssetLibrary={onOpenAssetLibrary}
+          onImageUpload={onImageUpload}
+          onAddText={onAddText}
+          onAddShape={onAddShape}
         />
       </div>
 
@@ -209,211 +167,21 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           </div>
 
           {/* Layers List */}
-          <div className="bg-secondary/30 rounded-lg p-4 border border-border">
-            <h3 className="text-foreground font-semibold mb-3 text-sm flex items-center gap-2">
-              <LayersIcon className="w-4 h-4" />
-              Couches ({scene.layers?.length || 0})
-            </h3>
-            
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {(!scene.layers || scene.layers.length === 0) ? (
-                <p className="text-muted-foreground text-xs italic text-center py-4">
-                  Aucune couche pour le moment.<br />
-                  Cliquez sur "+" pour ajouter une image.
-                </p>
-              ) : (
-                scene.layers.map((layer, index) => (
-                  <div
-                    key={layer.id}
-                    className={`p-3 rounded-lg cursor-pointer transition-all border ${
-                      selectedLayerId === layer.id
-                        ? 'bg-primary bg-opacity-20 border-primary'
-                        : 'bg-secondary hover:bg-gray-650 border-border'
-                    }`}
-                    onClick={() => onSelectLayer(layer.id)}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <span className="text-lg">🖼️</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-foreground text-xs font-medium truncate">
-                            {layer.name || `Couche ${index + 1}`}
-                          </p>
-                          <p className="text-muted-foreground text-xs">
-                            z: {layer.z_index || index + 1}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onMoveLayer(layer.id, 'up');
-                          }}
-                          disabled={index === 0}
-                          className="p-1 hover:bg-secondary/80 rounded disabled:opacity-30"
-                          title="Déplacer vers le haut"
-                        >
-                          <MoveUp className="w-3 h-3 text-foreground" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onMoveLayer(layer.id, 'down');
-                          }}
-                          disabled={index === scene.layers.length - 1}
-                          className="p-1 hover:bg-secondary/80 rounded disabled:opacity-30"
-                          title="Déplacer vers le bas"
-                        >
-                          <MoveDown className="w-3 h-3 text-foreground" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDuplicateLayer(layer.id);
-                          }}
-                          className="p-1 hover:bg-secondary/80 rounded"
-                          title="Dupliquer"
-                        >
-                          <Copy className="w-3 h-3 text-foreground" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteLayer(layer.id);
-                          }}
-                          className="p-1 hover:bg-red-600 rounded"
-                          title="Supprimer"
-                        >
-                          <Trash2 className="w-3 h-3 text-red-400" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+          <LayersListPanel
+            layers={scene.layers || []}
+            selectedLayerId={selectedLayerId}
+            onSelectLayer={onSelectLayer}
+            onMoveLayer={onMoveLayer}
+            onDuplicateLayer={onDuplicateLayer}
+            onDeleteLayer={onDeleteLayer}
+          />
 
           {/* Selected Layer Properties */}
           {selectedLayer && (
-            <div className="bg-secondary/30 rounded-lg p-4 border border-border">
-              <h3 className="text-foreground font-semibold mb-3 text-sm">
-                Propriétés de la Couche Sélectionnée
-              </h3>
-
-              {/* Layer Name */}
-              <div className="mb-3">
-                <label className="block text-foreground text-xs mb-1.5">
-                  Nom
-                </label>
-                <input
-                  type="text"
-                  value={selectedLayer.name || ''}
-                  onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'name', e.target.value)}
-                  className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Nom de la couche"
-                />
-              </div>
-
-              {/* Position */}
-              <div className="mb-3 grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-foreground text-xs mb-1.5">
-                    Position X
-                  </label>
-                  <input
-                    type="number"
-                    value={Math.round(selectedLayer.position?.x || 0)}
-                    onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'position', {
-                      ...selectedLayer.position,
-                      x: parseInt(e.target.value) || 0
-                    })}
-                    className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-                <div>
-                  <label className="block text-foreground text-xs mb-1.5">
-                    Position Y
-                  </label>
-                  <input
-                    type="number"
-                    value={Math.round(selectedLayer.position?.y || 0)}
-                    onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'position', {
-                      ...selectedLayer.position,
-                      y: parseInt(e.target.value) || 0
-                    })}
-                    className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-              </div>
-
-              {/* Scale */}
-              <div className="mb-3">
-                <label className="block text-foreground text-xs mb-1.5">
-                  Échelle: {(selectedLayer.scale || 1.0).toFixed(2)}
-                </label>
-                <input
-                  type="range"
-                  min="0.1"
-                  max="3"
-                  step="0.1"
-                  value={selectedLayer.scale || 1.0}
-                  onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'scale', parseFloat(e.target.value))}
-                  className="w-full"
-                />
-              </div>
-
-              {/* Opacity */}
-              <div className="mb-3">
-                <label className="block text-foreground text-xs mb-1.5">
-                  Opacité: {Math.round((selectedLayer.opacity || 1.0) * 100)}%
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={selectedLayer.opacity || 1.0}
-                  onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'opacity', parseFloat(e.target.value))}
-                  className="w-full"
-                />
-              </div>
-
-              {/* Skip Rate */}
-              <div className="mb-3">
-                <label className="block text-foreground text-xs mb-1.5">
-                  Skip Rate (Vitesse de dessin)
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="50"
-                  value={selectedLayer.skip_rate || 10}
-                  onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'skip_rate', parseInt(e.target.value) || 10)}
-                  className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <p className="text-gray-500 text-xs mt-1">
-                  Plus élevé = dessin plus rapide
-                </p>
-              </div>
-
-              {/* Mode */}
-              <div className="mb-3">
-                <label className="block text-foreground text-xs mb-1.5">
-                  Mode de dessin
-                </label>
-                <select
-                  value={selectedLayer.mode || 'draw'}
-                  onChange={(e) => handleLayerPropertyChange(selectedLayer.id, 'mode', e.target.value)}
-                  className="w-full bg-secondary text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="draw">Draw (Dessin progressif)</option>
-                  <option value="eraser">Eraser (Gomme)</option>
-                  <option value="static">Static (Statique)</option>
-                </select>
-              </div>
-            </div>
+            <LayerPropertiesForm
+              layer={selectedLayer}
+              onPropertyChange={handleLayerPropertyChange}
+            />
           )}
 
           {/* Audio Manager */}

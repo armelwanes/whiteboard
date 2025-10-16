@@ -10,3 +10,8 @@ export { default as ImageCropModal } from './ImageCropModal';
 export { default as ParticleEditor } from './ParticleEditor';
 export { default as TextAnimationEditor } from './TextAnimationEditor';
 export { default as EnhancedAudioManager } from './EnhancedAudioManager';
+
+export * from './layer-management';
+export * from './canvas';
+export * from './thumbnail';
+export * from './properties';
