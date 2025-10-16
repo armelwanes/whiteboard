@@ -3,6 +3,7 @@ import Scene from '../Scene';
 import { LayersList } from '../molecules';
 import LayerEditor from './LayerEditor';
 import PropertiesPanel from './PropertiesPanel';
+import AssetLibrary from './AssetLibrary';
 import { createTimeline } from '../../utils/timelineSystem';
 import ScenePanel from './ScenePanel';
 
@@ -25,6 +26,7 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
+  const [showAssetLibrary, setShowAssetLibrary] = useState(false);
   const [globalTimeline, setGlobalTimeline] = useState(() => {
     // Initialize with empty timeline
     const totalDuration = scenes.reduce((sum, scene) => sum + scene.duration, 0);
@@ -32,6 +34,7 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
   });
   const animationRef = useRef<number | null>(null);
   const lastTimeRef = useRef(Date.now());
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Calculate total duration
   const totalDuration = scenes.reduce((sum, scene) => sum + scene.duration, 0);
@@ -90,10 +93,89 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
     };
   }, [isPlaying, totalDuration]);
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
 
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const imageUrl = event.target?.result as string;
+      
+      const currentScene = scenes[selectedSceneIndex];
+      if (!currentScene) return;
+
+      const newLayer = {
+        id: `layer-${Date.now()}`,
+        image_path: imageUrl,
+        name: file.name,
+        position: { x: 100, y: 100 },
+        z_index: (currentScene.layers?.length || 0) + 1,
+        skip_rate: 10,
+        scale: 1.0,
+        opacity: 1.0,
+        mode: 'draw',
+        type: 'image',
+        audio: {
+          narration: null,
+          soundEffects: [],
+          typewriter: null,
+          drawing: null,
+        }
+      };
+
+      updateScene(selectedSceneIndex, {
+        ...currentScene,
+        layers: [...(currentScene.layers || []), newLayer]
+      });
+      setSelectedLayerId(newLayer.id);
+    };
+    reader.readAsDataURL(file);
+    
+    // Reset file input
+    e.target.value = '';
+  };
+
+  const handleSelectAssetFromLibrary = (asset: any) => {
+    const currentScene = scenes[selectedSceneIndex];
+    if (!currentScene) return;
+
+    const newLayer = {
+      id: `layer-${Date.now()}`,
+      image_path: asset.dataUrl,
+      name: asset.name,
+      position: { x: 100, y: 100 },
+      z_index: (currentScene.layers?.length || 0) + 1,
+      skip_rate: 10,
+      scale: 1.0,
+      opacity: 1.0,
+      mode: 'draw',
+      type: 'image',
+      audio: {
+        narration: null,
+        soundEffects: [],
+        typewriter: null,
+        drawing: null,
+      }
+    };
+
+    updateScene(selectedSceneIndex, {
+      ...currentScene,
+      layers: [...(currentScene.layers || []), newLayer]
+    });
+    setSelectedLayerId(newLayer.id);
+    setShowAssetLibrary(false);
+  };
 
   return (
     <div className="animation-container">
+      {/* Asset Library Modal */}
+      {showAssetLibrary && (
+        <AssetLibrary
+          onClose={() => setShowAssetLibrary(false)}
+          onSelectAsset={handleSelectAssetFromLibrary}
+        />
+      )}
+
       {/* Main animation area */}
       <div className="grid grid-cols-12 grid-rows-12 gap-4">
         <div className="col-span-2 row-span-9">
@@ -184,9 +266,9 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
 
                 updateScene(selectedSceneIndex, { ...currentScene, layers: sortedLayers });
               }}
-              onImageUpload={() => {}}
-              onOpenAssetLibrary={() => {}}
-              fileInputRef={null}
+              onImageUpload={handleImageUpload}
+              onOpenAssetLibrary={() => setShowAssetLibrary(true)}
+              fileInputRef={fileInputRef}
             />
           )}
         </div>
