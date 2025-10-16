@@ -157,7 +157,7 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
     <div className="text-animation-editor space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-blue-400">
+        <div className="flex items-center gap-2 text-primary">
           <Type className="w-5 h-5" />
           <h3 className="text-lg font-semibold">Animations de Texte</h3>
         </div>
@@ -165,13 +165,13 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
 
       {/* Text Input */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-300">
+        <label className="block text-sm font-medium text-foreground">
           Texte à animer
         </label>
         <textarea
           value={previewText}
           onChange={(e) => setPreviewText(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white resize-none"
+          className="w-full px-3 py-2 bg-secondary/30 border border-border rounded text-white resize-none"
           rows={3}
           placeholder="Entrez votre texte ici..."
         />
@@ -179,11 +179,11 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
 
       {/* Preview */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-300">
+        <label className="block text-sm font-medium text-foreground">
           Aperçu
         </label>
         <div 
-          className="w-full bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 overflow-hidden"
+          className="w-full bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg border border-border overflow-hidden"
           style={{ minHeight: '120px' }}
         >
           <div style={getTextStyle()}>
@@ -193,7 +193,7 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
 
         {/* Progress bar */}
         {isPlaying && (
-          <div className="w-full bg-gray-700 rounded-full h-2">
+          <div className="w-full bg-secondary rounded-full h-2">
             <div 
               className="bg-blue-500 h-2 rounded-full transition-all"
               style={{ width: `${progress * 100}%` }}
@@ -207,7 +207,7 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
         {!isPlaying ? (
           <button
             onClick={handleStartPreview}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors"
           >
             <Play className="w-4 h-4" />
             Aperçu
@@ -232,7 +232,7 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
 
       {/* Animation Type Selection */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-300">
+        <label className="block text-sm font-medium text-foreground">
           Type d'animation
         </label>
         <div className="grid grid-cols-2 gap-2">
@@ -242,15 +242,15 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
               onClick={() => setAnimationType(type.id)}
               className={`p-3 rounded-lg border-2 transition-all text-left ${
                 animationType === type.id
-                  ? 'border-blue-500 bg-blue-500/20'
-                  : 'border-gray-700 bg-gray-800 hover:border-blue-400'
+                  ? 'border-primary bg-blue-500/20'
+                  : 'border-border bg-secondary/30 hover:border-blue-400'
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xl">{type.icon}</span>
                 <span className="text-sm font-medium text-white">{type.name}</span>
               </div>
-              <div className="text-xs text-gray-400">{type.description}</div>
+              <div className="text-xs text-muted-foreground">{type.description}</div>
             </button>
           ))}
         </div>
@@ -258,7 +258,7 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
 
       {/* Effect Type Selection */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-300">
+        <label className="block text-sm font-medium text-foreground">
           Effet visuel
         </label>
         <div className="grid grid-cols-4 gap-2">
@@ -269,11 +269,11 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
               className={`p-2 rounded-lg border-2 transition-all ${
                 effectType === type.id
                   ? 'border-purple-500 bg-purple-500/20'
-                  : 'border-gray-700 bg-gray-800 hover:border-purple-400'
+                  : 'border-border bg-secondary/30 hover:border-purple-400'
               }`}
             >
               <div className="text-2xl mb-1">{type.icon}</div>
-              <div className="text-xs font-medium text-gray-300">{type.name}</div>
+              <div className="text-xs font-medium text-foreground">{type.name}</div>
             </button>
           ))}
         </div>
@@ -281,7 +281,7 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
 
       {/* Animation Speed */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-300">
+        <label className="block text-sm font-medium text-foreground">
           Vitesse d'animation
         </label>
         <input
@@ -302,19 +302,19 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
       {/* Advanced Options */}
       <button
         onClick={() => setShowAdvanced(!showAdvanced)}
-        className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-300 transition-colors"
+        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <Settings className="w-4 h-4" />
         {showAdvanced ? 'Masquer' : 'Afficher'} les options avancées
       </button>
 
       {showAdvanced && (
-        <div className="space-y-3 p-4 bg-gray-800 rounded-lg">
+        <div className="space-y-3 p-4 bg-secondary/30 rounded-lg">
           {/* Animation Mode */}
           {(animationType === 'typing' || animationType === 'wordTyping') && (
             <>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">
+                <label className="block text-xs text-muted-foreground mb-1">
                   Mode
                 </label>
                 <Select
@@ -324,7 +324,7 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
                     mode: value
                   })}
                 >
-                  <SelectTrigger className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm">
+                  <SelectTrigger className="w-full px-3 py-2 bg-secondary border border-border rounded text-white text-sm">
                     <SelectValue placeholder="Sélectionner un mode" />
                   </SelectTrigger>
                   <SelectContent>
@@ -344,14 +344,14 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
                   })}
                   className="w-4 h-4"
                 />
-                <label className="text-xs text-gray-400">
+                <label className="text-xs text-muted-foreground">
                   Afficher le curseur
                 </label>
               </div>
 
               {animationOptions.showCursor && (
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">
+                  <label className="block text-xs text-muted-foreground mb-1">
                     Caractère du curseur
                   </label>
                   <input
@@ -362,7 +362,7 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
                       ...animationOptions,
                       cursor: e.target.value
                     })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                    className="w-full px-3 py-2 bg-secondary border border-border rounded text-white text-sm"
                   />
                 </div>
               )}
@@ -372,7 +372,7 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
           {/* Slide Direction */}
           {animationType === 'slideIn' && (
             <div>
-              <label className="block text-xs text-gray-400 mb-1">
+              <label className="block text-xs text-muted-foreground mb-1">
                 Direction
               </label>
               <Select
@@ -382,7 +382,7 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
                   direction: value
                 })}
               >
-                <SelectTrigger className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm">
+                <SelectTrigger className="w-full px-3 py-2 bg-secondary border border-border rounded text-white text-sm">
                   <SelectValue placeholder="Sélectionner une direction" />
                 </SelectTrigger>
                 <SelectContent>
@@ -398,7 +398,7 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
           {/* Effect Options */}
           {['glow', 'neon'].includes(effectType) && (
             <div>
-              <label className="block text-xs text-gray-400 mb-1">
+              <label className="block text-xs text-muted-foreground mb-1">
                 Intensité
               </label>
               <input
@@ -418,7 +418,7 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
 
           {effectType === 'outline' && (
             <div>
-              <label className="block text-xs text-gray-400 mb-1">
+              <label className="block text-xs text-muted-foreground mb-1">
                 Épaisseur du contour
               </label>
               <input
@@ -439,7 +439,7 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
           {/* Color picker for effects */}
           {['glow', 'neon', 'gradient'].includes(effectType) && (
             <div>
-              <label className="block text-xs text-gray-400 mb-1">
+              <label className="block text-xs text-muted-foreground mb-1">
                 Couleur
               </label>
               <div className="flex gap-2">
@@ -459,7 +459,7 @@ const TextAnimationEditor: React.FC<TextAnimationEditorProps> = ({
                     ...effectOptions,
                     color: e.target.value
                   })}
-                  className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="flex-1 px-3 py-2 bg-secondary border border-border rounded text-white text-sm"
                 />
               </div>
             </div>

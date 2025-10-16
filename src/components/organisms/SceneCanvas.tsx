@@ -539,7 +539,7 @@ const SceneCanvas = ({
   const scaledSceneHeight = sceneHeight * sceneZoom;
   
   return (
-    <div className="flex flex-col h-full bg-gray-950">
+    <div className="flex flex-col h-full bg-secondary">
       {/* Camera Toolbar */}
       <CameraToolbar
         cameras={sceneCameras}

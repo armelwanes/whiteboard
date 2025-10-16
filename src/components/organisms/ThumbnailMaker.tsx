@@ -311,7 +311,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-gray-900 rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -333,16 +333,16 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
 
         <div className="flex-1 overflow-hidden flex">
           {/* Left Panel - Canvas */}
-          <div className="flex-1 p-6 overflow-auto bg-gray-800">
+          <div className="flex-1 p-6 overflow-auto bg-secondary/30">
             <div className="space-y-4">
               {/* Konva Stage */}
-              <div className="bg-gray-950 rounded-xl p-4">
+              <div className="bg-secondary rounded-xl p-4">
                 <div className="relative" style={{ maxWidth: '100%', overflow: 'hidden' }}>
                   <Stage
                     width={WIDTH}
                     height={HEIGHT}
                     ref={stageRef}
-                    className="border-2 border-gray-700 rounded-lg shadow-2xl"
+                    className="border-2 border-border rounded-lg shadow-2xl"
                     style={{ 
                       maxWidth: '100%', 
                       height: 'auto',
@@ -428,7 +428,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
               <div className="flex gap-3">
                 <button
                   onClick={handleDownload}
-                  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-lg"
+                  className="flex-1 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-lg"
                 >
                   <Download className="w-5 h-5" />
                   Télécharger PNG
@@ -447,10 +447,10 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
           </div>
 
           {/* Right Panel - Controls */}
-          <div className="w-96 bg-gray-850 border-l border-gray-700 overflow-auto">
+          <div className="w-96 bg-gray-850 border-l border-border overflow-auto">
             <div className="p-6 space-y-6">
               {/* Add Elements */}
-              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+              <div className="bg-secondary/30 rounded-lg p-4 border border-border">
                 <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
                   <Plus className="w-4 h-4" />
                   Ajouter des éléments
@@ -459,7 +459,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
                 <div className="space-y-2">
                   <button
                     onClick={() => imageUploadRef.current?.click()}
-                    className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
+                    className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white py-2 px-4 rounded-lg transition-colors"
                   >
                     <Upload className="w-4 h-4" />
                     Importer Image
@@ -483,14 +483,14 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
               </div>
 
               {/* Background */}
-              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+              <div className="bg-secondary/30 rounded-lg p-4 border border-border">
                 <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
                   <Palette className="w-4 h-4" />
                   Arrière-plan
                 </h3>
                 
                 <div className="mb-3">
-                  <label className="block text-gray-300 text-sm mb-2">Couleur de fond</label>
+                  <label className="block text-foreground text-sm mb-2">Couleur de fond</label>
                   <input
                     type="color"
                     value={backgroundColor}
@@ -513,7 +513,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
               </div>
 
               {/* Layers List */}
-              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+              <div className="bg-secondary/30 rounded-lg p-4 border border-border">
                 <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
                   <Layers className="w-4 h-4" />
                   Calques ({layers.length})
@@ -526,8 +526,8 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
                       onClick={() => setSelectedLayerId(layer.id)}
                       className={`p-3 rounded-lg cursor-pointer transition-colors ${
                         layer.id === selectedLayerId
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          ? 'bg-primary text-white'
+                          : 'bg-secondary text-foreground hover:bg-secondary/80'
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -578,7 +578,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
                 </div>
                 
                 {layers.length === 0 && (
-                  <p className="text-gray-400 text-sm text-center py-4">
+                  <p className="text-muted-foreground text-sm text-center py-4">
                     Aucun calque. Ajoutez une image ou du texte.
                   </p>
                 )}
@@ -586,7 +586,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
 
               {/* Selected Layer Properties */}
               {selectedLayer && selectedLayer.type === 'text' && (
-                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                <div className="bg-secondary/30 rounded-lg p-4 border border-border">
                   <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
                     <Type className="w-4 h-4" />
                     Propriétés du texte
@@ -594,17 +594,17 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
                   
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-gray-300 text-sm mb-2">Texte</label>
+                      <label className="block text-foreground text-sm mb-2">Texte</label>
                       <input
                         type="text"
                         value={selectedLayer.text}
                         onChange={(e) => handleTextChange('text', e.target.value)}
-                        className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-2"
+                        className="w-full bg-secondary text-white border border-border rounded-lg px-3 py-2"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-gray-300 text-sm mb-2">
+                      <label className="block text-foreground text-sm mb-2">
                         Taille: {Math.round(selectedLayer.fontSize)}px
                       </label>
                       <input
@@ -619,7 +619,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
                     
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-gray-300 text-sm mb-2">Couleur</label>
+                        <label className="block text-foreground text-sm mb-2">Couleur</label>
                         <input
                           type="color"
                           value={selectedLayer.fill}
@@ -628,7 +628,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
                         />
                       </div>
                       <div>
-                        <label className="block text-gray-300 text-sm mb-2">Contour</label>
+                        <label className="block text-foreground text-sm mb-2">Contour</label>
                         <input
                           type="color"
                           value={selectedLayer.stroke}
@@ -639,7 +639,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
                     </div>
                     
                     <div>
-                      <label className="block text-gray-300 text-sm mb-2">
+                      <label className="block text-foreground text-sm mb-2">
                         Épaisseur contour: {selectedLayer.strokeWidth}px
                       </label>
                       <input
@@ -653,7 +653,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
                     </div>
                     
                     <div>
-                      <label className="flex items-center gap-2 text-gray-300 text-sm cursor-pointer">
+                      <label className="flex items-center gap-2 text-foreground text-sm cursor-pointer">
                         <input
                           type="checkbox"
                           checked={selectedLayer.shadowEnabled}
@@ -668,8 +668,8 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
               )}
 
               {/* Utilities */}
-              <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                <label className="flex items-center gap-2 text-gray-300 text-sm cursor-pointer">
+              <div className="bg-secondary/30 rounded-lg p-4 border border-border">
+                <label className="flex items-center gap-2 text-foreground text-sm cursor-pointer">
                   <input
                     type="checkbox"
                     checked={showGrid}

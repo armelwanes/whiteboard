@@ -276,21 +276,21 @@ function App() {
 
   if (loading && scenes.length === 0) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
+      <div className="flex h-screen items-center justify-center bg-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-white mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Chargement des scènes...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Chargement des scènes...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="app flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
+    <div className="app flex h-screen overflow-hidden bg-white">
       {/* Floating Demo Button */}
       <button
         onClick={() => setShowShadcnDemo(true)}
-        className="fixed bottom-4 right-4 z-50 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 transition-all hover:scale-105"
+        className="fixed bottom-4 right-4 z-50 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-full shadow-lg flex items-center gap-2 transition-all hover:scale-105"
         title="Voir la démo shadcn/ui (Ctrl+Shift+D)"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

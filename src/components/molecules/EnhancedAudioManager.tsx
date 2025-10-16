@@ -194,7 +194,7 @@ const EnhancedAudioManager: React.FC<EnhancedAudioManagerProps> = ({ scene, onSc
   const getTrackColor = (type) => {
     switch (type) {
       case 'backgroundMusic':
-        return 'bg-blue-500/10 border-blue-500/20 text-blue-600';
+        return 'bg-blue-500/10 border-primary/20 text-blue-600';
       case 'narration':
         return 'bg-green-500/10 border-green-500/20 text-green-600';
       case 'soundEffect':
@@ -207,7 +207,7 @@ const EnhancedAudioManager: React.FC<EnhancedAudioManagerProps> = ({ scene, onSc
   const allTracks = getAllTracks();
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden">
+    <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl border border-border overflow-hidden">
       {/* Header */}
       <div 
         className="flex items-center justify-between p-4 cursor-pointer hover:bg-white/5 transition-colors"
@@ -215,30 +215,30 @@ const EnhancedAudioManager: React.FC<EnhancedAudioManagerProps> = ({ scene, onSc
       >
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-500/20 rounded-lg">
-            <Music className="w-5 h-5 text-blue-400" />
+            <Music className="w-5 h-5 text-primary" />
           </div>
           <div>
             <h3 className="font-semibold text-white text-base">Gestionnaire Audio</h3>
-            <p className="text-xs text-gray-400">{allTracks.length} piste{allTracks.length !== 1 ? 's' : ''}</p>
+            <p className="text-xs text-muted-foreground">{allTracks.length} piste{allTracks.length !== 1 ? 's' : ''}</p>
           </div>
         </div>
-        <button className="text-gray-400 hover:text-white transition-colors p-1">
+        <button className="text-muted-foreground hover:text-white transition-colors p-1">
           {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
         </button>
       </div>
 
       {/* Content */}
       {expanded && (
-        <div className="p-4 border-t border-gray-700 space-y-4">
+        <div className="p-4 border-t border-border space-y-4">
           {/* Master Volume Control */}
-          <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+          <div className="bg-secondary/30/50 rounded-lg p-4 border border-border">
             <div className="flex items-center gap-3 mb-2">
               {masterVolume > 0 ? (
-                <Volume2 className="w-5 h-5 text-blue-400" />
+                <Volume2 className="w-5 h-5 text-primary" />
               ) : (
                 <VolumeX className="w-5 h-5 text-gray-500" />
               )}
-              <span className="text-sm font-medium text-gray-300 flex-1">Volume Principal</span>
+              <span className="text-sm font-medium text-foreground flex-1">Volume Principal</span>
               <span className="text-sm font-semibold text-white min-w-[45px] text-right">
                 {Math.round(masterVolume * 100)}%
               </span>
@@ -257,7 +257,7 @@ const EnhancedAudioManager: React.FC<EnhancedAudioManagerProps> = ({ scene, onSc
                   if (audio) audio.volume = vol;
                 });
               }}
-              className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-blue-500"
             />
           </div>
 
@@ -265,10 +265,10 @@ const EnhancedAudioManager: React.FC<EnhancedAudioManagerProps> = ({ scene, onSc
           <div className="grid grid-cols-3 gap-2">
             <button
               onClick={() => backgroundMusicRef.current?.click()}
-              className="flex flex-col items-center gap-2 p-3 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg transition-colors group"
+              className="flex flex-col items-center gap-2 p-3 bg-blue-500/10 hover:bg-blue-500/20 border border-primary/20 rounded-lg transition-colors group"
             >
-              <Music className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
-              <span className="text-xs font-medium text-blue-400">Musique</span>
+              <Music className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
+              <span className="text-xs font-medium text-primary">Musique</span>
             </button>
             
             <button
@@ -314,7 +314,7 @@ const EnhancedAudioManager: React.FC<EnhancedAudioManagerProps> = ({ scene, onSc
           {/* Track List */}
           {allTracks.length > 0 ? (
             <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-gray-300 mb-3">Pistes Audio:</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-3">Pistes Audio:</h4>
               {allTracks.map((track) => (
                 <div
                   key={track.id}

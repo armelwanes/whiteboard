@@ -42,7 +42,7 @@ const LayerAnimationControls: React.FC<LayerAnimationControlsProps> = ({ animati
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+    <div className="bg-secondary/30 rounded-lg p-4 border border-border">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-white font-semibold text-sm flex items-center gap-2">
           <Film className="w-4 h-4" />
@@ -51,7 +51,7 @@ const LayerAnimationControls: React.FC<LayerAnimationControlsProps> = ({ animati
         {!animation ? (
           <button
             onClick={handleAddAnimation}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-1.5 px-3 rounded flex items-center gap-1 transition-colors"
+            className="bg-primary hover:bg-primary/90 text-white text-xs font-semibold py-1.5 px-3 rounded flex items-center gap-1 transition-colors"
           >
             <Plus className="w-3 h-3" />
             Ajouter
@@ -68,7 +68,7 @@ const LayerAnimationControls: React.FC<LayerAnimationControlsProps> = ({ animati
       </div>
 
       {!animation ? (
-        <p className="text-gray-400 text-xs italic text-center py-4">
+        <p className="text-muted-foreground text-xs italic text-center py-4">
           Aucune animation configurée.
           <br />
           Cliquez sur "Ajouter" pour créer une animation.
@@ -77,14 +77,14 @@ const LayerAnimationControls: React.FC<LayerAnimationControlsProps> = ({ animati
         <div className="space-y-3">
           {/* Animation Type */}
           <div>
-            <label className="block text-gray-300 text-xs mb-1.5">
+            <label className="block text-foreground text-xs mb-1.5">
               Type d'animation
             </label>
             <Select
               value={animation.type}
               onValueChange={(value) => handleUpdateAnimation({ type: value })}
             >
-              <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <SelectTrigger className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                 <SelectValue placeholder="Sélectionner un type" />
               </SelectTrigger>
               <SelectContent>
@@ -96,7 +96,7 @@ const LayerAnimationControls: React.FC<LayerAnimationControlsProps> = ({ animati
 
           {/* Duration */}
           <div>
-            <label className="block text-gray-300 text-xs mb-1.5">
+            <label className="block text-foreground text-xs mb-1.5">
               Durée (secondes)
             </label>
             <input
@@ -108,14 +108,14 @@ const LayerAnimationControls: React.FC<LayerAnimationControlsProps> = ({ animati
               onChange={(e) =>
                 handleUpdateAnimation({ duration: parseFloat(e.target.value) || 2.0 })
               }
-              className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           {/* Zoom Range */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-gray-300 text-xs mb-1.5">
+              <label className="block text-foreground text-xs mb-1.5">
                 Zoom Initial
               </label>
               <input
@@ -127,11 +127,11 @@ const LayerAnimationControls: React.FC<LayerAnimationControlsProps> = ({ animati
                 onChange={(e) =>
                   handleUpdateAnimation({ start_zoom: parseFloat(e.target.value) || 1.0 })
                 }
-                className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
             <div>
-              <label className="block text-gray-300 text-xs mb-1.5">
+              <label className="block text-foreground text-xs mb-1.5">
                 Zoom Final
               </label>
               <input
@@ -143,19 +143,19 @@ const LayerAnimationControls: React.FC<LayerAnimationControlsProps> = ({ animati
                 onChange={(e) =>
                   handleUpdateAnimation({ end_zoom: parseFloat(e.target.value) || 2.0 })
                 }
-                className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
           </div>
 
           {/* Focus Position */}
           <div>
-            <label className="block text-gray-300 text-xs mb-1.5">
+            <label className="block text-foreground text-xs mb-1.5">
               Point de Focus
             </label>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-gray-400 text-xs mb-1">
+                <label className="block text-muted-foreground text-xs mb-1">
                   X: {animation.focus_position.x.toFixed(2)}
                 </label>
                 <input
@@ -180,7 +180,7 @@ const LayerAnimationControls: React.FC<LayerAnimationControlsProps> = ({ animati
                 </div>
               </div>
               <div>
-                <label className="block text-gray-400 text-xs mb-1">
+                <label className="block text-muted-foreground text-xs mb-1">
                   Y: {animation.focus_position.y.toFixed(2)}
                 </label>
                 <input
@@ -207,7 +207,7 @@ const LayerAnimationControls: React.FC<LayerAnimationControlsProps> = ({ animati
             </div>
           </div>
 
-          <div className="p-2 bg-gray-700 rounded text-xs text-gray-400">
+          <div className="p-2 bg-secondary rounded text-xs text-muted-foreground">
             💡 <span className="font-semibold">Info:</span> L'animation se joue après le dessin de la couche.
           </div>
         </div>

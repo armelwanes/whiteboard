@@ -175,9 +175,9 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
 
   return (
     <div className="bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-gray-900 rounded-xl shadow-2xl w-full  overflow-hidden flex border border-gray-700">
+      <div className="bg-white rounded-xl shadow-2xl w-full  overflow-hidden flex border border-border">
         {/* Left Side - Canvas Editor */}
-        <div className="flex-1 bg-gray-800/30 relative flex flex-col">
+        <div className="flex-1 bg-secondary/30/30 relative flex flex-col">
           {/* Canvas Header */}
           <div className="flex items-center justify-between">
             
@@ -201,7 +201,7 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
           {/* Canvas Area */}
           <div className="flex-1 overflow-hidden flex items-start justify-center p-4">
             <div 
-              className="bg-white rounded-lg shadow-xl overflow-hidden border-2 border-gray-700"
+              className="bg-white rounded-lg shadow-xl overflow-hidden border-2 border-border"
              >
               <Stage
                 width={960}
@@ -239,7 +239,7 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
 
           {/* Object Controls */}
           {selectedObject && (
-            <div className="bg-gray-800 border-t border-gray-700 px-6 py-4">
+            <div className="bg-secondary/30 border-t border-border px-6 py-4">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium mr-4">
                   {selectedObject.name}

@@ -82,10 +82,10 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
 
 
   return (
-    <div className="animation-container w-full h-full flex flex-col bg-gray-950">
+    <div className="animation-container w-full h-full flex flex-col bg-secondary/20">
       {/* Main animation area */}
       <div 
-        className=" relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800"
+        className=" relative overflow-hidden bg-gradient-to-br from-secondary/30 to-secondary/50"
       >
         {scenes.map((scene, index) => (
           <Scene
@@ -102,7 +102,7 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
         {/* Loading state */}
         {scenes.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-white text-xl">No scenes available</p>
+            <p className="text-muted-foreground text-xl">No scenes available</p>
           </div>
         )}
       </div>

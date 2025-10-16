@@ -220,8 +220,8 @@ const CameraViewport: React.FC<CameraViewportProps> = ({
         } ${
           isSelected
             ? camera.locked 
-              ? 'border-blue-500 bg-blue-500/10'
-              : 'border-pink-500 bg-pink-500/10'
+              ? 'border-primary bg-blue-500/10'
+              : 'border-primary bg-pink-500/10'
             : camera.locked
               ? 'border-blue-300 bg-blue-300/5 hover:border-blue-400'
               : 'border-pink-300 bg-pink-300/5 hover:border-pink-400'
@@ -276,7 +276,7 @@ const CameraViewport: React.FC<CameraViewportProps> = ({
                 e.stopPropagation();
                 onDelete(camera.id);
               }}
-              className="ml-2 hover:bg-pink-600 rounded p-0.5 transition-colors"
+              className="ml-2 hover:bg-primary rounded p-0.5 transition-colors"
               title="Supprimer caméra"
             >
               <X className="w-3 h-3" />

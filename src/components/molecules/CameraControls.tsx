@@ -75,7 +75,7 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+    <div className="bg-secondary/30 rounded-lg p-4 border border-border">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-white font-semibold text-sm flex items-center gap-2">
           <Camera className="w-4 h-4" />
@@ -84,7 +84,7 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
         {type === 'scene' && (
           <button
             onClick={handleAddCamera}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-1.5 px-3 rounded flex items-center gap-1 transition-colors"
+            className="bg-primary hover:bg-primary/90 text-white text-xs font-semibold py-1.5 px-3 rounded flex items-center gap-1 transition-colors"
           >
             <Plus className="w-3 h-3" />
             Ajouter
@@ -94,7 +94,7 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
 
       <div className="space-y-2">
         {cameras.length === 0 ? (
-          <p className="text-gray-400 text-xs italic text-center py-4">
+          <p className="text-muted-foreground text-xs italic text-center py-4">
             Aucune caméra configurée.
             {type === 'scene' && <><br />Cliquez sur "Ajouter" pour créer une caméra.</>}
           </p>
@@ -102,18 +102,18 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
           cameras.map((camera, index) => (
             <div
               key={index}
-              className="bg-gray-700 rounded-lg border border-gray-600 overflow-hidden"
+              className="bg-secondary rounded-lg border border-border overflow-hidden"
             >
               <div
                 className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-650"
                 onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
               >
                 <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-gray-400" />
+                  <Eye className="w-4 h-4 text-muted-foreground" />
                   <span className="text-white text-xs font-medium">
                     Caméra {index + 1}
                   </span>
-                  <span className="text-gray-400 text-xs">
+                  <span className="text-muted-foreground text-xs">
                     (Zoom: {camera.zoom.toFixed(1)}x)
                   </span>
                 </div>
@@ -126,10 +126,10 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
                           handleMoveCamera(index, 'up');
                         }}
                         disabled={index === 0}
-                        className="p-1 hover:bg-gray-600 rounded disabled:opacity-30"
+                        className="p-1 hover:bg-secondary/80 rounded disabled:opacity-30"
                         title="Déplacer vers le haut"
                       >
-                        <MoveUp className="w-3 h-3 text-gray-300" />
+                        <MoveUp className="w-3 h-3 text-foreground" />
                       </button>
                       <button
                         onClick={(e) => {
@@ -137,10 +137,10 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
                           handleMoveCamera(index, 'down');
                         }}
                         disabled={index === cameras.length - 1}
-                        className="p-1 hover:bg-gray-600 rounded disabled:opacity-30"
+                        className="p-1 hover:bg-secondary/80 rounded disabled:opacity-30"
                         title="Déplacer vers le bas"
                       >
-                        <MoveDown className="w-3 h-3 text-gray-300" />
+                        <MoveDown className="w-3 h-3 text-foreground" />
                       </button>
                       <button
                         onClick={(e) => {
@@ -158,10 +158,10 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
               </div>
 
               {expandedIndex === index && (
-                <div className="p-3 border-t border-gray-600 space-y-3">
+                <div className="p-3 border-t border-border space-y-3">
                   {/* Zoom */}
                   <div>
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Zoom: {camera.zoom.toFixed(2)}x
                     </label>
                     <input
@@ -183,12 +183,12 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
 
                   {/* Position */}
                   <div>
-                    <label className="block text-gray-300 text-xs mb-1.5">
+                    <label className="block text-foreground text-xs mb-1.5">
                       Position Focus
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="block text-gray-400 text-xs mb-1">
+                        <label className="block text-muted-foreground text-xs mb-1">
                           X: {camera.position.x.toFixed(2)}
                         </label>
                         <input
@@ -213,7 +213,7 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
                         </div>
                       </div>
                       <div>
-                        <label className="block text-gray-400 text-xs mb-1">
+                        <label className="block text-muted-foreground text-xs mb-1">
                           Y: {camera.position.y.toFixed(2)}
                         </label>
                         <input
@@ -244,7 +244,7 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
                     <>
                       {/* Duration */}
                       <div>
-                        <label className="block text-gray-300 text-xs mb-1.5">
+                        <label className="block text-foreground text-xs mb-1.5">
                           Durée d'attente (secondes)
                         </label>
                         <input
@@ -258,13 +258,13 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
                               duration: parseFloat(e.target.value) || 2.0,
                             })
                           }
-                          className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                       </div>
 
                       {/* Transition Duration */}
                       <div>
-                        <label className="block text-gray-300 text-xs mb-1.5">
+                        <label className="block text-foreground text-xs mb-1.5">
                           Durée de transition (secondes)
                         </label>
                         <input
@@ -278,13 +278,13 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
                               transition_duration: parseFloat(e.target.value) || 0,
                             })
                           }
-                          className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                       </div>
 
                       {/* Easing */}
                       <div>
-                        <label className="block text-gray-300 text-xs mb-1.5">
+                        <label className="block text-foreground text-xs mb-1.5">
                           Fonction d'Easing
                         </label>
                         <Select
@@ -293,7 +293,7 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
                             handleUpdateCamera(index, { easing: value })
                           }
                         >
-                          <SelectTrigger className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <SelectTrigger className="w-full bg-secondary text-white border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                             <SelectValue placeholder="Sélectionner un easing" />
                           </SelectTrigger>
                           <SelectContent>

@@ -15,7 +15,7 @@ interface ToolbarProps {
 
 const Toolbar: React.FC<ToolbarProps> = ({ onOpenEditor, onShowHandWritingTest, onOpenShapeToolbar, onOpenAssetLibrary, onUndo, onRedo, canUndo, canRedo }) => {
   return (
-    <div className="toolbar bg-gradient-to-r from-gray-900 via-gray-900 to-gray-800 border-b border-gray-700 px-6 py-3 flex items-center gap-3 shadow-lg">
+    <div className="toolbar bg-white border-b border-border px-6 py-3 flex items-center gap-3 shadow-sm">
       {/* Main Actions */}
       <Button
         onClick={onOpenEditor}
@@ -127,7 +127,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ onOpenEditor, onShowHandWritingTest, 
 
       {/* Info */}
       <div className="flex items-center gap-3">
-        <div className="text-gray-400 text-sm font-medium">
+        <div className="text-muted-foreground text-sm font-medium">
           Whiteboard Animation
         </div>
         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>

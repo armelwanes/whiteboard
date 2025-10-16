@@ -58,7 +58,7 @@ const SceneObject: React.FC<SceneObjectProps> = ({
     <>
       <div
         ref={objectRef}
-        className={` cursor-move ${isSelected && isEditing ? 'ring-2 ring-blue-500' : ''}`}
+        className={` cursor-move ${isSelected && isEditing ? 'ring-2 ring-primary' : ''}`}
         style={{
           width: `${object.width}px`,
           height: `${object.height}px`,
@@ -83,7 +83,7 @@ const SceneObject: React.FC<SceneObjectProps> = ({
       {/* Control Panel - show when selected and editing */}
       {isSelected && isEditing && (
         <div
-          className=" bg-gray-800 rounded-lg shadow-xl px-3 py-2 flex items-center gap-2 z-50"
+          className=" bg-secondary/30 rounded-lg shadow-xl px-3 py-2 flex items-center gap-2 z-50"
           style={{
             left: `${object.x}px`,
             top: `${object.y - 50}px`,
@@ -91,21 +91,21 @@ const SceneObject: React.FC<SceneObjectProps> = ({
         >
           <button
             onClick={handleFlipHorizontal}
-            className="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded"
+            className="px-2 py-1 text-xs bg-secondary hover:bg-secondary/80 text-white rounded"
             title="Flip horizontal"
           >
             ↔️
           </button>
           <button
             onClick={handleFlipVertical}
-            className="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded"
+            className="px-2 py-1 text-xs bg-secondary hover:bg-secondary/80 text-white rounded"
             title="Flip vertical"
           >
             ↕️
           </button>
           <button
             onClick={handleRotate}
-            className="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded"
+            className="px-2 py-1 text-xs bg-secondary hover:bg-secondary/80 text-white rounded"
             title="Rotate 15°"
           >
             🔄
