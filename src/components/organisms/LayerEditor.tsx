@@ -71,8 +71,8 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
   const backgroundImageInputRef = useRef<HTMLInputElement>(null);
   const backgroundMusicInputRef = useRef<HTMLInputElement>(null);
 
-  const sceneWidth = 800;
-  const sceneHeight = 600;
+  const sceneWidth = 1920;
+  const sceneHeight = 1080;
 
   // Update editedScene when scene prop changes (switching between scenes)
   React.useEffect(() => {

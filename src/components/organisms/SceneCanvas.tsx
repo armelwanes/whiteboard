@@ -418,7 +418,7 @@ const SceneCanvas = ({
       // Calculate zoom to fit with some padding (90% of container)
       const zoomX = (containerWidth * 0.9) / sceneWidth;
       const zoomY = (containerHeight * 0.9) / sceneHeight;
-      const fitZoom = Math.min(zoomX, zoomY, 1.0); // Don't zoom in beyond 100%
+      const fitZoom = Math.max(0.5, Math.min(zoomX, zoomY, 1.0)); // Min 50%, max 100%
       
       if (fitZoom < 1.0) {
         setSceneZoom(fitZoom);
