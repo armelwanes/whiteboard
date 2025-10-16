@@ -3,6 +3,7 @@ export { default as CameraToolbar } from './CameraToolbar';
 export { default as CameraViewport } from './CameraViewport';
 export { default as CameraSettingsPanel } from './CameraSettingsPanel';
 export { default as LayersList } from './LayersList';
+export { default as LayerPropertiesPanel } from './LayerPropertiesPanel';
 export { default as Timeline } from './Timeline';
 export { default as MultiTimeline } from './MultiTimeline';
 export { default as LayerAnimationControls } from './LayerAnimationControls';
