@@ -386,7 +386,7 @@ const AssetLibrary: React.FC<AssetLibraryProps> = ({ onClose, onSelectAsset }) =
             </div>
 
             {/* Assets Grid */}
-            <div className="flex-1 overflow-y-auto p-6 bg-white">
+            <div className="flex-1 overflow-y-auto p-2 bg-white">
               {assets.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-500">
                   <ImageIcon className="w-16 h-16 mb-4 opacity-50" />

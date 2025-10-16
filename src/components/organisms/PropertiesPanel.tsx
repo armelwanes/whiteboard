@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { LayersListPanel, LayerPropertiesForm, ToolbarActions } from '../molecules';
+import { ImageIcon } from 'lucide-react';
 
 interface PropertiesPanelProps {
   scene: any;
@@ -80,7 +81,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       </div>
 
       {/* Content - Scrollable */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-2">
         <div className="space-y-5">
           {/* Scene Properties */}
           <div className="bg-secondary/30 rounded-lg p-4 border border-border">
