@@ -17,8 +17,7 @@ import {
   AssetSearchBar,
   AssetViewModeSelector,
   AssetSortControls,
-  AssetTagsFilter,
-  AssetCard
+  AssetTagsFilter
 } from '../molecules/asset-library';
 
 interface AssetLibraryProps {

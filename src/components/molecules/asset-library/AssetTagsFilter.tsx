@@ -44,7 +44,7 @@ export const AssetTagsFilter: React.FC<AssetTagsFilterProps> = ({
           onClick={onClearTags}
           className="w-full mt-2 text-xs text-primary hover:text-blue-300"
         >
-          Effacer les tags
+          Effacer les filtres
         </button>
       )}
     </div>
