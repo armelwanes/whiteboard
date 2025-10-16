@@ -100,17 +100,24 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
     let finalImageUrl = imageUrl;
     let imageDimensions = null;
     
-    // Get dimensions from the image element
-    if (imgRef.current) {
-      imageDimensions = {
-        width: imgRef.current.naturalWidth,
-        height: imgRef.current.naturalHeight
-      };
-    }
-    
-     setTimeout(() => {
+    try {
+      // Get dimensions from the image element
+      if (imgRef.current) {
+        imageDimensions = {
+          width: imgRef.current.naturalWidth,
+          height: imgRef.current.naturalHeight
+        };
+      }
+    } catch (error) {
+      console.error('Error getting image dimensions:', error);
+    } finally {
+      // Always reset state and call callback in finally block
+      setIsRemovingBackground(false);
+      // Use setTimeout to ensure state update completes before callback
+      setTimeout(() => {
         onCropComplete(finalImageUrl, imageDimensions);
       }, 0);
+    }
   };
 
   return (
