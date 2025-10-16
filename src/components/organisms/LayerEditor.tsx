@@ -35,16 +35,33 @@ interface LayerEditorProps {
   scene: any;
   onClose: () => void;
   onSave: (scene: any) => void;
+  selectedLayerId?: string | null;
+  onSelectLayer?: (layerId: string | null) => void;
 }
 
-const LayerEditor: React.FC<LayerEditorProps> = ({ scene, onClose, onSave }) => {
+const LayerEditor: React.FC<LayerEditorProps> = ({ 
+  scene, 
+  onClose, 
+  onSave,
+  selectedLayerId: externalSelectedLayerId,
+  onSelectLayer: externalOnSelectLayer
+}) => {
   const [editedScene, setEditedScene] = useState({ 
     ...scene,
     layers: scene.layers || [],
     sceneCameras: scene.sceneCameras || []
   });
-  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
+  const [internalSelectedLayerId, setInternalSelectedLayerId] = useState<string | null>(null);
   const [selectedCamera, setSelectedCamera] = useState<any>(null);
+  
+  const selectedLayerId = externalSelectedLayerId !== undefined ? externalSelectedLayerId : internalSelectedLayerId;
+  const setSelectedLayerId = (layerId: string | null) => {
+    if (externalOnSelectLayer) {
+      externalOnSelectLayer(layerId);
+    } else {
+      setInternalSelectedLayerId(layerId);
+    }
+  };
   const [showShapeToolbar, setShowShapeToolbar] = useState(false);
   const [showAssetLibrary, setShowAssetLibrary] = useState(false);
   const [showCropModal, setShowCropModal] = useState(false);

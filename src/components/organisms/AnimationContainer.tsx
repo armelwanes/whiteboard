@@ -117,6 +117,8 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
                 updateScene(selectedSceneIndex, updatedScene);
               }}
               onClose={() => { }}
+              selectedLayerId={selectedLayerId}
+              onSelectLayer={setSelectedLayerId}
             />
           )}
 
@@ -129,10 +131,10 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
               selectedLayerId={selectedLayerId}
               onSelectLayer={setSelectedLayerId}
               onUpdateScene={(updates) => updateScene(selectedSceneIndex, updates)}
-              onUpdateLayer={(layerId, updates) => {
+              onUpdateLayer={(updatedLayer: any) => {
                 const currentScene = scenes[selectedSceneIndex];
                 const updatedLayers = currentScene.layers.map((l: any) =>
-                  l.id === layerId ? { ...l, ...updates } : l
+                  l.id === updatedLayer.id ? updatedLayer : l
                 );
                 updateScene(selectedSceneIndex, { ...currentScene, layers: updatedLayers });
               }}
