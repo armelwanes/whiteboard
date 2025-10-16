@@ -1,11 +1,10 @@
 import React, { useRef } from 'react';
 import { Button, Card } from '../atoms';
 import { Plus, ArrowUp, ArrowDown, Copy, Trash2, Download, Upload } from 'lucide-react';
+import { useSceneStore } from '../../app/scenes';
 
 interface ScenePanelProps {
   scenes: any[];
-  selectedSceneIndex: number;
-  onSelectScene: (index: number) => void;
   onAddScene: () => void;
   onDeleteScene: (index: number) => void;
   onDuplicateScene: (index: number) => void;
@@ -16,8 +15,6 @@ interface ScenePanelProps {
 
 const ScenePanel: React.FC<ScenePanelProps> = ({
   scenes,
-  selectedSceneIndex,
-  onSelectScene,
   onAddScene,
   onDeleteScene,
   onDuplicateScene,
@@ -26,6 +23,11 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
   onImportConfig,
 }) => {
   const importInputRef = useRef<HTMLInputElement>(null);
+  
+  // Get state from Zustand store
+  const selectedSceneIndex = useSceneStore((state) => state.selectedSceneIndex);
+  const setSelectedSceneIndex = useSceneStore((state) => state.setSelectedSceneIndex);
+  
   return (
     <div className="bg-white border-r border-border flex flex-col shadow-sm">
       {/* Header */}
@@ -88,7 +90,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
                 ? 'border-primary shadow-md bg-primary/5'
                 : 'border-border hover:border-primary/50'
             }`}
-            onClick={() => onSelectScene(index)}
+            onClick={() => setSelectedSceneIndex(index)}
           >
             <div className="p-2.5">
               {/* Thumbnail and Info */}

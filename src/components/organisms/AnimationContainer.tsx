@@ -381,8 +381,6 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({
 
           <ScenePanel
             scenes={scenes}
-            selectedSceneIndex={selectedSceneIndex}
-            onSelectScene={setSelectedSceneIndex}
             onAddScene={onAddScene}
             onDeleteScene={onDeleteScene}
             onDuplicateScene={onDuplicateScene}
