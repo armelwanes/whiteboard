@@ -737,7 +737,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
         {/* Save Button - Floating Action Button */}
         <button
           onClick={handleSave}
-          className="absolute bottom-6 right-6 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-lg flex items-center gap-2 shadow-lg transition-all hover:shadow-xl"
+          className="absolute bottom-6 right-6 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-lg flex items-center gap-2 shadow-lg transition-all hover:shadow-xl z-10"
           title="Sauvegarder les modifications"
         >
           <Save className="w-5 h-5" />
