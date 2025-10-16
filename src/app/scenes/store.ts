@@ -28,6 +28,14 @@ interface SceneState {
   duplicateScene: (sceneId: string) => Promise<void>;
   reorderScenes: (sceneIds: string[]) => Promise<void>;
   
+  // Layer Management Actions
+  addLayer: (sceneId: string, layer: Layer) => Promise<void>;
+  updateLayer: (sceneId: string, layerId: string, data: Partial<Layer>) => Promise<void>;
+  deleteLayer: (sceneId: string, layerId: string) => Promise<void>;
+  
+  // Camera Management Actions
+  addCamera: (sceneId: string, camera: Camera) => Promise<void>;
+  
   // Reset all state
   reset: () => void;
 }
@@ -76,6 +84,28 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   
   reorderScenes: async (sceneIds: string[]) => {
     await scenesService.reorder(sceneIds);
+  },
+  
+  // Layer Management Actions
+  addLayer: async (sceneId: string, layer: Layer) => {
+    await scenesService.addLayer(sceneId, layer);
+  },
+  
+  updateLayer: async (sceneId: string, layerId: string, data: Partial<Layer>) => {
+    await scenesService.updateLayer(sceneId, layerId, data);
+  },
+  
+  deleteLayer: async (sceneId: string, layerId: string) => {
+    await scenesService.deleteLayer(sceneId, layerId);
+    const { selectedLayerId } = get();
+    if (selectedLayerId === layerId) {
+      set({ selectedLayerId: null });
+    }
+  },
+  
+  // Camera Management Actions
+  addCamera: async (sceneId: string, camera: Camera) => {
+    await scenesService.addCamera(sceneId, camera);
   },
   
   reset: () => set(initialState),
