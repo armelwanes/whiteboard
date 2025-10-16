@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AnimationContainer, ScenePanel, ShapeToolbar, AssetLibrary } from './components/organisms';
 import HandWritingTest from './pages/HandWritingTest';
 import ShadcnDemo from './components/ShadcnDemo';
-import { useScenes, useScenesActions, Scene, Layer } from './app/scenes';
+import { useScenesStore, Scene, Layer } from './app/scenes';
 import { MAX_HISTORY_STATES } from './config/constants';
 
 interface AssetData {
@@ -12,15 +12,19 @@ interface AssetData {
 }
 
 function App() {
-  const { scenes, loading } = useScenes();
-  const {
-    createScene,
+  const { 
+    scenes, 
+    loading, 
+    selectedSceneIndex, 
+    setSelectedSceneIndex,
+    addScene: addSceneAction,
     updateScene: updateSceneAction,
     deleteScene: deleteSceneAction,
     duplicateScene: duplicateSceneAction,
-  } = useScenesActions();
+    sortScenes,
+    loadScenes
+  } = useScenesStore();
 
-  const [selectedSceneIndex, setSelectedSceneIndex] = useState(0);
   const [showHandWritingTest, setShowHandWritingTest] = useState(false);
   const [showShadcnDemo, setShowShadcnDemo] = useState(false);
   const [showShapeToolbar, setShowShapeToolbar] = useState(false);
@@ -28,6 +32,10 @@ function App() {
   const [history, setHistory] = useState<Scene[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const isUndoRedoAction = useRef(false);
+
+  useEffect(() => {
+    loadScenes();
+  }, [loadScenes]);
 
   useEffect(() => {
     if (!isUndoRedoAction.current && scenes.length > 0) {
@@ -82,54 +90,41 @@ function App() {
 
   const addScene = async () => {
     try {
-      await createScene({
+      await addSceneAction({
         duration: 10,
         layers: [],
         sceneCameras: [],
       });
-      setSelectedSceneIndex(scenes.length);
     } catch (error: any) {
       alert('Erreur lors de la création de la scène: ' + error.message);
     }
   };
 
   const deleteScene = async (index: number) => {
-    const sceneId = scenes[index]?.id;
-    if (!sceneId) return;
-
     try {
-      await deleteSceneAction(sceneId);
-      if (selectedSceneIndex >= scenes.length - 1) {
-        setSelectedSceneIndex(Math.max(0, scenes.length - 2));
-      }
+      await deleteSceneAction(index);
     } catch (error: any) {
       alert(error.message);
     }
   };
 
   const duplicateScene = async (index: number) => {
-    const sceneId = scenes[index]?.id;
-    if (!sceneId) return;
-
     try {
-      await duplicateSceneAction(sceneId);
+      await duplicateSceneAction(index);
     } catch (error: any) {
       alert('Erreur lors de la duplication: ' + error.message);
     }
   };
 
   const updateScene = async (index: number, updatedScene: Partial<Scene>) => {
-    const sceneId = scenes[index]?.id;
-    if (!sceneId) return;
-
     try {
-      await updateSceneAction({ id: sceneId, data: updatedScene });
+      await updateSceneAction(index, updatedScene);
     } catch (error) {
       console.error('Error updating scene:', error);
     }
   };
 
-  const moveScene = (index: number, direction: 'up' | 'down') => {
+  const moveScene = async (index: number, direction: 'up' | 'down') => {
     if (
       (direction === 'up' && index === 0) ||
       (direction === 'down' && index === scenes.length - 1)
@@ -137,11 +132,13 @@ function App() {
       return;
     }
     
-    const newScenes = [...scenes];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    [newScenes[index], newScenes[targetIndex]] = [newScenes[targetIndex], newScenes[index]];
     
-    setSelectedSceneIndex(targetIndex);
+    try {
+      await sortScenes(index, targetIndex);
+    } catch (error) {
+      console.error('Error moving scene:', error);
+    }
   };
 
   const handleSelectAssetFromLibrary = (asset: AssetData) => {
@@ -249,7 +246,7 @@ function App() {
         if (config.scenes && Array.isArray(config.scenes)) {
           const scenesService = (await import('./app/scenes')).scenesService;
           await scenesService.bulkUpdate(config.scenes);
-          window.location.reload();
+          await loadScenes();
         } else {
           alert('Format de fichier invalide. Le fichier doit contenir un tableau "scenes".');
         }
