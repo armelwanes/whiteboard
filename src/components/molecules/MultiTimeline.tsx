@@ -29,7 +29,7 @@ const TRACK_ICONS: Record<string, any> = {
 };
 
 const TRACK_COLORS = {
-  [TrackType.VISUAL]: 'bg-blue-600',
+  [TrackType.VISUAL]: 'bg-primary',
   [TrackType.AUDIO]: 'bg-green-600',
   [TrackType.CAMERA]: 'bg-purple-600',
   [TrackType.FX]: 'bg-orange-600',
@@ -254,13 +254,13 @@ const MultiTimeline = ({
     for (let i = 0; i <= steps; i++) {
       const time = (multiTimeline.duration / steps) * i;
       timeSteps.push(
-        <div key={i} className="text-xs text-gray-400">
+        <div key={i} className="text-xs text-muted-foreground">
           {formatTime(time)}
         </div>
       );
     }
     return (
-      <div className="flex justify-between px-1 mb-2 border-b border-gray-700 pb-2">
+      <div className="flex justify-between px-1 mb-2 border-b border-border pb-2">
         {timeSteps}
       </div>
     );
@@ -288,16 +288,16 @@ const MultiTimeline = ({
       <div key={track.id} className="track-container border-b border-gray-800">
         <div className="flex">
           {/* Track Header */}
-          <div className="track-header w-48 bg-gray-900 p-3 flex items-center gap-2 border-r border-gray-800">
-            <Icon className="w-4 h-4 text-gray-400" />
-            <span className="text-sm font-medium text-gray-200 flex-1 truncate" title={track.name}>
+          <div className="track-header w-48 bg-white p-3 flex items-center gap-2 border-r border-gray-800">
+            <Icon className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-foreground flex-1 truncate" title={track.name}>
               {track.name}
             </span>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => handleMoveTrack(track.id, -1)}
                 disabled={isFirst}
-                className={`p-1 rounded ${isFirst ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-800'}`}
+                className={`p-1 rounded ${isFirst ? 'opacity-30 cursor-not-allowed' : 'hover:bg-secondary/30'}`}
                 title="Déplacer vers le haut"
               >
                 <ChevronUp className="w-3 h-3" />
@@ -305,14 +305,14 @@ const MultiTimeline = ({
               <button
                 onClick={() => handleMoveTrack(track.id, 1)}
                 disabled={isLast}
-                className={`p-1 rounded ${isLast ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-800'}`}
+                className={`p-1 rounded ${isLast ? 'opacity-30 cursor-not-allowed' : 'hover:bg-secondary/30'}`}
                 title="Déplacer vers le bas"
               >
                 <ChevronDown className="w-3 h-3" />
               </button>
               <button
                 onClick={() => toggleTrackEnabled(track.id)}
-                className={`p-1 rounded ${track.enabled ? 'text-blue-400' : 'text-gray-600'}`}
+                className={`p-1 rounded ${track.enabled ? 'text-primary' : 'text-gray-600'}`}
                 title={track.enabled ? 'Désactiver' : 'Activer'}
               >
                 <Eye className="w-4 h-4" />
@@ -329,7 +329,7 @@ const MultiTimeline = ({
                   setSelectedTrack(track.id);
                   handleDeleteTrack(track.id);
                 }}
-                className="p-1 rounded hover:bg-red-600 text-gray-400 hover:text-white"
+                className="p-1 rounded hover:bg-red-600 text-muted-foreground hover:text-white"
                 title="Supprimer la piste"
               >
                 <Trash2 className="w-3 h-3" />
@@ -340,7 +340,7 @@ const MultiTimeline = ({
           {/* Track Timeline */}
           <div 
             className={`track-timeline flex-1 relative cursor-pointer ${
-              track.enabled ? 'bg-gray-800' : 'bg-gray-850'
+              track.enabled ? 'bg-secondary/30' : 'bg-gray-850'
             }`}
             style={{ minHeight: `${track.height}px` }}
             onClick={(e) => !track.locked && handleTrackClick(e, track.id)}
@@ -349,7 +349,7 @@ const MultiTimeline = ({
             {[...Array(11)].map((_, i) => (
               <div
                 key={i}
-                className="absolute top-0 bottom-0 w-px bg-gray-700 opacity-30"
+                className="absolute top-0 bottom-0 w-px bg-secondary opacity-30"
                 style={{ left: `${(i / 10) * 100}%` }}
               />
             ))}
@@ -403,20 +403,20 @@ const MultiTimeline = ({
     return (
       <div key={trackType} className="track-group">
         {/* Group Header */}
-        <div className="flex items-center bg-gray-800 border-b border-gray-700 px-3 py-2">
+        <div className="flex items-center bg-secondary/30 border-b border-border px-3 py-2">
           <button
             onClick={() => toggleGroupCollapse(trackType)}
-            className="flex items-center gap-2 flex-1 text-left hover:bg-gray-700 rounded px-2 py-1"
+            className="flex items-center gap-2 flex-1 text-left hover:bg-secondary rounded px-2 py-1"
           >
-            <Icon className="w-4 h-4 text-gray-300" />
-            <span className="text-sm font-semibold text-gray-200">
+            <Icon className="w-4 h-4 text-foreground" />
+            <span className="text-sm font-semibold text-foreground">
               {typeName} ({tracksOfType.length})
             </span>
             <ChevronDown className={`w-4 h-4 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
           </button>
           <button
             onClick={() => handleAddTrack(trackType)}
-            className="p-1 rounded hover:bg-gray-700 text-gray-300"
+            className="p-1 rounded hover:bg-secondary text-foreground"
             title={`Ajouter une piste ${typeName}`}
           >
             <Plus className="w-4 h-4" />
@@ -433,11 +433,11 @@ const MultiTimeline = ({
   };
 
   return (
-    <div className="multi-timeline bg-gray-900 text-white rounded-lg p-4">
+    <div className="multi-timeline bg-white text-white rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">Multi-Level Timeline</h3>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-400">
+          <span className="text-sm text-muted-foreground">
             {formatTime(currentTime)} / {formatTime(multiTimeline.duration)}
           </span>
           {selectedElement && (
@@ -468,10 +468,10 @@ const MultiTimeline = ({
             onClick={() => setShowAddMenu(null)}
           />
           <div
-            className="fixed bg-gray-800 rounded-lg shadow-xl p-3 z-50 border border-gray-700"
+            className="fixed bg-secondary/30 rounded-lg shadow-xl p-3 z-50 border border-border"
             style={{ left: showAddMenu.x, top: showAddMenu.y }}
           >
-            <div className="text-xs text-gray-400 mb-2">
+            <div className="text-xs text-muted-foreground mb-2">
               Ajouter à {formatTime(showAddMenu.time)}
             </div>
             <div className="space-y-1">
@@ -484,19 +484,19 @@ const MultiTimeline = ({
                     <>
                       <button
                         onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'image')}
-                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                        className="w-full text-left px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 rounded"
                       >
                         Image
                       </button>
                       <button
                         onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'text')}
-                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                        className="w-full text-left px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 rounded"
                       >
                         Texte
                       </button>
                       <button
                         onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'svg')}
-                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                        className="w-full text-left px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 rounded"
                       >
                         SVG
                       </button>
@@ -507,19 +507,19 @@ const MultiTimeline = ({
                     <>
                       <button
                         onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'music')}
-                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                        className="w-full text-left px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 rounded"
                       >
                         Musique
                       </button>
                       <button
                         onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'narration')}
-                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                        className="w-full text-left px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 rounded"
                       >
                         Narration
                       </button>
                       <button
                         onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'sfx')}
-                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                        className="w-full text-left px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 rounded"
                       >
                         Effet sonore
                       </button>
@@ -530,19 +530,19 @@ const MultiTimeline = ({
                     <>
                       <button
                         onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'pan')}
-                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                        className="w-full text-left px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 rounded"
                       >
                         Pan
                       </button>
                       <button
                         onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'zoom')}
-                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                        className="w-full text-left px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 rounded"
                       >
                         Zoom
                       </button>
                       <button
                         onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'rotate')}
-                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                        className="w-full text-left px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 rounded"
                       >
                         Rotation
                       </button>
@@ -553,19 +553,19 @@ const MultiTimeline = ({
                     <>
                       <button
                         onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'fade')}
-                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                        className="w-full text-left px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 rounded"
                       >
                         Fade
                       </button>
                       <button
                         onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'blur')}
-                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                        className="w-full text-left px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 rounded"
                       >
                         Blur
                       </button>
                       <button
                         onClick={() => handleAddElement(showAddMenu.trackId, showAddMenu.time, 'transition')}
-                        className="w-full text-left px-3 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                        className="w-full text-left px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 rounded"
                       >
                         Transition
                       </button>

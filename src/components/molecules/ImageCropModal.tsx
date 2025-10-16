@@ -115,16 +115,16 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
 
   return (
     <div className="fixed inset-0 bg-white/90 dark:bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-4xl w-full mx-4 overflow-hidden border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-white rounded-lg shadow-2xl max-w-4xl w-full mx-4 overflow-hidden border border-gray-200 dark:border-border">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-border">
           <div className="flex items-center gap-2">
-            <Crop className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <Crop className="w-5 h-5 text-blue-600 dark:text-primary" />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Crop Image</h2>
           </div>
           <button
             onClick={onCancel}
-            className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            className="text-gray-500 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-white transition-colors"
             disabled={isRemovingBackground}
           >
             <X className="w-6 h-6" />
@@ -132,12 +132,12 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
         </div>
 
         {/* Crop Area */}
-        <div className="p-6 max-h-[70vh] overflow-auto bg-gray-50 dark:bg-gray-800/50">
+        <div className="p-6 max-h-[70vh] overflow-auto bg-gray-50 dark:bg-secondary/30/50">
           {isRemovingBackground ? (
             <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
               <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-gray-700 dark:text-gray-300 font-medium">Processing image...</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">This may take a few moments</p>
+              <p className="text-gray-700 dark:text-foreground font-medium">Processing image...</p>
+              <p className="text-sm text-gray-500 dark:text-muted-foreground">This may take a few moments</p>
             </div>
           ) : (
             <div className="flex justify-center">
@@ -161,14 +161,14 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
         </div>
 
         {/* Instructions */}
-        <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/20 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
+        <div className="px-6 py-2 bg-gray-50 dark:bg-secondary/30/20 border-t border-gray-200 dark:border-border">
+          <p className="text-xs text-gray-600 dark:text-muted-foreground text-center">
             Drag to select the area to keep, or click "Use Full Image" to skip cropping
           </p>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <div className="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-border bg-white dark:bg-white">
           <Button
             variant="outline"
             onClick={onCancel}
@@ -189,7 +189,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
           <Button
             onClick={handleCropComplete}
             disabled={isRemovingBackground}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700"
+            className="flex items-center gap-2 bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90"
           >
             <Check className="w-4 h-4" />
             Apply Crop

@@ -88,7 +88,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       </div>
       
       {animationData && (
-        <div className="bg-gray-700 p-3 rounded text-sm text-gray-300">
+        <div className="bg-secondary p-3 rounded text-sm text-foreground">
           <p><strong>Animation chargée:</strong></p>
           <p>• Résolution: {animationData.metadata.width}x{animationData.metadata.height}</p>
           <p>• FPS: {animationData.metadata.frame_rate}</p>

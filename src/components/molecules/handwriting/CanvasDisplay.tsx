@@ -21,7 +21,7 @@ export const CanvasDisplay: React.FC<CanvasDisplayProps> = ({
           ref={sourceCanvasRef} 
           width={width} 
           height={height} 
-          className="border border-gray-600 bg-white w-full" 
+          className="border border-border bg-white w-full" 
         />
       </div>
       <div>
@@ -30,7 +30,7 @@ export const CanvasDisplay: React.FC<CanvasDisplayProps> = ({
           ref={drawCanvasRef} 
           width={width} 
           height={height} 
-          className="border border-gray-600 bg-white w-full" 
+          className="border border-border bg-white w-full" 
         />
       </div>
     </div>

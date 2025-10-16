@@ -166,16 +166,16 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
 
   // Get file size estimate
   const sizeEstimate = estimateFileSize(
-    canvas?.width || customWidth,
-    canvas?.height || customHeight,
+    canvas?.width || 1920,
+    canvas?.height || 1080,
     selectedFormat,
     1
   );
 
   // Validate options
   const validation = validateExportOptions({
-    width: canvas?.width || customWidth,
-    height: canvas?.height || customHeight,
+    width: canvas?.width || 1920,
+    height: canvas?.height || 1080,
     format: selectedFormat,
     quality
   });
@@ -206,7 +206,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
 
       {/* Format Selection */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-300">
+        <label className="block text-sm font-medium text-foreground">
           Format d'export
         </label>
         <div className="grid grid-cols-2 gap-2">
@@ -218,14 +218,14 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
               className={`p-3 rounded-lg border-2 transition-all text-left ${
                 selectedFormat === format.id
                   ? 'border-green-500 bg-green-500/20'
-                  : 'border-gray-700 bg-gray-800 hover:border-green-400'
+                  : 'border-border bg-secondary/30 hover:border-green-400'
               } ${isExporting ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <div className="flex items-center gap-2 mb-1">
                 {format.icon}
                 <span className="text-sm font-medium text-white">{format.name}</span>
               </div>
-              <div className="text-xs text-gray-400">{format.description}</div>
+              <div className="text-xs text-muted-foreground">{format.description}</div>
             </button>
           ))}
         </div>
@@ -234,7 +234,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
       {/* Quality Settings */}
       {['jpeg', 'webp'].includes(selectedFormat) && (
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-300">
+          <label className="block text-sm font-medium text-foreground">
             Qualité
           </label>
           <input
@@ -257,8 +257,8 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
 
       {/* Canvas Info */}
       {canvas && (
-        <div className="p-3 bg-gray-800 rounded-lg space-y-1">
-          <div className="text-sm text-gray-400">Dimensions du canvas</div>
+        <div className="p-3 bg-secondary/30 rounded-lg space-y-1">
+          <div className="text-sm text-muted-foreground">Dimensions du canvas</div>
           <div className="text-white font-medium">{canvas.width} × {canvas.height} px</div>
           <div className="text-xs text-gray-500">
             Taille estimée: {sizeEstimate.formatted}
@@ -286,7 +286,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
         disabled={isExporting || !validation.valid}
         className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-colors ${
           isExporting || !validation.valid
-            ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+            ? 'bg-secondary text-gray-500 cursor-not-allowed'
             : 'bg-green-600 hover:bg-green-700 text-white'
         }`}
       >
@@ -295,9 +295,9 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
       </button>
 
       {/* Social Media Presets */}
-      <div className="pt-4 border-t border-gray-700">
+      <div className="pt-4 border-t border-border">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-300">
+          <label className="block text-sm font-medium text-foreground">
             Préréglages réseaux sociaux
           </label>
           <Select
@@ -305,7 +305,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
             onValueChange={(value) => setSelectedPreset(value)}
             disabled={isExporting}
           >
-            <SelectTrigger className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white text-sm">
+            <SelectTrigger className="w-full px-3 py-2 bg-secondary/30 border border-border rounded text-white text-sm">
               <SelectValue placeholder="Sélectionner un préréglage" />
             </SelectTrigger>
             <SelectContent>
@@ -322,8 +322,8 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
             disabled={isExporting}
             className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors ${
               isExporting
-                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                ? 'bg-secondary text-gray-500 cursor-not-allowed'
+                : 'bg-primary hover:bg-primary/90 text-white'
             }`}
           >
             <Download className="w-4 h-4" />
@@ -333,7 +333,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
       </div>
 
       {/* Format Info */}
-      <div className="p-3 bg-gray-800/50 rounded-lg text-xs text-gray-400 space-y-1">
+      <div className="p-3 bg-secondary/30/50 rounded-lg text-xs text-muted-foreground space-y-1">
         <div><strong>PNG:</strong> Meilleure qualité, supporte la transparence</div>
         <div><strong>JPEG:</strong> Taille réduite, pas de transparence</div>
         <div><strong>WebP:</strong> Moderne, excellente compression</div>

@@ -54,14 +54,14 @@ export function ShadcnDemo() {
   const [selectedFormat, setSelectedFormat] = useState('png');
 
   return (
-    <div className="min-h-screen bg-gray-950 p-8">
+    <div className="min-h-screen bg-secondary p-8">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-white">
             shadcn/ui Components Demo
           </h1>
-          <p className="text-gray-400">
+          <p className="text-muted-foreground">
             Composants UI modernes et accessibles pour Whiteboard Animation
           </p>
           <Badge variant="default" className="mt-4">Version 1.0</Badge>

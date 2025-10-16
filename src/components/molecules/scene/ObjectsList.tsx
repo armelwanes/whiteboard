@@ -20,15 +20,15 @@ export const ObjectsList: React.FC<ObjectsListProps> = ({
       </label>
       <div className="space-y-2">
         {objects.length === 0 ? (
-          <p className="text-gray-400 text-xs italic">Aucun objet pour le moment</p>
+          <p className="text-muted-foreground text-xs italic">Aucun objet pour le moment</p>
         ) : (
           objects.map((obj) => (
             <div
               key={obj.id}
               className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
                 selectedObjectId === obj.id
-                  ? 'bg-blue-600 bg-opacity-20 border border-blue-500'
-                  : 'bg-gray-800 hover:bg-gray-750 border border-gray-700'
+                  ? 'bg-primary bg-opacity-20 border border-primary'
+                  : 'bg-secondary/30 hover:bg-secondary/80 border border-border'
               }`}
               onClick={() => onSelectObject(obj.id)}
             >
@@ -38,7 +38,7 @@ export const ObjectsList: React.FC<ObjectsListProps> = ({
                   <p className="text-white text-sm font-medium truncate max-w-[150px]">
                     {obj.name || 'Image'}
                   </p>
-                  <p className="text-gray-400 text-xs">
+                  <p className="text-muted-foreground text-xs">
                     {Math.round(obj.width)} × {Math.round(obj.height)}
                   </p>
                 </div>

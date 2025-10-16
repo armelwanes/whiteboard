@@ -91,12 +91,12 @@ const Timeline: React.FC<TimelineProps> = ({
   };
 
   return (
-    <div className="timeline bg-gray-900 bg-opacity-95 text-white p-4 rounded-lg shadow-xl">
+    <div className="timeline bg-white bg-opacity-95 text-white p-4 rounded-lg shadow-xl">
       {/* Playback Controls */}
       <div className="flex items-center gap-3 mb-4">
         <button
           onClick={handleSkipToStart}
-          className="p-2 hover:bg-gray-700 rounded transition-colors"
+          className="p-2 hover:bg-secondary rounded transition-colors"
           title="Skip to start"
         >
           <SkipBack className="w-5 h-5" />
@@ -104,7 +104,7 @@ const Timeline: React.FC<TimelineProps> = ({
         
         <button
           onClick={onPlayPause}
-          className="play-pause-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 flex items-center gap-2"
+          className="play-pause-btn bg-primary hover:bg-primary/90 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 flex items-center gap-2"
         >
           {isPlaying ? (
             <>
@@ -121,7 +121,7 @@ const Timeline: React.FC<TimelineProps> = ({
         
         <button
           onClick={handleSkipToEnd}
-          className="p-2 hover:bg-gray-700 rounded transition-colors"
+          className="p-2 hover:bg-secondary rounded transition-colors"
           title="Skip to end"
         >
           <SkipForward className="w-5 h-5" />
@@ -133,11 +133,11 @@ const Timeline: React.FC<TimelineProps> = ({
 
         {/* Timeline Controls */}
         {timeline && (
-          <div className="flex items-center gap-2 ml-4 border-l border-gray-700 pl-4">
+          <div className="flex items-center gap-2 ml-4 border-l border-border pl-4">
             <button
               onClick={() => setShowKeyframes(!showKeyframes)}
               className={`px-3 py-1 rounded text-xs transition-colors ${
-                showKeyframes ? 'bg-purple-600' : 'bg-gray-700 hover:bg-gray-600'
+                showKeyframes ? 'bg-purple-600' : 'bg-secondary hover:bg-secondary/80'
               }`}
             >
               Keyframes
@@ -145,7 +145,7 @@ const Timeline: React.FC<TimelineProps> = ({
             <button
               onClick={() => setShowMarkers(!showMarkers)}
               className={`px-3 py-1 rounded text-xs transition-colors ${
-                showMarkers ? 'bg-yellow-600' : 'bg-gray-700 hover:bg-gray-600'
+                showMarkers ? 'bg-yellow-600' : 'bg-secondary hover:bg-secondary/80'
               }`}
             >
               Markers
@@ -165,7 +165,7 @@ const Timeline: React.FC<TimelineProps> = ({
       <div className="timeline-track-container">
         {/* Progress bar with markers */}
         <div 
-          className="progress-bar h-12 bg-gray-800 rounded-lg cursor-pointer mb-2 relative overflow-visible border border-gray-700"
+          className="progress-bar h-12 bg-secondary/30 rounded-lg cursor-pointer mb-2 relative overflow-visible border border-border"
           onClick={handleSeek}
         >
           {/* Playhead */}
@@ -179,7 +179,7 @@ const Timeline: React.FC<TimelineProps> = ({
 
           {/* Progress fill */}
           <div 
-            className="progress-fill h-full bg-blue-600 bg-opacity-30 transition-all duration-100"
+            className="progress-fill h-full bg-primary bg-opacity-30 transition-all duration-100"
             style={{ width: `${(currentTime / totalDuration) * 100}%` }}
           />
           
@@ -196,7 +196,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 title={`${scene.title} (${scene.duration}s)`}
               >
                 <div 
-                  className="absolute top-1 text-xs text-gray-300 px-1 truncate"
+                  className="absolute top-1 text-xs text-foreground px-1 truncate"
                   style={{ width: `${sceneWidth * (100 / sceneWidth)}%` }}
                 >
                   {scene.title}
@@ -218,7 +218,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 }}
                 title={marker.label}
               >
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 px-2 py-1 bg-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                   {marker.label}
                   <button
                     onClick={(e) => {
@@ -279,8 +279,8 @@ const Timeline: React.FC<TimelineProps> = ({
               onClick={() => onSeek(sceneStart)}
               className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 ${
                 isActive 
-                  ? 'bg-blue-600 text-white shadow-lg scale-105' 
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  ? 'bg-primary text-white shadow-lg scale-105' 
+                  : 'bg-secondary text-foreground hover:bg-secondary/80'
               }`}
             >
               {index + 1}. {scene.title}
@@ -291,8 +291,8 @@ const Timeline: React.FC<TimelineProps> = ({
 
       {/* Property Tracks Panel (if timeline exists) */}
       {timeline && timeline.propertyTracks && Object.keys(timeline.propertyTracks).length > 0 && (
-        <div className="property-tracks mt-4 border-t border-gray-700 pt-4">
-          <h3 className="text-sm font-semibold mb-2 text-gray-400">Property Tracks</h3>
+        <div className="property-tracks mt-4 border-t border-border pt-4">
+          <h3 className="text-sm font-semibold mb-2 text-muted-foreground">Property Tracks</h3>
           <div className="space-y-1">
             {Object.entries(timeline.propertyTracks).map(([trackName, track]) => (
               <div
@@ -300,13 +300,13 @@ const Timeline: React.FC<TimelineProps> = ({
                 className={`px-3 py-2 rounded cursor-pointer transition-colors ${
                   selectedTrack === trackName 
                     ? 'bg-purple-600 bg-opacity-30 border border-purple-500' 
-                    : 'bg-gray-800 hover:bg-gray-750'
+                    : 'bg-secondary/30 hover:bg-secondary/80'
                 }`}
                 onClick={() => setSelectedTrack(trackName)}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono">{trackName}</span>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-muted-foreground">
                     {track.keyframes?.length || 0} keyframes
                   </span>
                 </div>
