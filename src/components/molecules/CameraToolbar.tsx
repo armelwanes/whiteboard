@@ -82,7 +82,7 @@ const CameraToolbar: React.FC<CameraToolbarProps> = ({
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground text-xs">Zoom scène:</span>
           <button
-            onClick={() => onSceneZoom(Math.max(0.1, sceneZoom - 0.1))}
+            onClick={() => onSceneZoom(Math.max(0.5, sceneZoom - 0.1))}
             className="bg-secondary hover:bg-secondary/80 text-foreground p-1.5 rounded-lg transition-colors"
             title="Dézoom scène"
           >
@@ -92,7 +92,7 @@ const CameraToolbar: React.FC<CameraToolbarProps> = ({
             {(sceneZoom * 100).toFixed(0)}%
           </span>
           <button
-            onClick={() => onSceneZoom(Math.min(2.0, sceneZoom + 0.1))}
+            onClick={() => onSceneZoom(Math.min(1.0, sceneZoom + 0.1))}
             className="bg-secondary hover:bg-secondary/80 text-foreground p-1.5 rounded-lg transition-colors"
             title="Zoom scène"
           >
