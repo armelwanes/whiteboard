@@ -288,13 +288,11 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
     
     const text = 'Votre texte ici';
     const fontSize = 48;
-    const estimatedWidth = text.length * fontSize * 0.6;
     const estimatedHeight = fontSize * 1.2;
     
-    const scaledWidth = estimatedWidth * cameraZoom;
     const scaledHeight = estimatedHeight * cameraZoom;
     
-    const initialX = cameraCenterX - (scaledWidth / 2);
+    const initialX = cameraCenterX;
     const initialY = cameraCenterY - (scaledHeight / 2);
     
     const newLayer = {
@@ -314,7 +312,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
         color: [0, 0, 0],
         style: 'normal',
         line_height: 1.2,
-        align: 'left'
+        align: 'center'
       },
       audio: {
         narration: null,
