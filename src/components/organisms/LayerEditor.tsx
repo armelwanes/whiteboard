@@ -342,21 +342,44 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
       cameraZoom = selectedCamera.zoom || 0.8;
     }
     
-    const shapeWidth = (shapeLayer.shape_config?.width || 100) * cameraZoom;
-    const shapeHeight = (shapeLayer.shape_config?.height || 100) * cameraZoom;
+    const shapeConfig = shapeLayer.shape_config;
+    const scaledShapeConfig = { ...shapeConfig };
     
-    const initialX = cameraCenterX - (shapeWidth / 2);
-    const initialY = cameraCenterY - (shapeHeight / 2);
+    if (shapeConfig.width !== undefined) {
+      scaledShapeConfig.width = shapeConfig.width * cameraZoom;
+    }
+    if (shapeConfig.height !== undefined) {
+      scaledShapeConfig.height = shapeConfig.height * cameraZoom;
+    }
+    if (shapeConfig.radius !== undefined) {
+      scaledShapeConfig.radius = shapeConfig.radius * cameraZoom;
+    }
+    if (shapeConfig.radiusX !== undefined) {
+      scaledShapeConfig.radiusX = shapeConfig.radiusX * cameraZoom;
+    }
+    if (shapeConfig.radiusY !== undefined) {
+      scaledShapeConfig.radiusY = shapeConfig.radiusY * cameraZoom;
+    }
+    if (shapeConfig.innerRadius !== undefined) {
+      scaledShapeConfig.innerRadius = shapeConfig.innerRadius * cameraZoom;
+    }
+    if (shapeConfig.outerRadius !== undefined) {
+      scaledShapeConfig.outerRadius = shapeConfig.outerRadius * cameraZoom;
+    }
+    if (shapeConfig.size !== undefined) {
+      scaledShapeConfig.size = shapeConfig.size * cameraZoom;
+    }
+    
+    const shapeWidth = scaledShapeConfig.width || scaledShapeConfig.radius || scaledShapeConfig.size || 100;
+    const shapeHeight = scaledShapeConfig.height || scaledShapeConfig.radius || scaledShapeConfig.size || 100;
+    
+    scaledShapeConfig.x = cameraCenterX - (shapeWidth / 2);
+    scaledShapeConfig.y = cameraCenterY - (shapeHeight / 2);
     
     const updatedShapeLayer = {
       ...shapeLayer,
       z_index: editedScene.layers.length + 1,
-      scale: cameraZoom,
-      shape_config: {
-        ...shapeLayer.shape_config,
-        x: initialX,
-        y: initialY,
-      }
+      shape_config: scaledShapeConfig
     };
     
     setEditedScene({
