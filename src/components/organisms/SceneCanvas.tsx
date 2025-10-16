@@ -400,12 +400,32 @@ const SceneCanvas = ({
     }
   }, [selectedCameraId, sceneCameras, onSelectCamera]);
   const [sceneZoom, setSceneZoom] = useState(1.0);
+  const [hasCalculatedInitialZoom, setHasCalculatedInitialZoom] = useState(false);
   const canvasRef = useRef(null);
   const stageRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
   const sceneWidth = 1920;
   const sceneHeight = 1080;
+
+  // Calculate initial zoom to fit scene in viewport
+  React.useEffect(() => {
+    if (!hasCalculatedInitialZoom && scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
+      
+      // Calculate zoom to fit with some padding (90% of container)
+      const zoomX = (containerWidth * 0.9) / sceneWidth;
+      const zoomY = (containerHeight * 0.9) / sceneHeight;
+      const fitZoom = Math.min(zoomX, zoomY, 1.0); // Don't zoom in beyond 100%
+      
+      if (fitZoom < 1.0) {
+        setSceneZoom(fitZoom);
+      }
+      setHasCalculatedInitialZoom(true);
+    }
+  }, [hasCalculatedInitialZoom, sceneWidth, sceneHeight]);
 
   // Create a new camera
   const handleAddCamera = useCallback(() => {
@@ -501,34 +521,14 @@ const SceneCanvas = ({
     setHasInitialCentered(false);
   }, [scene.id]);
 
-  // Auto-scroll to selected camera - only on initial load
+  // Auto-scroll to selected camera - disabled since canvas is now centered with flexbox
+  // The canvas is always centered in the viewport, so scrolling is not needed
   React.useEffect(() => {
-    if (!hasInitialCentered && selectedCameraId && scrollContainerRef.current && canvasRef.current) {
-      const selectedCamera = sceneCameras.find(cam => cam.id === selectedCameraId);
-      if (selectedCamera) {
-        const container = scrollContainerRef.current;
-        
-        // Calculate camera position in pixels (accounting for 500px padding)
-        const padding = 500;
-        const cameraX = (selectedCamera.position.x * sceneWidth * sceneZoom) + padding;
-        const cameraY = (selectedCamera.position.y * sceneHeight * sceneZoom) + padding;
-
-        // Calculate scroll position to center the camera
-        const scrollX = cameraX - (container.clientWidth / 2);
-        const scrollY = cameraY - (container.clientHeight / 2);
-        
-        // Smooth scroll to camera position
-        container.scrollTo({
-          left: scrollX,
-          top: scrollY,
-          behavior: 'smooth'
-        });
-        
-        // Mark as centered so it doesn't happen again
-        setHasInitialCentered(true);
-      }
+    // Mark as centered immediately since we don't need to scroll
+    if (!hasInitialCentered) {
+      setHasInitialCentered(true);
     }
-  }, [selectedCameraId, sceneCameras, sceneWidth, sceneHeight, sceneZoom, hasInitialCentered]);
+  }, [selectedCameraId, hasInitialCentered]);
 
   // Sort layers by z_index for rendering
   const sortedLayers = [...(scene.layers || [])].sort((a, b) => 
@@ -553,10 +553,10 @@ const SceneCanvas = ({
       />
       {/* Main Content Area */}
       <div className="flex flex-1 min-h-0 bg-white" style={{ height: '100%' }}>
-        {/* Canvas Area - Scrollable viewport */}
+        {/* Canvas Area - Centered viewport */}
         <div 
           ref={scrollContainerRef}
-          className="flex-1 bg-white relative overflow-auto"
+          className="flex-1 bg-white relative flex items-center justify-center overflow-hidden"
           style={{ 
             width: '100%',
             height: '100%',
@@ -565,18 +565,16 @@ const SceneCanvas = ({
             backgroundPosition: '0 0'
           }}
         >
-          {/* Padding wrapper for infinite canvas effect */}
-          <div style={{ padding: '500px' }}>
-            {/* Scene Canvas - The actual stage */}
-            <div
-              ref={canvasRef}
-              className="bg-white shadow-2xl"
-              style={{
-                width: `${scaledSceneWidth}px`,
-                height: `${scaledSceneHeight}px`,
-                position: 'relative'
-              }}
-            >
+          {/* Scene Canvas - The actual stage */}
+          <div
+            ref={canvasRef}
+            className="bg-white shadow-2xl"
+            style={{
+              width: `${scaledSceneWidth}px`,
+              height: `${scaledSceneHeight}px`,
+              position: 'relative'
+            }}
+          >
             {/* Konva Stage for layers and cameras */}
             <div style={{ position: 'relative', zIndex: 2 }}>
               <Stage
@@ -666,7 +664,6 @@ const SceneCanvas = ({
                 </KonvaLayer>
               </Stage>
             </div>
-          </div>
           </div>
         </div>
       </div>
