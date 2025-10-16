@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AnimationContainer, ScenePanel, ShapeToolbar, AssetLibrary } from './components/organisms';
 import HandWritingTest from './pages/HandWritingTest';
 import ShadcnDemo from './components/ShadcnDemo';
-import { useScenes, useScenesActions, Scene, Layer } from './app/scenes';
+import { useScenes, useScenesActions, useSceneStore, Scene, Layer } from './app/scenes';
 import { MAX_HISTORY_STATES } from './config/constants';
 
 interface AssetData {
@@ -20,11 +20,16 @@ function App() {
     duplicateScene: duplicateSceneAction,
   } = useScenesActions();
 
-  const [selectedSceneIndex, setSelectedSceneIndex] = useState(0);
+  // Get state and actions from Zustand store
+  const selectedSceneIndex = useSceneStore((state) => state.selectedSceneIndex);
+  const setSelectedSceneIndex = useSceneStore((state) => state.setSelectedSceneIndex);
+  const showShapeToolbar = useSceneStore((state) => state.showShapeToolbar);
+  const setShowShapeToolbar = useSceneStore((state) => state.setShowShapeToolbar);
+  const showAssetLibrary = useSceneStore((state) => state.showAssetLibrary);
+  const setShowAssetLibrary = useSceneStore((state) => state.setShowAssetLibrary);
+
   const [showHandWritingTest, setShowHandWritingTest] = useState(false);
   const [showShadcnDemo, setShowShadcnDemo] = useState(false);
-  const [showShapeToolbar, setShowShapeToolbar] = useState(false);
-  const [showAssetLibrary, setShowAssetLibrary] = useState(false);
   const [history, setHistory] = useState<Scene[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const isUndoRedoAction = useRef(false);
@@ -309,10 +314,7 @@ function App() {
 
       <AnimationContainer 
           scenes={scenes} 
-          selectedSceneIndex={selectedSceneIndex}
-          setSelectedSceneIndex={setSelectedSceneIndex}
           updateScene={updateScene}
-          onSelectScene={setSelectedSceneIndex}
           onAddScene={addScene}
           onDeleteScene={deleteScene}
           onDuplicateScene={duplicateScene}

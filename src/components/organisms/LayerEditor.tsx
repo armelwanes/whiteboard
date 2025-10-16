@@ -23,6 +23,7 @@ import { exportDefaultCameraView, exportAllCameras, downloadImage } from '../../
 import { exportLayerFromJSON, downloadDataUrl, validateLayerJSON } from '../../utils/layerExporter';
 import { exportSceneImage, downloadSceneImage } from '../../utils/sceneExporter';
 import { addAsset } from '../../utils/assetManager';
+import { useSceneStore } from '../../app/scenes';
 import {
   Select,
   SelectContent,
@@ -46,6 +47,16 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
   selectedLayerId: externalSelectedLayerId,
   onSelectLayer: externalOnSelectLayer
 }) => {
+  // Get UI state from Zustand store
+  const showShapeToolbar = useSceneStore((state) => state.showShapeToolbar);
+  const setShowShapeToolbar = useSceneStore((state) => state.setShowShapeToolbar);
+  const showAssetLibrary = useSceneStore((state) => state.showAssetLibrary);
+  const setShowAssetLibrary = useSceneStore((state) => state.setShowAssetLibrary);
+  const showCropModal = useSceneStore((state) => state.showCropModal);
+  const setShowCropModal = useSceneStore((state) => state.setShowCropModal);
+  const pendingImageData = useSceneStore((state) => state.pendingImageData);
+  const setPendingImageData = useSceneStore((state) => state.setPendingImageData);
+
   const [editedScene, setEditedScene] = useState({ 
     ...scene,
     layers: scene.layers || [],
@@ -62,11 +73,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
       setInternalSelectedLayerId(layerId);
     }
   };
-  const [showShapeToolbar, setShowShapeToolbar] = useState(false);
-  const [showAssetLibrary, setShowAssetLibrary] = useState(false);
-  const [showCropModal, setShowCropModal] = useState(false);
   const [showThumbnailMaker, setShowThumbnailMaker] = useState(false);
-  const [pendingImageData, setPendingImageData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const backgroundImageInputRef = useRef<HTMLInputElement>(null);
   const backgroundMusicInputRef = useRef<HTMLInputElement>(null);
