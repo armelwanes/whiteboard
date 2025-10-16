@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from '../atoms';
-import { X, Check, Crop as CropIcon, Eraser } from 'lucide-react';
+import { X, Check, Crop as CropIcon, Eraser, Crop } from 'lucide-react';
 
 interface ImageCropModalProps {
   imageUrl: string;
