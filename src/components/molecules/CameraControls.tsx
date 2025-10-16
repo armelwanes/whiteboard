@@ -162,13 +162,13 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
                   {/* Zoom */}
                   <div>
                     <label className="block text-foreground text-xs mb-1.5">
-                      Zoom: {camera.zoom.toFixed(2)}x
+                      Zoom: {camera.zoom.toFixed(2)}x ({(camera.zoom * 100).toFixed(0)}%)
                     </label>
                     <input
                       type="range"
                       min="0.1"
-                      max="5"
-                      step="0.1"
+                      max="1.0"
+                      step="0.05"
                       value={camera.zoom}
                       onChange={(e) =>
                         handleUpdateCamera(index, { zoom: parseFloat(e.target.value) })
@@ -176,8 +176,8 @@ const CameraControls: React.FC<CameraControlsProps> = ({ cameras = [], onChange,
                       className="w-full"
                     />
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>0.1x</span>
-                      <span>5.0x</span>
+                      <span>10%</span>
+                      <span>100% (max)</span>
                     </div>
                   </div>
 

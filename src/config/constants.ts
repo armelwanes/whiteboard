@@ -25,8 +25,8 @@ export const EXPORT_FORMATS = {
 export const MAX_HISTORY_STATES = 50;
 
 export const CANVAS_DEFAULTS = {
-  WIDTH: 1920,
-  HEIGHT: 1080,
+  WIDTH: 800,
+  HEIGHT: 600,
   BACKGROUND: '#ffffff',
 } as const;
 

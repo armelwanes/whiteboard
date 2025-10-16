@@ -4,7 +4,9 @@ import {
   MoveUp, MoveDown, Copy,
   Image as ImageIcon,
   Layers as LayersIcon,
-  Library
+  Library,
+  Type as TextIcon,
+  Square as ShapeIcon
 } from 'lucide-react';
 import AudioManager from '../audio/AudioManager';
 import {
@@ -23,6 +25,8 @@ interface PropertiesPanelProps {
   onUpdateLayer: (layerId: string, updates: any) => void;
   onDeleteLayer: (layerId: string) => void;
   onDuplicateLayer: (layerId: string) => void;
+  onAddText?: () => void;
+  onAddShape?: () => void;
   [key: string]: any;
 }
 
@@ -37,6 +41,8 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   onMoveLayer,
   onImageUpload,
   onOpenAssetLibrary,
+  onAddText,
+  onAddShape,
   fileInputRef
 }) => {
   if (!scene) {
@@ -72,7 +78,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       {/* Header */}
       <div className="bg-secondary/30 px-6 py-4 border-b border-border flex items-center justify-between flex-shrink-0">
         <h2 className="text-xl font-bold text-foreground">Propriétés</h2>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button
             onClick={onOpenAssetLibrary}
             className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
@@ -82,11 +88,29 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
           </button>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="bg-primary hover:bg-primary/90 text-foreground font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
             title="Ajouter une image"
           >
             <Upload className="w-4 h-4" />
           </button>
+          {onAddText && (
+            <button
+              onClick={onAddText}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
+              title="Ajouter du texte"
+            >
+              <TextIcon className="w-4 h-4" />
+            </button>
+          )}
+          {onAddShape && (
+            <button
+              onClick={onAddShape}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2 px-3 rounded flex items-center gap-2 transition-colors text-sm"
+              title="Ajouter une forme"
+            >
+              <ShapeIcon className="w-4 h-4" />
+            </button>
+          )}
         </div>
         <input
           ref={fileInputRef}

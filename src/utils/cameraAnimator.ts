@@ -49,13 +49,13 @@ export interface ValidationResult {
  * Default camera configuration
  */
 export const DEFAULT_CAMERA: Camera = {
-  zoom: 1.0,
+  zoom: 0.8,
   position: { x: 0.5, y: 0.5 },
   duration: 2.0,
   transition_duration: 0,
   easing: 'ease_out',
-  width: 1920,
-  height: 1080,
+  width: 800,
+  height: 600,
   locked: false,
   isDefault: false,
   pauseDuration: 0,
@@ -84,25 +84,25 @@ export const createCamera = (overrides: Partial<Camera> = {}): Camera => {
  * @param {string} aspectRatio - Aspect ratio (e.g., '16:9', '4:3')
  * @returns {object} Default camera configuration
  */
-export const createDefaultCamera = (aspectRatio: string = '16:9'): Camera => {
-  let cameraWidth = 1920;
-  let cameraHeight = 1080;
+export const createDefaultCamera = (aspectRatio: string = '4:3'): Camera => {
+  let cameraWidth = 800;
+  let cameraHeight = 600;
   
   if (aspectRatio === '16:9') {
-    cameraWidth = 1920;
-    cameraHeight = 1080;
+    cameraWidth = 800;
+    cameraHeight = 450;
   } else if (aspectRatio === '4:3') {
-    cameraWidth = 1440;
-    cameraHeight = 1080;
+    cameraWidth = 800;
+    cameraHeight = 600;
   } else if (aspectRatio === '1:1') {
-    cameraWidth = 1080;
-    cameraHeight = 1080;
+    cameraWidth = 600;
+    cameraHeight = 600;
   }
   
   return {
     id: 'default-camera',
     name: 'Caméra Par Défaut',
-    zoom: 1.0,
+    zoom: 0.8,
     position: { x: 0.5, y: 0.5 },
     duration: 2.0,
     transition_duration: 0,
