@@ -35,7 +35,7 @@ function App() {
 
   useEffect(() => {
     loadScenes();
-  }, [loadScenes]);
+  }, []);
 
   useEffect(() => {
     if (!isUndoRedoAction.current && scenes.length > 0) {
