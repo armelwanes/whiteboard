@@ -8,8 +8,14 @@ import ShapeToolbar from './ShapeToolbar';
 import { ImageCropModal } from '../molecules';
 import { createTimeline } from '../../utils/timelineSystem';
 import ScenePanel from './ScenePanel';
-import { addAsset } from '../../utils/assetManager';
 import { useSceneStore } from '../../app/scenes';
+import {
+  useAnimationPlayback,
+  useLayerCreation,
+  useImageHandling,
+  useLayerOperations,
+  useFileUpload
+} from '../molecules/layer-management';
 
 interface AnimationContainerProps {
   scenes?: any[];
@@ -46,22 +52,34 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({
   const pendingImageData = useSceneStore((state) => state.pendingImageData);
   const setPendingImageData = useSceneStore((state) => state.setPendingImageData);
 
-  const [currentTime, setCurrentTime] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
   const [globalTimeline, setGlobalTimeline] = useState(() => {
-    // Initialize with empty timeline
     const totalDuration = scenes.reduce((sum, scene) => sum + scene.duration, 0);
     return createTimeline(totalDuration, 30);
   });
-  const animationRef = useRef<number | null>(null);
-  const lastTimeRef = useRef(Date.now());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Calculate total duration
   const totalDuration = scenes.reduce((sum, scene) => sum + scene.duration, 0);
+  const { currentTime, isPlaying, setCurrentTime, setIsPlaying } = useAnimationPlayback(totalDuration);
 
-  // Update timeline duration when scenes change
+  const currentScene = scenes[selectedSceneIndex];
+  const defaultCamera = currentScene?.sceneCameras?.[0] || { zoom: 0.8, position: { x: 0.5, y: 0.5 }, width: 800, height: 450 };
+  
+  const { createTextLayer, createShapeLayer } = useLayerCreation({
+    sceneWidth: 1920,
+    sceneHeight: 1080,
+    selectedCamera: defaultCamera
+  });
+
+  const { handleCropComplete: handleImageCrop, handleSelectAssetFromLibrary: handleAssetSelection } = useImageHandling({
+    sceneWidth: 1920,
+    sceneHeight: 1080,
+    selectedCamera: defaultCamera
+  });
+
+  const { deleteLayer, duplicateLayer, moveLayer, updateLayer } = useLayerOperations();
+  const { handleImageUpload: uploadImage } = useFileUpload();
+
   useEffect(() => {
     setGlobalTimeline(prev => ({
       ...prev,
@@ -69,7 +87,6 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({
     }));
   }, [totalDuration]);
 
-  // Determine current scene based on time
   useEffect(() => {
     let accumulatedTime = 0;
     for (let i = 0; i < scenes.length; i++) {
@@ -84,129 +101,28 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({
     }
   }, [currentTime, scenes, totalDuration]);
 
-  // Animation loop
-  useEffect(() => {
-    if (isPlaying) {
-      const animate = () => {
-        const now = Date.now();
-        const deltaTime = (now - lastTimeRef.current) / 1000;
-        lastTimeRef.current = now;
-
-        setCurrentTime(prevTime => {
-          const newTime = prevTime + deltaTime;
-          if (newTime >= totalDuration) {
-            setIsPlaying(false);
-            return totalDuration;
-          }
-          return newTime;
-        });
-
-        animationRef.current = requestAnimationFrame(animate);
-      };
-
-      lastTimeRef.current = Date.now();
-      animationRef.current = requestAnimationFrame(animate);
-    }
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [isPlaying, totalDuration]);
-
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !file.type.startsWith('image/')) return;
-
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const originalImageUrl = event.target?.result as string;
-      
-      // Store pending image data with file name and original URL
-      setPendingImageData({
-        imageUrl: originalImageUrl,
-        fileName: file.name,
-        originalUrl: originalImageUrl,
-        fileType: file.type
-      });
-      setShowCropModal(true);
-    };
-    reader.readAsDataURL(file);
-
-    // Reset file input
-    e.target.value = '';
+    await uploadImage(e, setPendingImageData, setShowCropModal);
   };
 
   const handleCropComplete = async (croppedImageUrl: string, imageDimensions: any) => {
-    if (!pendingImageData) return;
+    if (!pendingImageData || !currentScene) return;
 
-    // Save ORIGINAL (uncropped) image to asset library
-    try {
-      await addAsset({
-        name: pendingImageData.fileName,
-        dataUrl: pendingImageData.originalUrl,
-        type: pendingImageData.fileType,
-        tags: []
+    const newLayer = await handleImageCrop(
+      croppedImageUrl,
+      imageDimensions,
+      pendingImageData,
+      currentScene.layers?.length || 0
+    );
+
+    if (newLayer) {
+      updateScene(selectedSceneIndex, {
+        ...currentScene,
+        layers: [...(currentScene.layers || []), newLayer]
       });
-    } catch (error) {
-      console.error('Error saving asset to library:', error);
+      setSelectedLayerId(newLayer.id);
     }
 
-    const currentScene = scenes[selectedSceneIndex];
-    if (!currentScene) return;
-
-    const sceneWidth = 1920;
-    const sceneHeight = 1080;
-    
-    const defaultCamera = currentScene.sceneCameras?.[0] || { zoom: 0.8, position: { x: 0.5, y: 0.5 }, width: 800, height: 450 };
-    const cameraZoom = defaultCamera.zoom || 0.8;
-    const cameraCenterX = (defaultCamera.position?.x || 0.5) * sceneWidth;
-    const cameraCenterY = (defaultCamera.position?.y || 0.5) * sceneHeight;
-    const cameraWidth = defaultCamera.width || 800;
-    const cameraHeight = defaultCamera.height || 450;
-    
-    let calculatedScale = 1.0;
-    if (imageDimensions) {
-      const maxWidth = cameraWidth * 0.8;
-      const maxHeight = cameraHeight * 0.8;
-      
-      const scaleX = maxWidth / imageDimensions.width;
-      const scaleY = maxHeight / imageDimensions.height;
-      
-      calculatedScale = Math.min(scaleX, scaleY, 1.0) * cameraZoom;
-    }
-    
-    const scaledImageWidth = imageDimensions ? imageDimensions.width * calculatedScale : 0;
-    const scaledImageHeight = imageDimensions ? imageDimensions.height * calculatedScale : 0;
-    
-    const initialX = cameraCenterX - (scaledImageWidth / 2);
-    const initialY = cameraCenterY - (scaledImageHeight / 2);
-
-    const newLayer = {
-      id: `layer-${Date.now()}`,
-      image_path: croppedImageUrl,
-      name: pendingImageData.fileName,
-      position: { x: initialX, y: initialY },
-      z_index: (currentScene.layers?.length || 0) + 1,
-      skip_rate: 10,
-      scale: calculatedScale,
-      opacity: 1.0,
-      mode: 'draw',
-      type: 'image',
-      audio: {
-        narration: null,
-        soundEffects: [],
-        typewriter: null,
-        drawing: null,
-      }
-    };
-
-    updateScene(selectedSceneIndex, {
-      ...currentScene,
-      layers: [...(currentScene.layers || []), newLayer]
-    });
-    setSelectedLayerId(newLayer.id);
     setShowCropModal(false);
     setPendingImageData(null);
   };
@@ -217,54 +133,9 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({
   };
 
   const handleSelectAssetFromLibrary = (asset: any) => {
-    const currentScene = scenes[selectedSceneIndex];
     if (!currentScene) return;
 
-    const sceneWidth = 1920;
-    const sceneHeight = 1080;
-    
-    const defaultCamera = currentScene.sceneCameras?.[0] || { zoom: 0.8, position: { x: 0.5, y: 0.5 }, width: 800, height: 450 };
-    const cameraZoom = defaultCamera.zoom || 0.8;
-    const cameraCenterX = (defaultCamera.position?.x || 0.5) * sceneWidth;
-    const cameraCenterY = (defaultCamera.position?.y || 0.5) * sceneHeight;
-    const cameraWidth = defaultCamera.width || 800;
-    const cameraHeight = defaultCamera.height || 450;
-    
-    let calculatedScale = 1.0;
-    if (asset.width && asset.height) {
-      const maxWidth = cameraWidth * 0.8;
-      const maxHeight = cameraHeight * 0.8;
-      
-      const scaleX = maxWidth / asset.width;
-      const scaleY = maxHeight / asset.height;
-      
-      calculatedScale = Math.min(scaleX, scaleY, 1.0) * cameraZoom;
-    }
-    
-    const scaledImageWidth = asset.width ? asset.width * calculatedScale : 0;
-    const scaledImageHeight = asset.height ? asset.height * calculatedScale : 0;
-    
-    const initialX = cameraCenterX - (scaledImageWidth / 2);
-    const initialY = cameraCenterY - (scaledImageHeight / 2);
-
-    const newLayer = {
-      id: `layer-${Date.now()}`,
-      image_path: asset.dataUrl,
-      name: asset.name,
-      position: { x: initialX, y: initialY },
-      z_index: (currentScene.layers?.length || 0) + 1,
-      skip_rate: 10,
-      scale: calculatedScale,
-      opacity: 1.0,
-      mode: 'draw',
-      type: 'image',
-      audio: {
-        narration: null,
-        soundEffects: [],
-        typewriter: null,
-        drawing: null,
-      }
-    };
+    const newLayer = handleAssetSelection(asset, currentScene.layers?.length || 0);
 
     updateScene(selectedSceneIndex, {
       ...currentScene,
@@ -275,54 +146,9 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({
   };
 
   const handleAddText = () => {
-    const currentScene = scenes[selectedSceneIndex];
     if (!currentScene) return;
 
-    const sceneWidth = 1920;
-    const sceneHeight = 1080;
-    
-    const defaultCamera = currentScene.sceneCameras?.[0] || { zoom: 0.8, position: { x: 0.5, y: 0.5 }, width: 800, height: 450 };
-    const cameraZoom = defaultCamera.zoom || 0.8;
-    const cameraCenterX = (defaultCamera.position?.x || 0.5) * sceneWidth;
-    const cameraCenterY = (defaultCamera.position?.y || 0.5) * sceneHeight;
-    
-    const text = 'Votre texte ici';
-    const fontSize = 48;
-    const estimatedWidth = text.length * fontSize * 0.6;
-    const estimatedHeight = fontSize * 1.2;
-    
-    const scaledWidth = estimatedWidth * cameraZoom;
-    const scaledHeight = estimatedHeight * cameraZoom;
-    
-    const initialX = cameraCenterX - (scaledWidth / 2);
-    const initialY = cameraCenterY - (scaledHeight / 2);
-
-    const newLayer = {
-      id: `layer-${Date.now()}`,
-      name: 'Texte',
-      position: { x: initialX, y: initialY },
-      z_index: (currentScene.layers?.length || 0) + 1,
-      skip_rate: 12,
-      scale: cameraZoom,
-      opacity: 1.0,
-      mode: 'draw',
-      type: 'text',
-      text_config: {
-        text: text,
-        font: 'Arial',
-        size: fontSize,
-        color: [0, 0, 0],
-        style: 'normal',
-        line_height: 1.2,
-        align: 'left'
-      },
-      audio: {
-        narration: null,
-        soundEffects: [],
-        typewriter: null,
-        drawing: null,
-      }
-    };
+    const newLayer = createTextLayer(currentScene.layers?.length || 0);
 
     updateScene(selectedSceneIndex, {
       ...currentScene,
@@ -332,13 +158,9 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({
   };
 
   const handleAddShape = (shapeLayer: any) => {
-    const currentScene = scenes[selectedSceneIndex];
     if (!currentScene) return;
 
-    const updatedShapeLayer = {
-      ...shapeLayer,
-      z_index: (currentScene.layers?.length || 0) + 1,
-    };
+    const updatedShapeLayer = createShapeLayer(shapeLayer, currentScene.layers?.length || 0);
 
     updateScene(selectedSceneIndex, {
       ...currentScene,
@@ -346,6 +168,34 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({
     });
     setSelectedLayerId(updatedShapeLayer.id);
     setShowShapeToolbar(false);
+  };
+
+  const handleLayerOperation = (operation: 'delete' | 'duplicate' | 'move', layerId: string, direction?: 'up' | 'down') => {
+    if (!currentScene) return;
+
+    let updatedScene;
+    switch (operation) {
+      case 'delete':
+        updatedScene = deleteLayer(currentScene, layerId);
+        if (selectedLayerId === layerId) {
+          setSelectedLayerId(null);
+        }
+        break;
+      case 'duplicate':
+        updatedScene = duplicateLayer(currentScene, layerId);
+        break;
+      case 'move':
+        if (direction) {
+          updatedScene = moveLayer(currentScene, layerId, direction);
+        }
+        break;
+      default:
+        return;
+    }
+
+    if (updatedScene) {
+      updateScene(selectedSceneIndex, updatedScene);
+    }
   };
 
   return (
@@ -414,58 +264,12 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({
               onSelectLayer={setSelectedLayerId}
               onUpdateScene={(updates) => updateScene(selectedSceneIndex, updates)}
               onUpdateLayer={(updatedLayer: any) => {
-                const currentScene = scenes[selectedSceneIndex];
-                const updatedLayers = currentScene.layers.map((l: any) =>
-                  l.id === updatedLayer.id ? updatedLayer : l
-                );
-                updateScene(selectedSceneIndex, { ...currentScene, layers: updatedLayers });
+                const updatedScene = updateLayer(currentScene, updatedLayer);
+                updateScene(selectedSceneIndex, updatedScene);
               }}
-              onDeleteLayer={(layerId) => {
-                const currentScene = scenes[selectedSceneIndex];
-                const updatedLayers = currentScene.layers.filter((l: any) => l.id !== layerId);
-                updateScene(selectedSceneIndex, { ...currentScene, layers: updatedLayers });
-                if (selectedLayerId === layerId) {
-                  setSelectedLayerId(null);
-                }
-              }}
-              onDuplicateLayer={(layerId) => {
-                const currentScene = scenes[selectedSceneIndex];
-                const layerToDuplicate = currentScene.layers.find((l: any) => l.id === layerId);
-                if (layerToDuplicate) {
-                  const newLayer = {
-                    ...layerToDuplicate,
-                    id: `layer-${Date.now()}`,
-                    name: `${layerToDuplicate.name || 'Layer'} (copie)`,
-                    z_index: (layerToDuplicate.z_index || 0) + 1
-                  };
-                  updateScene(selectedSceneIndex, {
-                    ...currentScene,
-                    layers: [...currentScene.layers, newLayer]
-                  });
-                }
-              }}
-              onMoveLayer={(layerId, direction) => {
-                const currentScene = scenes[selectedSceneIndex];
-                const layerIndex = currentScene.layers.findIndex((l: any) => l.id === layerId);
-                if (layerIndex === -1) return;
-
-                const sortedLayers = [...currentScene.layers].sort((a: any, b: any) =>
-                  (a.z_index || 0) - (b.z_index || 0)
-                );
-                const sortedIndex = sortedLayers.findIndex((l: any) => l.id === layerId);
-
-                if (direction === 'up' && sortedIndex > 0) {
-                  const temp = sortedLayers[sortedIndex].z_index;
-                  sortedLayers[sortedIndex].z_index = sortedLayers[sortedIndex - 1].z_index;
-                  sortedLayers[sortedIndex - 1].z_index = temp;
-                } else if (direction === 'down' && sortedIndex < sortedLayers.length - 1) {
-                  const temp = sortedLayers[sortedIndex].z_index;
-                  sortedLayers[sortedIndex].z_index = sortedLayers[sortedIndex + 1].z_index;
-                  sortedLayers[sortedIndex + 1].z_index = temp;
-                }
-
-                updateScene(selectedSceneIndex, { ...currentScene, layers: sortedLayers });
-              }}
+              onDeleteLayer={(layerId) => handleLayerOperation('delete', layerId)}
+              onDuplicateLayer={(layerId) => handleLayerOperation('duplicate', layerId)}
+              onMoveLayer={(layerId, direction) => handleLayerOperation('move', layerId, direction)}
               onImageUpload={handleImageUpload}
               onOpenAssetLibrary={() => setShowAssetLibrary(true)}
               onAddText={handleAddText}
@@ -482,52 +286,9 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({
               scene={scenes[selectedSceneIndex]}
               selectedLayerId={selectedLayerId}
               onSelectLayer={setSelectedLayerId}
-              onDeleteLayer={(layerId) => {
-                const currentScene = scenes[selectedSceneIndex];
-                const updatedLayers = currentScene.layers.filter(l => l.id !== layerId);
-                updateScene(selectedSceneIndex, { ...currentScene, layers: updatedLayers });
-                if (selectedLayerId === layerId) {
-                  setSelectedLayerId(null);
-                }
-              }}
-              onDuplicateLayer={(layerId) => {
-                const currentScene = scenes[selectedSceneIndex];
-                const layerToDuplicate = currentScene.layers.find(l => l.id === layerId);
-                if (layerToDuplicate) {
-                  const newLayer = {
-                    ...layerToDuplicate,
-                    id: `layer-${Date.now()}`,
-                    name: `${layerToDuplicate.name || 'Layer'} (copie)`,
-                    z_index: (layerToDuplicate.z_index || 0) + 1
-                  };
-                  updateScene(selectedSceneIndex, {
-                    ...currentScene,
-                    layers: [...currentScene.layers, newLayer]
-                  });
-                }
-              }}
-              onMoveLayer={(layerId, direction) => {
-                const currentScene = scenes[selectedSceneIndex];
-                const layerIndex = currentScene.layers.findIndex(l => l.id === layerId);
-                if (layerIndex === -1) return;
-
-                const sortedLayers = [...currentScene.layers].sort((a, b) =>
-                  (a.z_index || 0) - (b.z_index || 0)
-                );
-                const sortedIndex = sortedLayers.findIndex(l => l.id === layerId);
-
-                if (direction === 'up' && sortedIndex > 0) {
-                  const temp = sortedLayers[sortedIndex].z_index;
-                  sortedLayers[sortedIndex].z_index = sortedLayers[sortedIndex - 1].z_index;
-                  sortedLayers[sortedIndex - 1].z_index = temp;
-                } else if (direction === 'down' && sortedIndex < sortedLayers.length - 1) {
-                  const temp = sortedLayers[sortedIndex].z_index;
-                  sortedLayers[sortedIndex].z_index = sortedLayers[sortedIndex + 1].z_index;
-                  sortedLayers[sortedIndex + 1].z_index = temp;
-                }
-
-                updateScene(selectedSceneIndex, { ...currentScene, layers: sortedLayers });
-              }}
+              onDeleteLayer={(layerId) => handleLayerOperation('delete', layerId)}
+              onDuplicateLayer={(layerId) => handleLayerOperation('duplicate', layerId)}
+              onMoveLayer={(layerId, direction) => handleLayerOperation('move', layerId, direction)}
             />
           )}
         </div>
