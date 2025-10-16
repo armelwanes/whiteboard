@@ -233,29 +233,6 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
   const [selectedId, setSelectedId] = useState(null);
   const fileInputRef = useRef(null);
   const stageRef = useRef(null);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Auto-save functionality with debouncing
-  useEffect(() => {
-    // Clear any existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    // Set a new timeout to auto-save after 500ms of inactivity
-    saveTimeoutRef.current = setTimeout(() => {
-      if (onSave && editedScene) {
-        onSave(editedScene);
-      }
-    }, 500);
-
-    // Cleanup on unmount
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [editedScene, onSave]);
 
   const handleChange = (field, value) => {
     setEditedScene({ ...editedScene, [field]: value });
@@ -366,23 +343,32 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
         {/* Left Side - Canvas Editor */}
         <div className="flex-1 bg-secondary/30/30 relative flex flex-col">
           {/* Canvas Header */}
-          <div className="flex items-center justify-between gap-2">
-            
+          <div className="flex items-center justify-between gap-2 p-4">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Importer Image
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAddText}
+              >
+                <Type className="w-4 h-4 mr-2" />
+                Ajouter Texte
+              </Button>
+            </div>
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handleSave}
             >
-              <Upload className="w-4 h-4 mr-2" />
-              Importer Image
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleAddText}
-            >
-              <Type className="w-4 h-4 mr-2" />
-              Ajouter Texte
+              <Save className="w-4 h-4 mr-2" />
+              Sauvegarder
             </Button>
             <input
               ref={fileInputRef}
