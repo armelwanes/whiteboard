@@ -1,9 +1,8 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { useSceneStore } from '../../app/scenes';
 import { 
   useLayerEditor, 
-  useLayerCreationHandlers, 
-  useFileUpload 
+  useLayerCreationHandlers
 } from '../molecules/layer-management';
 import LayerEditorModals from './LayerEditorModals';
 import LayerEditorCanvas from './LayerEditorCanvas';
@@ -32,10 +31,6 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
   const pendingImageData = useSceneStore((state) => state.pendingImageData);
   const setPendingImageData = useSceneStore((state) => state.setPendingImageData);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const backgroundImageInputRef = useRef<HTMLInputElement>(null);
-  const backgroundMusicInputRef = useRef<HTMLInputElement>(null);
-
   const sceneWidth = 1920;
   const sceneHeight = 1080;
 
@@ -62,14 +57,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
     onSelectLayer: externalOnSelectLayer
   });
 
-  const { 
-    handleImageUpload,
-    handleBackgroundImageUpload,
-    handleBackgroundMusicUpload
-  } = useFileUpload();
-
   const {
-    handleAddTextLayer,
     handleAddShape,
     handleCropComplete: handleCropCompleteBase,
     handleSelectAssetFromLibrary: handleSelectAssetBase
@@ -85,18 +73,6 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
     onSave(editedScene);
   };
 
-  const handleImageUploadWrapper = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleImageUpload(e, setPendingImageData, setShowCropModal);
-  };
-
-  const handleBackgroundImageUploadWrapper = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleBackgroundImageUpload(e, handleChange);
-  };
-
-  const handleBackgroundMusicUploadWrapper = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleBackgroundMusicUpload(e, handleChange);
-  };
-
   const handleCropComplete = async (croppedImageUrl: string, imageDimensions: any) => {
     await handleCropCompleteBase(croppedImageUrl, imageDimensions, pendingImageData, editedScene.layers.length);
     setShowCropModal(false);
@@ -110,10 +86,6 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
 
   const handleSelectAssetFromLibrary = (asset: any) => {
     handleSelectAssetBase(asset, editedScene.layers.length);
-  };
-
-  const handleAddTextLayerWrapper = () => {
-    handleAddTextLayer(editedScene.layers.length);
   };
 
   const handleAddShapeWrapper = (shapeLayer: any) => {
