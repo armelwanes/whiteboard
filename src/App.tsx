@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AnimationContainer, ScenePanel, ShapeToolbar, AssetLibrary } from './components/organisms';
 import HandWritingTest from './pages/HandWritingTest';
 import ShadcnDemo from './components/ShadcnDemo';
-import { useScenes, useScenesActions, useSceneStore, Scene, Layer } from './app/scenes';
+import { useScenes, useSceneStore, Scene, Layer } from './app/scenes';
 import { MAX_HISTORY_STATES } from './config/constants';
 
 interface AssetData {
@@ -12,13 +12,7 @@ interface AssetData {
 }
 
 function App() {
-  const { scenes, loading } = useScenes();
-  const {
-    createScene,
-    updateScene: updateSceneAction,
-    deleteScene: deleteSceneAction,
-    duplicateScene: duplicateSceneAction,
-  } = useScenesActions();
+  const { scenes, loading, invalidate } = useScenes();
 
   // Get state and actions from Zustand store
   const selectedSceneIndex = useSceneStore((state) => state.selectedSceneIndex);
@@ -27,6 +21,13 @@ function App() {
   const setShowShapeToolbar = useSceneStore((state) => state.setShowShapeToolbar);
   const showAssetLibrary = useSceneStore((state) => state.showAssetLibrary);
   const setShowAssetLibrary = useSceneStore((state) => state.setShowAssetLibrary);
+  
+  // Get centralized scene actions from Zustand store
+  const createScene = useSceneStore((state) => state.createScene);
+  const updateSceneAction = useSceneStore((state) => state.updateScene);
+  const deleteSceneAction = useSceneStore((state) => state.deleteScene);
+  const duplicateSceneAction = useSceneStore((state) => state.duplicateScene);
+  const reorderScenesAction = useSceneStore((state) => state.reorderScenes);
 
   const [showHandWritingTest, setShowHandWritingTest] = useState(false);
   const [showShadcnDemo, setShowShadcnDemo] = useState(false);
@@ -91,8 +92,8 @@ function App() {
         duration: 10,
         layers: [],
         sceneCameras: [],
-      });
-      setSelectedSceneIndex(scenes.length);
+      }, scenes);
+      await invalidate();
     } catch (error: any) {
       alert('Erreur lors de la création de la scène: ' + error.message);
     }
@@ -103,10 +104,8 @@ function App() {
     if (!sceneId) return;
 
     try {
-      await deleteSceneAction(sceneId);
-      if (selectedSceneIndex >= scenes.length - 1) {
-        setSelectedSceneIndex(Math.max(0, scenes.length - 2));
-      }
+      await deleteSceneAction(sceneId, scenes);
+      await invalidate();
     } catch (error: any) {
       alert(error.message);
     }
@@ -118,6 +117,7 @@ function App() {
 
     try {
       await duplicateSceneAction(sceneId);
+      await invalidate();
     } catch (error: any) {
       alert('Erreur lors de la duplication: ' + error.message);
     }
@@ -128,13 +128,14 @@ function App() {
     if (!sceneId) return;
 
     try {
-      await updateSceneAction({ id: sceneId, data: updatedScene });
+      await updateSceneAction(sceneId, updatedScene);
+      await invalidate();
     } catch (error) {
       console.error('Error updating scene:', error);
     }
   };
 
-  const moveScene = (index: number, direction: 'up' | 'down') => {
+  const moveScene = async (index: number, direction: 'up' | 'down') => {
     if (
       (direction === 'up' && index === 0) ||
       (direction === 'down' && index === scenes.length - 1)
@@ -146,7 +147,15 @@ function App() {
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     [newScenes[index], newScenes[targetIndex]] = [newScenes[targetIndex], newScenes[index]];
     
-    setSelectedSceneIndex(targetIndex);
+    const sceneIds = newScenes.map(scene => scene.id);
+    
+    try {
+      await reorderScenesAction(sceneIds);
+      setSelectedSceneIndex(targetIndex);
+      await invalidate();
+    } catch (error) {
+      console.error('Error reordering scenes:', error);
+    }
   };
 
   const handleSelectAssetFromLibrary = (asset: AssetData) => {
