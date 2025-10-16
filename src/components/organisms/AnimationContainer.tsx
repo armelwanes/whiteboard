@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Scene from '../Scene';
 import { LayersList } from '../molecules';
 import LayerEditor from './LayerEditor';
+import PropertiesPanel from './PropertiesPanel';
 import { createTimeline } from '../../utils/timelineSystem';
 import ScenePanel from './ScenePanel';
 
@@ -23,6 +24,7 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
+  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
   const [globalTimeline, setGlobalTimeline] = useState(() => {
     // Initialize with empty timeline
     const totalDuration = scenes.reduce((sum, scene) => sum + scene.duration, 0);
@@ -119,22 +121,86 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
           )}
 
         </div>
-        <div className="col-span-2 row-span-6 col-start-11 row-start-2">
+        <div className="col-span-2 row-span-9 col-start-11">
           {/**  Right Side - Properties Panel */}
+          {scenes[selectedSceneIndex] && (
+            <PropertiesPanel
+              scene={scenes[selectedSceneIndex]}
+              selectedLayerId={selectedLayerId}
+              onSelectLayer={setSelectedLayerId}
+              onUpdateScene={(updates) => updateScene(selectedSceneIndex, updates)}
+              onUpdateLayer={(layerId, updates) => {
+                const currentScene = scenes[selectedSceneIndex];
+                const updatedLayers = currentScene.layers.map((l: any) =>
+                  l.id === layerId ? { ...l, ...updates } : l
+                );
+                updateScene(selectedSceneIndex, { ...currentScene, layers: updatedLayers });
+              }}
+              onDeleteLayer={(layerId) => {
+                const currentScene = scenes[selectedSceneIndex];
+                const updatedLayers = currentScene.layers.filter((l: any) => l.id !== layerId);
+                updateScene(selectedSceneIndex, { ...currentScene, layers: updatedLayers });
+                if (selectedLayerId === layerId) {
+                  setSelectedLayerId(null);
+                }
+              }}
+              onDuplicateLayer={(layerId) => {
+                const currentScene = scenes[selectedSceneIndex];
+                const layerToDuplicate = currentScene.layers.find((l: any) => l.id === layerId);
+                if (layerToDuplicate) {
+                  const newLayer = {
+                    ...layerToDuplicate,
+                    id: `layer-${Date.now()}`,
+                    name: `${layerToDuplicate.name || 'Layer'} (copie)`,
+                    z_index: (layerToDuplicate.z_index || 0) + 1
+                  };
+                  updateScene(selectedSceneIndex, {
+                    ...currentScene,
+                    layers: [...currentScene.layers, newLayer]
+                  });
+                }
+              }}
+              onMoveLayer={(layerId, direction) => {
+                const currentScene = scenes[selectedSceneIndex];
+                const layerIndex = currentScene.layers.findIndex((l: any) => l.id === layerId);
+                if (layerIndex === -1) return;
+
+                const sortedLayers = [...currentScene.layers].sort((a: any, b: any) =>
+                  (a.z_index || 0) - (b.z_index || 0)
+                );
+                const sortedIndex = sortedLayers.findIndex((l: any) => l.id === layerId);
+
+                if (direction === 'up' && sortedIndex > 0) {
+                  const temp = sortedLayers[sortedIndex].z_index;
+                  sortedLayers[sortedIndex].z_index = sortedLayers[sortedIndex - 1].z_index;
+                  sortedLayers[sortedIndex - 1].z_index = temp;
+                } else if (direction === 'down' && sortedIndex < sortedLayers.length - 1) {
+                  const temp = sortedLayers[sortedIndex].z_index;
+                  sortedLayers[sortedIndex].z_index = sortedLayers[sortedIndex + 1].z_index;
+                  sortedLayers[sortedIndex + 1].z_index = temp;
+                }
+
+                updateScene(selectedSceneIndex, { ...currentScene, layers: sortedLayers });
+              }}
+              onImageUpload={() => {}}
+              onOpenAssetLibrary={() => {}}
+              fileInputRef={null}
+            />
+          )}
         </div>
         <div className="col-span-12 row-span-2 row-start-8">
             {scenes[selectedSceneIndex] && (
               <LayersList
                 scene={scenes[selectedSceneIndex]}
-                selectedLayerId={null}
-                onSelectLayer={(layerId) => {
-                  // Handle layer selection if needed
-                  console.log('Selected layer:', layerId);
-                }}
+                selectedLayerId={selectedLayerId}
+                onSelectLayer={setSelectedLayerId}
                 onDeleteLayer={(layerId) => {
                   const currentScene = scenes[selectedSceneIndex];
                   const updatedLayers = currentScene.layers.filter(l => l.id !== layerId);
                   updateScene(selectedSceneIndex, { ...currentScene, layers: updatedLayers });
+                  if (selectedLayerId === layerId) {
+                    setSelectedLayerId(null);
+                  }
                 }}
                 onDuplicateLayer={(layerId) => {
                   const currentScene = scenes[selectedSceneIndex];
