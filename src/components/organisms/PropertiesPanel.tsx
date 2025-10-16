@@ -41,7 +41,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 }) => {
   if (!scene) {
     return (
-      <div className="w-96 bg-white flex flex-col border-l border-border">
+      <div className="bg-white flex flex-col border-l border-border">
         <div className="bg-secondary/30 px-6 py-4 border-b border-border">
           <h2 className="text-xl font-bold text-foreground">Propriétés</h2>
         </div>
@@ -68,7 +68,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   };
 
   return (
-    <div className="w-96 bg-white flex flex-col border-l border-border overflow-hidden">
+    <div className="bg-white flex flex-col border-l border-border overflow-hidden">
       {/* Header */}
       <div className="bg-secondary/30 px-6 py-4 border-b border-border flex items-center justify-between flex-shrink-0">
         <h2 className="text-xl font-bold text-foreground">Propriétés</h2>

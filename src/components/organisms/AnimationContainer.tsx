@@ -100,7 +100,7 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
     const reader = new FileReader();
     reader.onload = async (event) => {
       const imageUrl = event.target?.result as string;
-      
+
       const currentScene = scenes[selectedSceneIndex];
       if (!currentScene) return;
 
@@ -130,7 +130,7 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
       setSelectedLayerId(newLayer.id);
     };
     reader.readAsDataURL(file);
-    
+
     // Reset file input
     e.target.value = '';
   };
@@ -176,9 +176,11 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
         />
       )}
 
-      {/* Main animation area */}
-      <div className="grid grid-cols-12 grid-rows-12 gap-4">
-        <div className="col-span-2 row-span-9">
+
+      <div className="grid grid-cols-12 gap-3 h-screen">
+        {/* Zone 1 - Panneau de scènes (gauche) */}
+        <div className="col-span-2 row-span-2 overflow-y-auto">
+
           <ScenePanel
             scenes={scenes}
             selectedSceneIndex={selectedSceneIndex}
@@ -191,7 +193,9 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
             onImportConfig={onImportConfig}
           />
         </div>
-        <div className="col-span-8 row-span-9 col-start-3">
+
+        {/* Zone 3 - Éditeur de calques (centre) */}
+        <div className="col-span-8 row-span-2 overflow-y-auto">
           {scenes[selectedSceneIndex] && (
             <LayerEditor
               scene={scenes[selectedSceneIndex]}
@@ -203,10 +207,10 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
               onSelectLayer={setSelectedLayerId}
             />
           )}
-
         </div>
-        <div className="col-span-2 row-span-9 col-start-11">
-          {/**  Right Side - Properties Panel */}
+
+        {/* Zone 4 - Panneau de propriétés (droite) */}
+        <div className="col-span-2 row-span-2 overflow-y-auto">
           {scenes[selectedSceneIndex] && (
             <PropertiesPanel
               scene={scenes[selectedSceneIndex]}
@@ -272,60 +276,62 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
             />
           )}
         </div>
-        <div className="col-span-12 row-span-2 row-start-8">
-            {scenes[selectedSceneIndex] && (
-              <LayersList
-                scene={scenes[selectedSceneIndex]}
-                selectedLayerId={selectedLayerId}
-                onSelectLayer={setSelectedLayerId}
-                onDeleteLayer={(layerId) => {
-                  const currentScene = scenes[selectedSceneIndex];
-                  const updatedLayers = currentScene.layers.filter(l => l.id !== layerId);
-                  updateScene(selectedSceneIndex, { ...currentScene, layers: updatedLayers });
-                  if (selectedLayerId === layerId) {
-                    setSelectedLayerId(null);
-                  }
-                }}
-                onDuplicateLayer={(layerId) => {
-                  const currentScene = scenes[selectedSceneIndex];
-                  const layerToDuplicate = currentScene.layers.find(l => l.id === layerId);
-                  if (layerToDuplicate) {
-                    const newLayer = {
-                      ...layerToDuplicate,
-                      id: `layer-${Date.now()}`,
-                      name: `${layerToDuplicate.name || 'Layer'} (copie)`,
-                      z_index: (layerToDuplicate.z_index || 0) + 1
-                    };
-                    updateScene(selectedSceneIndex, {
-                      ...currentScene,
-                      layers: [...currentScene.layers, newLayer]
-                    });
-                  }
-                }}
-                onMoveLayer={(layerId, direction) => {
-                  const currentScene = scenes[selectedSceneIndex];
-                  const layerIndex = currentScene.layers.findIndex(l => l.id === layerId);
-                  if (layerIndex === -1) return;
 
-                  const sortedLayers = [...currentScene.layers].sort((a, b) =>
-                    (a.z_index || 0) - (b.z_index || 0)
-                  );
-                  const sortedIndex = sortedLayers.findIndex(l => l.id === layerId);
+        {/* Zone 5 - Liste des calques (bas, toute la largeur) */}
+        <div className="col-span-12 ">
+          {scenes[selectedSceneIndex] && (
+            <LayersList
+              scene={scenes[selectedSceneIndex]}
+              selectedLayerId={selectedLayerId}
+              onSelectLayer={setSelectedLayerId}
+              onDeleteLayer={(layerId) => {
+                const currentScene = scenes[selectedSceneIndex];
+                const updatedLayers = currentScene.layers.filter(l => l.id !== layerId);
+                updateScene(selectedSceneIndex, { ...currentScene, layers: updatedLayers });
+                if (selectedLayerId === layerId) {
+                  setSelectedLayerId(null);
+                }
+              }}
+              onDuplicateLayer={(layerId) => {
+                const currentScene = scenes[selectedSceneIndex];
+                const layerToDuplicate = currentScene.layers.find(l => l.id === layerId);
+                if (layerToDuplicate) {
+                  const newLayer = {
+                    ...layerToDuplicate,
+                    id: `layer-${Date.now()}`,
+                    name: `${layerToDuplicate.name || 'Layer'} (copie)`,
+                    z_index: (layerToDuplicate.z_index || 0) + 1
+                  };
+                  updateScene(selectedSceneIndex, {
+                    ...currentScene,
+                    layers: [...currentScene.layers, newLayer]
+                  });
+                }
+              }}
+              onMoveLayer={(layerId, direction) => {
+                const currentScene = scenes[selectedSceneIndex];
+                const layerIndex = currentScene.layers.findIndex(l => l.id === layerId);
+                if (layerIndex === -1) return;
 
-                  if (direction === 'up' && sortedIndex > 0) {
-                    const temp = sortedLayers[sortedIndex].z_index;
-                    sortedLayers[sortedIndex].z_index = sortedLayers[sortedIndex - 1].z_index;
-                    sortedLayers[sortedIndex - 1].z_index = temp;
-                  } else if (direction === 'down' && sortedIndex < sortedLayers.length - 1) {
-                    const temp = sortedLayers[sortedIndex].z_index;
-                    sortedLayers[sortedIndex].z_index = sortedLayers[sortedIndex + 1].z_index;
-                    sortedLayers[sortedIndex + 1].z_index = temp;
-                  }
+                const sortedLayers = [...currentScene.layers].sort((a, b) =>
+                  (a.z_index || 0) - (b.z_index || 0)
+                );
+                const sortedIndex = sortedLayers.findIndex(l => l.id === layerId);
 
-                  updateScene(selectedSceneIndex, { ...currentScene, layers: sortedLayers });
-                }}
-              />
-            )}
+                if (direction === 'up' && sortedIndex > 0) {
+                  const temp = sortedLayers[sortedIndex].z_index;
+                  sortedLayers[sortedIndex].z_index = sortedLayers[sortedIndex - 1].z_index;
+                  sortedLayers[sortedIndex - 1].z_index = temp;
+                } else if (direction === 'down' && sortedIndex < sortedLayers.length - 1) {
+                  const temp = sortedLayers[sortedIndex].z_index;
+                  sortedLayers[sortedIndex].z_index = sortedLayers[sortedIndex + 1].z_index;
+                  sortedLayers[sortedIndex + 1].z_index = temp;
+                }
+
+                updateScene(selectedSceneIndex, { ...currentScene, layers: sortedLayers });
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

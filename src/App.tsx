@@ -307,8 +307,7 @@ function App() {
 
       
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <AnimationContainer 
+      <AnimationContainer 
           scenes={scenes} 
           selectedSceneIndex={selectedSceneIndex}
           setSelectedSceneIndex={setSelectedSceneIndex}
@@ -321,7 +320,6 @@ function App() {
           onExportConfig={handleExportConfig}
           onImportConfig={handleImportConfig}
         />
-      </div>
     </div>
   );
 }
