@@ -7,7 +7,6 @@ import {
   exportAsWebP,
   exportWithPreset,
   estimateFileSize,
-  formatBytes,
   validateExportOptions
 } from '../../utils/exportFormats';
 import {
@@ -120,7 +119,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
       if (onExport) {
         onExport({ format: selectedFormat, success: true });
       }
-    } catch (error) {
+    } catch (error:any) {
       console.error('Export error:', error);
       setExportStatus({ type: 'error', message: `Erreur: ${error.message}` });
       
@@ -152,7 +151,7 @@ const ExportPanel: React.FC<ExportPanelProps> = ({
       if (onExport) {
         onExport({ preset: selectedPreset, success: true });
       }
-    } catch (error) {
+    } catch (error:any) {
       console.error('Preset export error:', error);
       setExportStatus({ type: 'error', message: `Erreur: ${error.message}` });
       

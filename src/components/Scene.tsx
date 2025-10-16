@@ -40,7 +40,7 @@ const Scene: React.FC<SceneProps> = ({
 
   return (
     <div
-      className={`scene absolute inset-0 transition-opacity duration-1000 ${
+      className={`scene  transition-opacity duration-1000 ${
         isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
       }`}
       style={{

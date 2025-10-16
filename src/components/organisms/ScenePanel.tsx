@@ -27,7 +27,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
 }) => {
   const importInputRef = useRef<HTMLInputElement>(null);
   return (
-    <div className="scene-panel w-60 bg-white border-r border-border flex flex-col shadow-sm">
+    <div className="bg-white border-r border-border flex flex-col shadow-sm">
       {/* Header */}
       <div className="p-4 border-b border-border bg-secondary/30">
         <div className="flex items-center justify-between mb-3">
