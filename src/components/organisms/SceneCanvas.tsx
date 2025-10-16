@@ -217,6 +217,29 @@ const LayerImage = ({ layer, isSelected, onSelect, onChange }) => {
 
   if (!img) return null;
 
+  // Boundary constraint function for dragging
+  const dragBoundFunc = (pos) => {
+    const node = imageRef.current;
+    if (!node) return pos;
+
+    const scale = layer.scale || 1.0;
+    const width = img.width * scale;
+    const height = img.height * scale;
+    
+    let newX = pos.x;
+    let newY = pos.y;
+
+    // Constrain X position (within scene bounds)
+    if (newX < 0) newX = 0;
+    if (newX + width > 1920) newX = 1920 - width;
+
+    // Constrain Y position (within scene bounds)
+    if (newY < 0) newY = 0;
+    if (newY + height > 1080) newY = 1080 - height;
+
+    return { x: newX, y: newY };
+  };
+
   return (
     <>
       <KonvaImage
@@ -227,6 +250,7 @@ const LayerImage = ({ layer, isSelected, onSelect, onChange }) => {
         scaleY={layer.scale || 1.0}
         opacity={layer.opacity || 1.0}
         draggable
+        dragBoundFunc={dragBoundFunc}
         onClick={onSelect}
         onTap={onSelect}
         ref={imageRef}
@@ -260,9 +284,18 @@ const LayerImage = ({ layer, isSelected, onSelect, onChange }) => {
         <Transformer
           ref={transformerRef}
           boundBoxFunc={(oldBox, newBox) => {
+            // Minimum size constraint
             if (newBox.width < 5 || newBox.height < 5) {
               return oldBox;
             }
+
+            // Boundary constraint - keep layer within scene bounds (1920x1080)
+            if (newBox.x < 0 || newBox.y < 0 || 
+                newBox.x + newBox.width > 1920 || 
+                newBox.y + newBox.height > 1080) {
+              return oldBox;
+            }
+
             return newBox;
           }}
         />
@@ -305,6 +338,29 @@ const LayerText = ({ layer, isSelected, onSelect, onChange }) => {
   const align = textConfig.align || 'left';
   const lineHeight = textConfig.line_height || 1.2;
 
+  // Boundary constraint function for dragging
+  const dragBoundFunc = (pos) => {
+    const node = textRef.current;
+    if (!node) return pos;
+
+    const scale = layer.scale || 1.0;
+    const width = node.width() * scale;
+    const height = node.height() * scale;
+    
+    let newX = pos.x;
+    let newY = pos.y;
+
+    // Constrain X position (within scene bounds)
+    if (newX < 0) newX = 0;
+    if (newX + width > 1920) newX = 1920 - width;
+
+    // Constrain Y position (within scene bounds)
+    if (newY < 0) newY = 0;
+    if (newY + height > 1080) newY = 1080 - height;
+
+    return { x: newX, y: newY };
+  };
+
   return (
     <>
       <Text
@@ -321,6 +377,7 @@ const LayerText = ({ layer, isSelected, onSelect, onChange }) => {
         scaleY={layer.scale || 1.0}
         opacity={layer.opacity || 1.0}
         draggable
+        dragBoundFunc={dragBoundFunc}
         onClick={onSelect}
         onTap={onSelect}
         ref={textRef}
@@ -354,9 +411,18 @@ const LayerText = ({ layer, isSelected, onSelect, onChange }) => {
         <Transformer
           ref={transformerRef}
           boundBoxFunc={(oldBox, newBox) => {
-            if (newBox.width < 5 || newBox.height < 5) {
+            // Minimum size constraint
+            if (newBox.width < 10 || newBox.height < 10) {
               return oldBox;
             }
+
+            // Boundary constraint - keep text within scene bounds (1920x1080)
+            if (newBox.x < 0 || newBox.y < 0 || 
+                newBox.x + newBox.width > 1920 || 
+                newBox.y + newBox.height > 1080) {
+              return oldBox;
+            }
+
             return newBox;
           }}
         />
