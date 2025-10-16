@@ -67,7 +67,7 @@ const KonvaCamera: React.FC<KonvaCameraProps> = ({ camera, isSelected, onSelect,
     const newWidth = Math.max(100, pixelDims.width * scaleX);
     const newHeight = Math.max(100, pixelDims.height * scaleY);
     // Calculate zoom based on width ratio (inverse)
-    const newZoom = Math.max(0.1, Math.min(5.0, pixelDims.width / newWidth * (camera.zoom || 1.0)));
+    const newZoom = Math.max(0.1, Math.min(1.0, pixelDims.width / newWidth * (camera.zoom || 0.8)));
     // Get new position
     const newX = node.x();
     const newY = node.y();
@@ -96,7 +96,7 @@ const KonvaCamera: React.FC<KonvaCameraProps> = ({ camera, isSelected, onSelect,
     const newWidth = Math.max(100, pixelDims.width * scaleX);
     const newHeight = Math.max(100, pixelDims.height * scaleY);
     // Calculate zoom based on width ratio (inverse)
-    const newZoom = Math.max(0.1, Math.min(5.0, pixelDims.width / newWidth * (camera.zoom || 1.0)));
+    const newZoom = Math.max(0.1, Math.min(1.0, pixelDims.width / newWidth * (camera.zoom || 0.8)));
     // Get new position
     const newX = node.x();
     const newY = node.y();
