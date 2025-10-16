@@ -130,21 +130,20 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
       console.error('Error saving asset to library:', error);
     }
 
-    // Calculate initial position based on selected camera
     let cameraCenterX = sceneWidth / 2;
     let cameraCenterY = sceneHeight / 2;
-    let cameraWidth = 800; // Default camera width
-    let cameraHeight = 450; // Default camera height
+    let cameraWidth = 800;
+    let cameraHeight = 450;
+    let cameraZoom = 0.8;
     
     if (selectedCamera && selectedCamera.position) {
       cameraCenterX = selectedCamera.position.x * sceneWidth;
       cameraCenterY = selectedCamera.position.y * sceneHeight;
       cameraWidth = selectedCamera.width || 800;
       cameraHeight = selectedCamera.height || 450;
+      cameraZoom = selectedCamera.zoom || 0.8;
     }
     
-    // Calculate scale to fit image within camera viewport
-    // The image should fit within 80% of the camera dimensions to leave some margin
     let calculatedScale = 1.0;
     if (imageDimensions) {
       const maxWidth = cameraWidth * 0.8;
@@ -153,14 +152,9 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
       const scaleX = maxWidth / imageDimensions.width;
       const scaleY = maxHeight / imageDimensions.height;
       
-      // Use the smaller scale to ensure the image fits within both dimensions
-      calculatedScale = Math.min(scaleX, scaleY, 1.0); // Don't scale up, only down
+      calculatedScale = Math.min(scaleX, scaleY, 1.0) * cameraZoom;
     }
     
-    // Calculate layer position to center it in the camera viewport
-    // The camera position represents the CENTER of the camera
-    // But layer position represents the TOP-LEFT corner of the image
-    // So we need to subtract half of the scaled image dimensions
     const scaledImageWidth = imageDimensions ? imageDimensions.width * calculatedScale : 0;
     const scaledImageHeight = imageDimensions ? imageDimensions.height * calculatedScale : 0;
     
@@ -201,30 +195,32 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
   };
 
   const handleSelectAssetFromLibrary = (asset) => {
-    // Calculate initial position based on selected camera
     let cameraCenterX = sceneWidth / 2;
     let cameraCenterY = sceneHeight / 2;
     let cameraWidth = 800;
     let cameraHeight = 450;
+    let cameraZoom = 0.8;
     
     if (selectedCamera && selectedCamera.position) {
       cameraCenterX = selectedCamera.position.x * sceneWidth;
       cameraCenterY = selectedCamera.position.y * sceneHeight;
       cameraWidth = selectedCamera.width || 800;
       cameraHeight = selectedCamera.height || 450;
+      cameraZoom = selectedCamera.zoom || 0.8;
     }
     
-    // Calculate scale to fit image within camera viewport
     let calculatedScale = 1.0;
-    const maxWidth = cameraWidth * 0.8;
-    const maxHeight = cameraHeight * 0.8;
+    if (asset.width && asset.height) {
+      const maxWidth = cameraWidth * 0.8;
+      const maxHeight = cameraHeight * 0.8;
+      
+      const scaleX = maxWidth / asset.width;
+      const scaleY = maxHeight / asset.height;
+      calculatedScale = Math.min(scaleX, scaleY, 1.0) * cameraZoom;
+    }
     
-    const scaleX = maxWidth / asset.width;
-    const scaleY = maxHeight / asset.height;
-    calculatedScale = Math.min(scaleX, scaleY, 1.0);
-    
-    const scaledImageWidth = asset.width * calculatedScale;
-    const scaledImageHeight = asset.height * calculatedScale;
+    const scaledImageWidth = asset.width ? asset.width * calculatedScale : 0;
+    const scaledImageHeight = asset.height ? asset.height * calculatedScale : 0;
     
     const initialX = cameraCenterX - (scaledImageWidth / 2);
     const initialY = cameraCenterY - (scaledImageHeight / 2);
@@ -280,25 +276,26 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
   };
 
   const handleAddTextLayer = () => {
-    // Calculate initial position based on selected camera
     let cameraCenterX = sceneWidth / 2;
     let cameraCenterY = sceneHeight / 2;
+    let cameraZoom = 0.8;
     
     if (selectedCamera && selectedCamera.position) {
       cameraCenterX = selectedCamera.position.x * sceneWidth;
       cameraCenterY = selectedCamera.position.y * sceneHeight;
+      cameraZoom = selectedCamera.zoom || 0.8;
     }
     
-    // For text, we estimate dimensions based on font size
-    // Average character width is roughly 0.6 * fontSize
     const text = 'Votre texte ici';
     const fontSize = 48;
     const estimatedWidth = text.length * fontSize * 0.6;
-    const estimatedHeight = fontSize * 1.2; // line height
+    const estimatedHeight = fontSize * 1.2;
     
-    // Center the text in the camera viewport
-    const initialX = cameraCenterX - (estimatedWidth / 2);
-    const initialY = cameraCenterY - (estimatedHeight / 2);
+    const scaledWidth = estimatedWidth * cameraZoom;
+    const scaledHeight = estimatedHeight * cameraZoom;
+    
+    const initialX = cameraCenterX - (scaledWidth / 2);
+    const initialY = cameraCenterY - (scaledHeight / 2);
     
     const newLayer = {
       id: `layer-${Date.now()}`,
@@ -306,7 +303,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
       position: { x: initialX, y: initialY },
       z_index: editedScene.layers.length + 1,
       skip_rate: 12,
-      scale: 1.0,
+      scale: cameraZoom,
       opacity: 1.0,
       mode: 'draw',
       type: 'text',
@@ -335,33 +332,54 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
   };
 
   const handleAddShape = (shapeLayer) => {
-    // Calculate camera center position
     let cameraCenterX = sceneWidth / 2;
     let cameraCenterY = sceneHeight / 2;
+    let cameraZoom = 0.8;
     
     if (selectedCamera && selectedCamera.position) {
       cameraCenterX = selectedCamera.position.x * sceneWidth;
       cameraCenterY = selectedCamera.position.y * sceneHeight;
+      cameraZoom = selectedCamera.zoom || 0.8;
     }
     
-    // Get shape dimensions from shape_config
-    const shapeWidth = shapeLayer.shape_config?.width || 100;
-    const shapeHeight = shapeLayer.shape_config?.height || 100;
+    const shapeConfig = shapeLayer.shape_config;
+    const scaledShapeConfig = { ...shapeConfig };
     
-    // Center the shape in the camera viewport
-    // Shape position represents the top-left corner, so subtract half dimensions
-    const initialX = cameraCenterX - (shapeWidth / 2);
-    const initialY = cameraCenterY - (shapeHeight / 2);
+    if (shapeConfig.width !== undefined) {
+      scaledShapeConfig.width = shapeConfig.width * cameraZoom;
+    }
+    if (shapeConfig.height !== undefined) {
+      scaledShapeConfig.height = shapeConfig.height * cameraZoom;
+    }
+    if (shapeConfig.radius !== undefined) {
+      scaledShapeConfig.radius = shapeConfig.radius * cameraZoom;
+    }
+    if (shapeConfig.radiusX !== undefined) {
+      scaledShapeConfig.radiusX = shapeConfig.radiusX * cameraZoom;
+    }
+    if (shapeConfig.radiusY !== undefined) {
+      scaledShapeConfig.radiusY = shapeConfig.radiusY * cameraZoom;
+    }
+    if (shapeConfig.innerRadius !== undefined) {
+      scaledShapeConfig.innerRadius = shapeConfig.innerRadius * cameraZoom;
+    }
+    if (shapeConfig.outerRadius !== undefined) {
+      scaledShapeConfig.outerRadius = shapeConfig.outerRadius * cameraZoom;
+    }
+    if (shapeConfig.size !== undefined) {
+      scaledShapeConfig.size = shapeConfig.size * cameraZoom;
+    }
     
-    // Update shape position to camera center
+    const shapeWidth = scaledShapeConfig.width || scaledShapeConfig.radius || scaledShapeConfig.size || 100;
+    const shapeHeight = scaledShapeConfig.height || scaledShapeConfig.radius || scaledShapeConfig.size || 100;
+    
+    scaledShapeConfig.x = cameraCenterX - (shapeWidth / 2);
+    scaledShapeConfig.y = cameraCenterY - (shapeHeight / 2);
+    
     const updatedShapeLayer = {
       ...shapeLayer,
       z_index: editedScene.layers.length + 1,
-      shape_config: {
-        ...shapeLayer.shape_config,
-        x: initialX,
-        y: initialY,
-      }
+      shape_config: scaledShapeConfig
     };
     
     setEditedScene({

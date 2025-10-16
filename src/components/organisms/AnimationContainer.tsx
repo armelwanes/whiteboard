@@ -140,26 +140,32 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
     const currentScene = scenes[selectedSceneIndex];
     if (!currentScene) return;
 
-    const sceneWidth = 800;
-    const sceneHeight = 600;
+    const sceneWidth = 1920;
+    const sceneHeight = 1080;
     
-    // Calculate scale based on camera (80% default)
+    const defaultCamera = currentScene.sceneCameras?.[0] || { zoom: 0.8, position: { x: 0.5, y: 0.5 }, width: 800, height: 450 };
+    const cameraZoom = defaultCamera.zoom || 0.8;
+    const cameraCenterX = (defaultCamera.position?.x || 0.5) * sceneWidth;
+    const cameraCenterY = (defaultCamera.position?.y || 0.5) * sceneHeight;
+    const cameraWidth = defaultCamera.width || 800;
+    const cameraHeight = defaultCamera.height || 450;
+    
     let calculatedScale = 1.0;
     if (imageDimensions) {
-      const maxWidth = sceneWidth * 0.64; // 80% of 800
-      const maxHeight = sceneHeight * 0.64; // 80% of 600
+      const maxWidth = cameraWidth * 0.8;
+      const maxHeight = cameraHeight * 0.8;
       
       const scaleX = maxWidth / imageDimensions.width;
       const scaleY = maxHeight / imageDimensions.height;
       
-      calculatedScale = Math.min(scaleX, scaleY, 1.0);
+      calculatedScale = Math.min(scaleX, scaleY, 1.0) * cameraZoom;
     }
     
     const scaledImageWidth = imageDimensions ? imageDimensions.width * calculatedScale : 0;
     const scaledImageHeight = imageDimensions ? imageDimensions.height * calculatedScale : 0;
     
-    const initialX = (sceneWidth / 2) - (scaledImageWidth / 2);
-    const initialY = (sceneHeight / 2) - (scaledImageHeight / 2);
+    const initialX = cameraCenterX - (scaledImageWidth / 2);
+    const initialY = cameraCenterY - (scaledImageHeight / 2);
 
     const newLayer = {
       id: `layer-${Date.now()}`,
@@ -198,14 +204,41 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
     const currentScene = scenes[selectedSceneIndex];
     if (!currentScene) return;
 
+    const sceneWidth = 1920;
+    const sceneHeight = 1080;
+    
+    const defaultCamera = currentScene.sceneCameras?.[0] || { zoom: 0.8, position: { x: 0.5, y: 0.5 }, width: 800, height: 450 };
+    const cameraZoom = defaultCamera.zoom || 0.8;
+    const cameraCenterX = (defaultCamera.position?.x || 0.5) * sceneWidth;
+    const cameraCenterY = (defaultCamera.position?.y || 0.5) * sceneHeight;
+    const cameraWidth = defaultCamera.width || 800;
+    const cameraHeight = defaultCamera.height || 450;
+    
+    let calculatedScale = 1.0;
+    if (asset.width && asset.height) {
+      const maxWidth = cameraWidth * 0.8;
+      const maxHeight = cameraHeight * 0.8;
+      
+      const scaleX = maxWidth / asset.width;
+      const scaleY = maxHeight / asset.height;
+      
+      calculatedScale = Math.min(scaleX, scaleY, 1.0) * cameraZoom;
+    }
+    
+    const scaledImageWidth = asset.width ? asset.width * calculatedScale : 0;
+    const scaledImageHeight = asset.height ? asset.height * calculatedScale : 0;
+    
+    const initialX = cameraCenterX - (scaledImageWidth / 2);
+    const initialY = cameraCenterY - (scaledImageHeight / 2);
+
     const newLayer = {
       id: `layer-${Date.now()}`,
       image_path: asset.dataUrl,
       name: asset.name,
-      position: { x: 100, y: 100 },
+      position: { x: initialX, y: initialY },
       z_index: (currentScene.layers?.length || 0) + 1,
       skip_rate: 10,
-      scale: 1.0,
+      scale: calculatedScale,
       opacity: 1.0,
       mode: 'draw',
       type: 'image',
@@ -229,18 +262,32 @@ const AnimationContainer: React.FC<AnimationContainerProps> = ({ scenes = [], up
     const currentScene = scenes[selectedSceneIndex];
     if (!currentScene) return;
 
-    const sceneWidth = 800;
-    const sceneHeight = 600;
+    const sceneWidth = 1920;
+    const sceneHeight = 1080;
+    
+    const defaultCamera = currentScene.sceneCameras?.[0] || { zoom: 0.8, position: { x: 0.5, y: 0.5 }, width: 800, height: 450 };
+    const cameraZoom = defaultCamera.zoom || 0.8;
+    const cameraCenterX = (defaultCamera.position?.x || 0.5) * sceneWidth;
+    const cameraCenterY = (defaultCamera.position?.y || 0.5) * sceneHeight;
+    
     const text = 'Votre texte ici';
     const fontSize = 48;
+    const estimatedWidth = text.length * fontSize * 0.6;
+    const estimatedHeight = fontSize * 1.2;
+    
+    const scaledWidth = estimatedWidth * cameraZoom;
+    const scaledHeight = estimatedHeight * cameraZoom;
+    
+    const initialX = cameraCenterX - (scaledWidth / 2);
+    const initialY = cameraCenterY - (scaledHeight / 2);
 
     const newLayer = {
       id: `layer-${Date.now()}`,
       name: 'Texte',
-      position: { x: sceneWidth / 2 - 150, y: sceneHeight / 2 - 25 },
+      position: { x: initialX, y: initialY },
       z_index: (currentScene.layers?.length || 0) + 1,
       skip_rate: 12,
-      scale: 1.0,
+      scale: cameraZoom,
       opacity: 1.0,
       mode: 'draw',
       type: 'text',
