@@ -32,6 +32,8 @@ interface SceneState {
   addLayer: (sceneId: string, layer: Layer) => Promise<void>;
   updateLayer: (sceneId: string, layerId: string, data: Partial<Layer>) => Promise<void>;
   deleteLayer: (sceneId: string, layerId: string) => Promise<void>;
+  moveLayer: (layerId: string, direction: 'up' | 'down') => void;
+  duplicateLayer: (layerId: string) => void;
   
   // Camera Management Actions
   addCamera: (sceneId: string, camera: Camera) => Promise<void>;
@@ -90,17 +92,50 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   addLayer: async (sceneId: string, layer: Layer) => {
     await scenesService.addLayer(sceneId, layer);
   },
-  
+
   updateLayer: async (sceneId: string, layerId: string, data: Partial<Layer>) => {
     await scenesService.updateLayer(sceneId, layerId, data);
   },
-  
+
   deleteLayer: async (sceneId: string, layerId: string) => {
     await scenesService.deleteLayer(sceneId, layerId);
     const { selectedLayerId } = get();
     if (selectedLayerId === layerId) {
       set({ selectedLayerId: null });
     }
+  },
+
+  moveLayer: (layerId: string, direction: 'up' | 'down') => {
+  const { selectedSceneIndex } = get();
+  // Use scenes from useScenes() hook
+  // @ts-ignore
+  const { scenes } = require('./hooks/useScenes').useScenes();
+  const scene = scenes[selectedSceneIndex];
+  if (!scene || !scene.layers) return;
+  const layers = [...scene.layers];
+  const idx = layers.findIndex((l: any) => l.id === layerId);
+  if (idx === -1) return;
+  const newIdx = direction === 'up' ? Math.max(0, idx - 1) : Math.min(layers.length - 1, idx + 1);
+  if (newIdx === idx) return;
+  const [moved] = layers.splice(idx, 1);
+  layers.splice(newIdx, 0, moved);
+  layers.forEach((l: any, i: number) => l.z_index = i + 1);
+  scenes[selectedSceneIndex] = { ...scene, layers };
+  set({});
+  },
+
+  duplicateLayer: (layerId: string) => {
+  const { selectedSceneIndex } = get();
+  // Use scenes from useScenes() hook
+  // @ts-ignore
+  const { scenes } = require('./hooks/useScenes').useScenes();
+  const scene = scenes[selectedSceneIndex];
+  if (!scene || !scene.layers) return;
+  const layer = scene.layers.find((l: any) => l.id === layerId);
+  if (!layer) return;
+  const newLayer = { ...layer, id: `layer-${Date.now()}`, name: `${layer.name || 'Layer'} (Copie)` };
+  scene.layers.push(newLayer);
+  set({});
   },
   
   // Camera Management Actions

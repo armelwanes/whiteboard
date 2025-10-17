@@ -1,258 +1,44 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Stage, Layer, Image as KonvaImage, Transformer, Text, Rect } from 'react-konva';
-import Konva from 'konva';
-import useImage from 'use-image';
-import { Button, Input, Label, Textarea, Card, CardContent, CardHeader, CardTitle } from '../atoms';
-import { Upload, X, Save, RotateCw, FlipHorizontal2, FlipVertical2, Trash2, Type } from 'lucide-react';
 
-// Canvas dimensions
-const STAGE_WIDTH = 960;
-const STAGE_HEIGHT = 540;
+import React, { useState, useRef } from 'react';
+import { Stage, Layer } from 'react-konva';
+import { Button } from '../atoms';
+import { Upload, Save, RotateCw, FlipHorizontal2, FlipVertical2, Trash2, Type, X } from 'lucide-react';
+import SceneImage from '../molecules/konva/SceneImage';
+import SceneText from '../molecules/konva/SceneText';
+import { STAGE_WIDTH, STAGE_HEIGHT, SceneObject, SceneType } from '../molecules/konva/types';
 
-interface SceneImageProps {
-  image: any;
-  isSelected: boolean;
-  onSelect: () => void;
-  onChange: (updates: any) => void;
+
+
+interface KonvaSceneEditorProps {
+  scene: SceneType;
+  onClose?: () => void;
+  onSave: (scene: SceneType) => void;
 }
 
-interface SceneTextProps {
-  text: any;
-  isSelected: boolean;
-  onSelect: () => void;
-  onChange: (updates: any) => void;
-}
-
-// Konva Image Component
-const SceneImage: React.FC<SceneImageProps> = ({ image, isSelected, onSelect, onChange }) => {
-  const [img] = useImage(image.src);
-  const imageRef = useRef<Konva.Image>(null);
-  const transformerRef = useRef<Konva.Transformer>(null);
-
-  React.useEffect(() => {
-    if (isSelected && transformerRef.current && imageRef.current && img) {
-      transformerRef.current.nodes([imageRef.current]);
-      transformerRef.current.getLayer().batchDraw();
-    }
-  }, [isSelected, img]);
-
-  // Boundary constraint function for dragging
-  const dragBoundFunc = (pos: { x: number; y: number }) => {
-    const node = imageRef.current;
-    if (!node) return pos;
-
-    const width = node.width();
-    const height = node.height();
-    
-    let newX = pos.x;
-    let newY = pos.y;
-
-    // Constrain X position
-    if (newX < 0) newX = 0;
-    if (newX + width > STAGE_WIDTH) newX = STAGE_WIDTH - width;
-
-    // Constrain Y position
-    if (newY < 0) newY = 0;
-    if (newY + height > STAGE_HEIGHT) newY = STAGE_HEIGHT - height;
-
-    return { x: newX, y: newY };
-  };
-
-  return (
-    <>
-      <KonvaImage
-        image={img}
-        x={image.x}
-        y={image.y}
-        width={image.width}
-        height={image.height}
-        rotation={image.rotation}
-        scaleX={image.flipX ? -1 : 1}
-        scaleY={image.flipY ? -1 : 1}
-        draggable
-        dragBoundFunc={dragBoundFunc}
-        onClick={onSelect}
-        onTap={onSelect}
-        ref={imageRef}
-        onDragEnd={(e) => {
-          onChange({
-            ...image,
-            x: e.target.x(),
-            y: e.target.y(),
-          });
-        }}
-        onTransformEnd={() => {
-          const node = imageRef.current;
-          const scaleX = node.scaleX();
-          const scaleY = node.scaleY();
-
-          onChange({
-            ...image,
-            x: node.x(),
-            y: node.y(),
-            width: Math.max(5, node.width() * scaleX),
-            height: Math.max(5, node.height() * scaleY),
-            rotation: node.rotation(),
-          });
-          
-          // Reset scale
-          node.scaleX(1);
-          node.scaleY(1);
-        }}
-      />
-      {isSelected && (
-        <Transformer
-          ref={transformerRef}
-          boundBoxFunc={(oldBox, newBox) => {
-            // Minimum size constraint
-            if (newBox.width < 5 || newBox.height < 5) {
-              return oldBox;
-            }
-
-            // Boundary constraint - keep object within stage
-            if (newBox.x < 0 || newBox.y < 0 || 
-                newBox.x + newBox.width > STAGE_WIDTH || 
-                newBox.y + newBox.height > STAGE_HEIGHT) {
-              return oldBox;
-            }
-
-            return newBox;
-          }}
-        />
-      )}
-    </>
-  );
-};
-
-// Konva Text Component
-const SceneText: React.FC<SceneTextProps> = ({ text, isSelected, onSelect, onChange }) => {
-  const textRef = useRef<Konva.Text>(null);
-  const transformerRef = useRef<Konva.Transformer>(null);
-
-  React.useEffect(() => {
-    if (isSelected && transformerRef.current && textRef.current) {
-      transformerRef.current.nodes([textRef.current]);
-      transformerRef.current.getLayer().batchDraw();
-    }
-  }, [isSelected]);
-
-  // Boundary constraint function for dragging
-  const dragBoundFunc = (pos: { x: number; y: number }) => {
-    const node = textRef.current;
-    if (!node) return pos;
-
-    const width = node.width();
-    const height = node.height();
-    
-    let newX = pos.x;
-    let newY = pos.y;
-
-    // Constrain X position
-    if (newX < 0) newX = 0;
-    if (newX + width > STAGE_WIDTH) newX = STAGE_WIDTH - width;
-
-    // Constrain Y position
-    if (newY < 0) newY = 0;
-    if (newY + height > STAGE_HEIGHT) newY = STAGE_HEIGHT - height;
-
-    return { x: newX, y: newY };
-  };
-
-  return (
-    <>
-      <Text
-        text={text.content}
-        x={text.x}
-        y={text.y}
-        fontSize={text.fontSize || 24}
-        fontFamily={text.fontFamily || 'Arial'}
-        fill={text.color || '#000000'}
-        width={text.width}
-        rotation={text.rotation || 0}
-        draggable
-        dragBoundFunc={dragBoundFunc}
-        onClick={onSelect}
-        onTap={onSelect}
-        ref={textRef}
-        onDragEnd={(e) => {
-          onChange({
-            ...text,
-            x: e.target.x(),
-            y: e.target.y(),
-          });
-        }}
-        onTransformEnd={() => {
-          const node = textRef.current;
-          const scaleX = node.scaleX();
-          const scaleY = node.scaleY();
-
-          onChange({
-            ...text,
-            x: node.x(),
-            y: node.y(),
-            width: Math.max(20, node.width() * scaleX),
-            fontSize: Math.max(10, (text.fontSize || 24) * scaleY),
-            rotation: node.rotation(),
-          });
-          
-          // Reset scale
-          node.scaleX(1);
-          node.scaleY(1);
-        }}
-      />
-      {isSelected && (
-        <Transformer
-          ref={transformerRef}
-          enabledAnchors={['middle-left', 'middle-right']}
-          boundBoxFunc={(oldBox, newBox) => {
-            // Minimum size constraint
-            if (newBox.width < 20) {
-              return oldBox;
-            }
-
-            // Boundary constraint - keep text within stage
-            if (newBox.x < 0 || newBox.y < 0 || 
-                newBox.x + newBox.width > STAGE_WIDTH || 
-                newBox.y + newBox.height > STAGE_HEIGHT) {
-              return oldBox;
-            }
-
-            return newBox;
-          }}
-        />
-      )}
-    </>
-  );
-};
-
-const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
-  const [editedScene, setEditedScene] = useState({ 
+const KonvaSceneEditor: React.FC<KonvaSceneEditorProps> = ({ scene, onClose, onSave }) => {
+  const [editedScene, setEditedScene] = useState<SceneType>({
     ...scene,
     objects: scene.objects || []
   });
-  const [selectedId, setSelectedId] = useState(null);
-  const fileInputRef = useRef(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const stageRef = useRef(null);
-
-  const handleChange = (field, value) => {
-    setEditedScene({ ...editedScene, [field]: value });
-  };
 
   const handleSave = () => {
     onSave(editedScene);
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        const img = new Image();
+        const img = new window.Image();
         img.onload = () => {
-          const newObject = {
+          const newObject: SceneObject = {
             id: `obj-${Date.now()}`,
             type: 'image',
-            src: event.target.result,
+            src: event.target && (event.target as FileReader).result ? (event.target as FileReader).result as string : '',
             name: file.name,
             x: 100,
             y: 100,
@@ -262,20 +48,22 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
             flipX: false,
             flipY: false,
           };
-          setEditedScene({
-            ...editedScene,
-            objects: [...editedScene.objects, newObject]
-          });
+          setEditedScene(prev => ({
+            ...prev,
+            objects: [...prev.objects, newObject]
+          }));
           setSelectedId(newObject.id);
         };
-        img.src = event.target.result;
+        if (event.target && (event.target as FileReader).result) {
+          img.src = (event.target as FileReader).result as string;
+        }
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleAddText = () => {
-    const newObject = {
+    const newObject: SceneObject = {
       id: `obj-${Date.now()}`,
       type: 'text',
       content: 'Nouveau texte',
@@ -287,33 +75,33 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
       color: '#000000',
       rotation: 0,
     };
-    setEditedScene({
-      ...editedScene,
-      objects: [...editedScene.objects, newObject]
-    });
+    setEditedScene(prev => ({
+      ...prev,
+      objects: [...prev.objects, newObject]
+    }));
     setSelectedId(newObject.id);
   };
 
-  const handleUpdateObject = (updatedObject) => {
-    setEditedScene({
-      ...editedScene,
-      objects: editedScene.objects.map(obj =>
+  const handleUpdateObject = (updatedObject: SceneObject) => {
+    setEditedScene(prev => ({
+      ...prev,
+      objects: prev.objects.map((obj: SceneObject) =>
         obj.id === updatedObject.id ? updatedObject : obj
       )
-    });
+    }));
   };
 
-  const handleDeleteObject = (objectId) => {
-    setEditedScene({
-      ...editedScene,
-      objects: editedScene.objects.filter(obj => obj.id !== objectId)
-    });
+  const handleDeleteObject = (objectId: string | null) => {
+    setEditedScene(prev => ({
+      ...prev,
+      objects: prev.objects.filter((obj: SceneObject) => obj.id !== objectId)
+    }));
     setSelectedId(null);
   };
 
   const handleRotate = () => {
     if (!selectedId) return;
-    const obj = editedScene.objects.find(o => o.id === selectedId);
+    const obj = editedScene.objects.find((o: SceneObject) => o.id === selectedId);
     if (obj) {
       handleUpdateObject({ ...obj, rotation: (obj.rotation + 90) % 360 });
     }
@@ -321,7 +109,7 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
 
   const handleFlipHorizontal = () => {
     if (!selectedId) return;
-    const obj = editedScene.objects.find(o => o.id === selectedId);
+    const obj = editedScene.objects.find((o: SceneObject) => o.id === selectedId);
     if (obj) {
       handleUpdateObject({ ...obj, flipX: !obj.flipX });
     }
@@ -329,13 +117,13 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
 
   const handleFlipVertical = () => {
     if (!selectedId) return;
-    const obj = editedScene.objects.find(o => o.id === selectedId);
+    const obj = editedScene.objects.find((o: SceneObject) => o.id === selectedId);
     if (obj) {
       handleUpdateObject({ ...obj, flipY: !obj.flipY });
     }
   };
 
-  const selectedObject = editedScene.objects.find(obj => obj.id === selectedId);
+  const selectedObject = editedScene.objects.find((obj: SceneObject) => obj.id === selectedId);
 
   return (
     <div className="bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
@@ -362,14 +150,27 @@ const KonvaSceneEditor = ({ scene, onClose, onSave }) => {
                 Ajouter Texte
               </Button>
             </div>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleSave}
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Sauvegarder
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleSave}
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Sauvegarder
+              </Button>
+              {onClose && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Fermer l'éditeur"
+                  onClick={onClose}
+                  className="ml-2"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              )}
+            </div>
             <input
               ref={fileInputRef}
               type="file"

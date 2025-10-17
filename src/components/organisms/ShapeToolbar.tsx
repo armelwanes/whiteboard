@@ -4,21 +4,27 @@ import {
   ArrowLeftRight, MoveUpRight, CornerDownRight, Star, Cloud, 
   MessageCircle, MessageSquare, Highlighter, Ribbon, 
   Target, Clock, Box, Lightbulb, Frame, Underline, Heart,
-  Sparkles, Zap, Hash, Type, PenTool
+  Sparkles, Zap, Hash, Type
 } from 'lucide-react';
 import { ShapeType, createShapeLayer, getShapeDisplayName } from '../../utils/shapeUtils';
+import { LayerType, LayerMode } from '@/app/scenes/types';
+import { useSceneStore } from '@/app/scenes';
+import { useCurrentScene } from '@/app/scenes';
 
-interface ShapeToolbarProps {
-  onAddShape: (shape: any) => void;
-  onClose: () => void;
-}
+
+
 
 /**
  * ShapeToolbar Component
  * Floating toolbar for selecting and adding shapes to the scene
  */
-const ShapeToolbar: React.FC<ShapeToolbarProps> = ({ onAddShape, onClose }) => {
-  const [selectedCategory, setSelectedCategory] = useState('basic');
+
+
+const ShapeToolbar: React.FC = () => {
+  const currentScene = useCurrentScene();
+  const [selectedCategory, setSelectedCategory] = useState<keyof typeof shapeCategories>('basic');
+  const setShowShapeToolbar = useSceneStore((state) => state.setShowShapeToolbar);
+  const addLayer = useSceneStore((state) => state.addLayer);
 
   const shapeCategories = {
     basic: {
@@ -140,9 +146,17 @@ const ShapeToolbar: React.FC<ShapeToolbarProps> = ({ onAddShape, onClose }) => {
     },
   };
 
-  const handleShapeClick = (shapeType) => {
-    const newLayer = createShapeLayer(shapeType);
-    onAddShape(newLayer);
+  const handleShapeClick = async (shapeType: string) => {
+    if (!currentScene) return;
+    const baseLayer = createShapeLayer(shapeType);
+    // Adapt to Layer type expected by addLayer
+    const newLayer = {
+      ...baseLayer,
+      mode: LayerMode.STATIC,
+      z_index: 0,
+      type: LayerType.SHAPE,
+    };
+    await addLayer(currentScene.id, newLayer);
   };
 
   return (
@@ -152,7 +166,7 @@ const ShapeToolbar: React.FC<ShapeToolbarProps> = ({ onAddShape, onClose }) => {
         <div className="bg-white px-6 py-4 border-b border-border flex items-center justify-between">
           <h2 className="text-xl font-bold text-white">Add Shape</h2>
           <button
-            onClick={onClose}
+            onClick={() => setShowShapeToolbar(false)}
             className="text-muted-foreground hover:text-white transition-colors"
             title="Close"
           >
@@ -165,7 +179,7 @@ const ShapeToolbar: React.FC<ShapeToolbarProps> = ({ onAddShape, onClose }) => {
           {Object.entries(shapeCategories).map(([key, category]) => (
             <button
               key={key}
-              onClick={() => setSelectedCategory(key)}
+              onClick={() => setSelectedCategory(key as keyof typeof shapeCategories)}
               className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
                 selectedCategory === key
                   ? 'text-primary border-blue-400'
@@ -184,19 +198,22 @@ const ShapeToolbar: React.FC<ShapeToolbarProps> = ({ onAddShape, onClose }) => {
               ? 'grid-cols-6' 
               : 'grid-cols-4'
           }`}>
-            {shapeCategories[selectedCategory].shapes.map(({ type, icon: Icon }) => (
-              <button
-                key={type}
-                onClick={() => handleShapeClick(type)}
-                className="flex flex-col items-center justify-center gap-3 p-6 bg-secondary hover:bg-secondary/80 rounded-lg transition-colors border-2 border-transparent hover:border-primary group"
-                title={`Add ${getShapeDisplayName(type)}`}
-              >
-                <Icon className="w-10 h-10 text-foreground group-hover:text-primary transition-colors" />
-                <span className="text-xs text-foreground group-hover:text-white font-medium">
-                  {getShapeDisplayName(type)}
-                </span>
-              </button>
-            ))}
+            {shapeCategories[selectedCategory].shapes.map((shape: { type: string; icon: React.ComponentType<any> }) => {
+              const { type, icon: Icon } = shape;
+              return (
+                <button
+                  key={type}
+                  onClick={() => handleShapeClick(type)}
+                  className="flex flex-col items-center justify-center gap-3 p-6 bg-secondary hover:bg-secondary/80 rounded-lg transition-colors border-2 border-transparent hover:border-primary group"
+                  title={`Add ${getShapeDisplayName(type)}`}
+                >
+                  <Icon className="w-10 h-10 text-foreground group-hover:text-primary transition-colors" />
+                  <span className="text-xs text-foreground group-hover:text-white font-medium">
+                    {getShapeDisplayName(type)}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -206,7 +223,7 @@ const ShapeToolbar: React.FC<ShapeToolbarProps> = ({ onAddShape, onClose }) => {
             Click on a shape to add it to the scene
           </p>
           <button
-            onClick={onClose}
+            onClick={() => setShowShapeToolbar(false)}
             className="px-4 py-2 bg-secondary hover:bg-secondary/80 text-white rounded transition-colors text-sm"
           >
             Cancel
@@ -215,6 +232,6 @@ const ShapeToolbar: React.FC<ShapeToolbarProps> = ({ onAddShape, onClose }) => {
       </div>
     </div>
   );
-};
+}
 
 export default ShapeToolbar;

@@ -1,33 +1,14 @@
 import React, { useRef } from 'react';
 import { Button, Card } from '../atoms';
 import { Plus, ArrowUp, ArrowDown, Copy, Trash2, Download, Upload } from 'lucide-react';
-import { useSceneStore } from '../../app/scenes';
+import { useScenes, useSceneStore } from '@/app/scenes';
 
-interface ScenePanelProps {
-  scenes: any[];
-  onAddScene: () => void;
-  onDeleteScene: (index: number) => void;
-  onDuplicateScene: (index: number) => void;
-  onMoveScene: (index: number, direction: 'up' | 'down') => void;
-  onExportConfig: () => void;
-  onImportConfig: (config: any) => void;
-}
-
-const ScenePanel: React.FC<ScenePanelProps> = ({
-  scenes,
-  onAddScene,
-  onDeleteScene,
-  onDuplicateScene,
-  onMoveScene,
-  onExportConfig,
-  onImportConfig,
-}) => {
-  const importInputRef = useRef<HTMLInputElement>(null);
-  
-  // Get state from Zustand store
+const ScenePanel: React.FC = () => {
+  const { scenes } = useScenes();
   const selectedSceneIndex = useSceneStore((state) => state.selectedSceneIndex);
   const setSelectedSceneIndex = useSceneStore((state) => state.setSelectedSceneIndex);
-  
+  const importInputRef = useRef<HTMLInputElement>(null);
+
   return (
     <div className="bg-white border-r border-border flex flex-col shadow-sm">
       {/* Header */}
@@ -42,7 +23,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
           </div>
         </div>
         <Button
-          onClick={onAddScene}
+          onClick={() => { }}
           className="w-full gap-2 mb-2"
           size="sm"
         >
@@ -51,7 +32,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
         </Button>
         <div className="flex gap-2">
           <Button
-            onClick={onExportConfig}
+            onClick={() => { }}
             variant="outline"
             className="flex-1 gap-2"
             size="sm"
@@ -74,7 +55,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
             ref={importInputRef}
             type="file"
             accept="application/json,.json"
-            onChange={onImportConfig}
+            onChange={() => { }}
             className="hidden"
           />
         </div>
@@ -82,14 +63,13 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
 
       {/* Scenes List */}
       <div className="flex-1 overflow-y-auto p-3">
-        {scenes.map((scene, index) => (
+        {scenes.map((scene: any, index: number) => (
           <Card
             key={scene.id}
-            className={`mb-2 cursor-pointer transition-all hover:shadow-md ${
-              selectedSceneIndex === index
+            className={`mb-2 cursor-pointer transition-all hover:shadow-md ${selectedSceneIndex === index
                 ? 'border-primary shadow-md bg-primary/5'
                 : 'border-border hover:border-primary/50'
-            }`}
+              }`}
             onClick={() => setSelectedSceneIndex(index)}
           >
             <div className="p-2.5">
@@ -137,7 +117,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onMoveScene(index, 'up');
+                      // onMoveScene(index, 'up');
                     }}
                     disabled={index === 0}
                     variant="outline"
@@ -150,7 +130,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onMoveScene(index, 'down');
+                      // onMoveScene(index, 'down');
                     }}
                     disabled={index === scenes.length - 1}
                     variant="outline"
@@ -163,7 +143,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDuplicateScene(index);
+                      // onDuplicateScene(index);
                     }}
                     variant="outline"
                     size="sm"
@@ -175,7 +155,7 @@ const ScenePanel: React.FC<ScenePanelProps> = ({
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDeleteScene(index);
+                      // onDeleteScene(index);
                     }}
                     variant="destructive"
                     size="sm"

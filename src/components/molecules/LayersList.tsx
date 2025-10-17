@@ -1,27 +1,15 @@
 import React from 'react';
 import { Eye, EyeOff, Trash2, Copy, MoveUp, MoveDown } from 'lucide-react';
+import { useCurrentScene, useSceneStore } from '@/app/scenes';
 
-interface LayersListProps {
-  scene: any;
-  selectedLayerId: string | null;
-  onSelectLayer: (layerId: string) => void;
-  onDeleteLayer: (layerId: string) => void;
-  onDuplicateLayer: (layerId: string) => void;
-  onMoveLayer: (layerId: string, direction: 'up' | 'down') => void;
-}
+const LayersList: React.FC = () => {
+  const scene = useCurrentScene();
+  const selectedLayerId = useSceneStore((state) => state.selectedLayerId);
+  const setSelectedLayerId = useSceneStore((state) => state.setSelectedLayerId);
+  const deleteLayer = useSceneStore((state) => state.deleteLayer);
+  const duplicateLayer = useSceneStore((state) => state.duplicateLayer);
+  const moveLayer = useSceneStore((state) => state.moveLayer);
 
-/**
- * LayersList - Horizontal scrollable list of layers from the current scene
- * Shows preview images for each layer
- */
-const LayersList: React.FC<LayersListProps> = ({ 
-  scene,
-  selectedLayerId,
-  onSelectLayer,
-  onDeleteLayer,
-  onDuplicateLayer,
-  onMoveLayer
-}) => {
   if (!scene || !scene.layers || scene.layers.length === 0) {
     return (
       <div className="layers-list bg-secondary/30 text-foreground p-4 rounded-lg shadow-sm">
@@ -45,7 +33,7 @@ const LayersList: React.FC<LayersListProps> = ({
           return (
             <div
               key={layer.id}
-              onClick={() => onSelectLayer(layer.id)}
+              onClick={() => setSelectedLayerId(layer.id)}
               className={`
                 flex-shrink-0 w-48 cursor-pointer rounded-lg border-2 transition-all
                 ${isSelected 
@@ -125,7 +113,7 @@ const LayersList: React.FC<LayersListProps> = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (index > 0) onMoveLayer(layer.id, 'up');
+                      if (index > 0) moveLayer(layer.id, 'up');
                     }}
                     disabled={index === 0}
                     className="p-1 rounded bg-secondary hover:bg-secondary/80 disabled:opacity-30 disabled:cursor-not-allowed"
@@ -137,7 +125,7 @@ const LayersList: React.FC<LayersListProps> = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (index < sortedLayers.length - 1) onMoveLayer(layer.id, 'down');
+                      if (index < sortedLayers.length - 1) moveLayer(layer.id, 'down');
                     }}
                     disabled={index === sortedLayers.length - 1}
                     className="p-1 rounded bg-secondary hover:bg-secondary/80 disabled:opacity-30 disabled:cursor-not-allowed"
@@ -149,7 +137,7 @@ const LayersList: React.FC<LayersListProps> = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDuplicateLayer(layer.id);
+                      duplicateLayer(layer.id);
                     }}
                     className="p-1 rounded bg-secondary hover:bg-secondary/80"
                     title="Dupliquer"
@@ -161,7 +149,7 @@ const LayersList: React.FC<LayersListProps> = ({
                     onClick={(e) => {
                       e.stopPropagation();
                       if (window.confirm('Supprimer cette couche ?')) {
-                        onDeleteLayer(layer.id);
+                        deleteLayer(scene.id, layer.id);
                       }
                     }}
                     className="p-1 rounded bg-red-600 hover:bg-red-700"

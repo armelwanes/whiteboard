@@ -286,12 +286,19 @@ export function updateAsset(assetId: string, updates: Partial<Pick<Asset, 'name'
   
   const allowedFields = ['name', 'tags'] as const;
   const safeUpdates: Partial<Asset> = {};
-  
   for (const field of allowedFields) {
     if (updates[field] !== undefined) {
-      safeUpdates[field] = field === 'tags' 
-        ? (updates[field] as string[]).map(tag => tag.toLowerCase().trim())
-        : updates[field];
+      if (field === 'tags') {
+        // Ensure tags is always an array of strings
+        const tagsValue = updates[field];
+        if (Array.isArray(tagsValue)) {
+          safeUpdates.tags = tagsValue.map(tag => tag.toLowerCase().trim());
+        }
+      } else if (field === 'name') {
+        if (typeof updates[field] === 'string') {
+          safeUpdates.name = updates[field] as string;
+        }
+      }
     }
   }
   
@@ -422,3 +429,4 @@ export function importAssets(jsonData: string, merge: boolean = true): number {
     return 0;
   }
 }
+

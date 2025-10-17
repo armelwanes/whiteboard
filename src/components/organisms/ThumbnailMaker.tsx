@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Stage, Layer as KonvaLayer, Rect } from 'react-konva';
-import { Eye } from 'lucide-react';
-import { 
-  ThumbnailImageLayer, 
+import {
+  ThumbnailImageLayer,
   ThumbnailTextLayer,
   ThumbnailHeader,
   ThumbnailActions,
@@ -12,26 +11,61 @@ import {
   ThumbnailTextProperties
 } from '../molecules';
 
+// Types for layers
+export type ThumbnailLayer =
+  | {
+      id: string;
+      type: 'image';
+      src: string;
+      x: number;
+      y: number;
+      scaleX: number;
+      scaleY: number;
+      rotation: number;
+    }
+  | {
+      id: string;
+      type: 'text';
+      text: string;
+      x: number;
+      y: number;
+      fontSize: number;
+      fontFamily: string;
+      fontStyle: string;
+      fill: string;
+      stroke: string;
+      strokeWidth: number;
+      shadowEnabled: boolean;
+      align: string;
+    };
+
+interface ThumbnailMakerProps {
+  scene?: { id?: string; title?: string; [key: string]: any };
+  onClose?: () => void;
+  onSave?: (scene: any) => void;
+}
+
 /**
  * Thumbnail Maker Component
  * Create and preview YouTube-style thumbnails (1280x720) using React Konva
  */
-const ThumbnailMaker = ({ scene, onClose, onSave }) => {
+const ThumbnailMaker = ({ scene, onClose, onSave }: ThumbnailMakerProps) => {
   const WIDTH = 1280;
   const HEIGHT = 720;
   
-  const [backgroundColor, setBackgroundColor] = useState('#1a1a2e');
-  const [layers, setLayers] = useState([]);
-  const [selectedLayerId, setSelectedLayerId] = useState(null);
-  const [showGrid, setShowGrid] = useState(false);
-  
-  const stageRef = useRef(null);
-  const imageUploadRef = useRef(null);
+  const [backgroundColor, setBackgroundColor] = useState<string>('#1a1a2e');
+  const [layers, setLayers] = useState<ThumbnailLayer[]>([]);
+  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
+  const [showGrid, setShowGrid] = useState<boolean>(false);
+
+  const stageRef = useRef<any>(null);
+  const imageUploadRef = useRef<HTMLInputElement>(null);
 
   // Initialize with default text layer
   useEffect(() => {
-    if (layers.length === 0) {
-      setLayers([{
+    // Initialisation une seule fois au montage
+    setLayers([
+      {
         id: 'text-1',
         type: 'text',
         text: scene?.title || 'Titre de la vidéo',
@@ -45,12 +79,13 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
         strokeWidth: 8,
         shadowEnabled: true,
         align: 'center',
-      }]);
-    }
+      },
+    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
@@ -60,25 +95,28 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const newLayer = {
-        id: `image-${Date.now()}`,
-        type: 'image',
-        src: event.target.result,
-        x: WIDTH / 2 - 200,
-        y: HEIGHT / 2 - 150,
-        scaleX: 1,
-        scaleY: 1,
-        rotation: 0,
-      };
-      setLayers([...layers, newLayer]);
-      setSelectedLayerId(newLayer.id);
+      const result = event.target?.result;
+      if (typeof result === 'string') {
+        const newLayer: ThumbnailLayer = {
+          id: `image-${Date.now()}`,
+          type: 'image',
+          src: result,
+          x: WIDTH / 2 - 200,
+          y: HEIGHT / 2 - 150,
+          scaleX: 1,
+          scaleY: 1,
+          rotation: 0,
+        };
+        setLayers([...layers, newLayer]);
+        setSelectedLayerId(newLayer.id);
+      }
     };
     reader.readAsDataURL(file);
-    e.target.value = ''; // Reset input
+    e.target.value = '';
   };
   
   const handleAddText = () => {
-    const newLayer = {
+    const newLayer: ThumbnailLayer = {
       id: `text-${Date.now()}`,
       type: 'text',
       text: 'Nouveau texte',
@@ -97,21 +135,21 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
     setSelectedLayerId(newLayer.id);
   };
   
-  const handleDeleteLayer = (layerId) => {
+  const handleDeleteLayer = (layerId: string) => {
     setLayers(layers.filter(l => l.id !== layerId));
     if (selectedLayerId === layerId) {
       setSelectedLayerId(null);
     }
   };
   
-  const handleLayerChange = (updatedLayer) => {
+  const handleLayerChange = (updatedLayer: ThumbnailLayer) => {
     setLayers(layers.map(l => l.id === updatedLayer.id ? updatedLayer : l));
   };
   
-  const handleMoveLayer = (layerId, direction) => {
+  const handleMoveLayer = (layerId: string, direction: 'up' | 'down') => {
     const index = layers.findIndex(l => l.id === layerId);
     if (index === -1) return;
-    
+
     const newLayers = [...layers];
     if (direction === 'up' && index < layers.length - 1) {
       [newLayers[index], newLayers[index + 1]] = [newLayers[index + 1], newLayers[index]];
@@ -142,26 +180,25 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
       thumbnail: {
         backgroundColor,
         layers,
-        dataUrl
-      }
+        dataUrl,
+      },
     });
   };
 
   const selectedLayer = layers.find(l => l.id === selectedLayerId);
   
-  const handleTextChange = (property, value) => {
+  const handleTextChange = (property: string, value: any) => {
     if (!selectedLayer || selectedLayer.type !== 'text') return;
-    
     handleLayerChange({
       ...selectedLayer,
-      [property]: value
+      [property]: value,
     });
   };
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
-        <ThumbnailHeader onClose={onClose} />
+  <ThumbnailHeader onClose={onClose ?? (() => {})} />
 
         <div className="flex-1 overflow-hidden flex">
           {/* Left Panel - Canvas */}
@@ -269,7 +306,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
               <ThumbnailAddElements
                 onImageUpload={() => imageUploadRef.current?.click()}
                 onAddText={handleAddText}
-                imageUploadRef={imageUploadRef}
+                imageUploadRef={imageUploadRef as React.RefObject<HTMLInputElement>} 
                 onFileChange={handleImageUpload}
               />
 
@@ -281,7 +318,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
               <ThumbnailLayersList
                 layers={layers}
                 selectedLayerId={selectedLayerId}
-                onSelectLayer={setSelectedLayerId}
+                onSelectLayer={(id: string) => setSelectedLayerId(id)}
                 onMoveLayer={handleMoveLayer}
                 onDeleteLayer={handleDeleteLayer}
               />
@@ -289,7 +326,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
               {selectedLayer && selectedLayer.type === 'text' && (
                 <ThumbnailTextProperties
                   layer={selectedLayer}
-                  onTextChange={handleTextChange}
+                  onTextChange={(property: string, value: any) => handleTextChange(property, value)}
                 />
               )}
 

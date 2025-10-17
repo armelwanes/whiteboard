@@ -1,0 +1,105 @@
+import { useCallback } from 'react';
+import {
+    getCachedAssets,
+    searchAssets,
+    getAllTags,
+    getAssetStats,
+    addAsset,
+    AssetStats as ManagerAssetStats
+} from '../../../utils/assetManager';
+import { useAssetLibraryStore } from './useAssetLibraryStore';
+import type { Asset } from './types';
+
+export function useAssetLibraryActions(setAssets: (assets: Asset[]) => void, setStats: (stats: ManagerAssetStats | null) => void) {
+    const {
+        searchQuery, selectedTags, sortBy, sortOrder, viewMode,
+        setAllTags, setShowCropModal, setPendingImageData, pendingImageData
+    } = useAssetLibraryStore();
+
+    const loadAssets = useCallback(() => {
+        let loadedAssets: Asset[];
+        if (viewMode === 'cached') {
+            loadedAssets = getCachedAssets();
+        } else if (viewMode === 'recent') {
+            loadedAssets = searchAssets({ sortBy: 'uploadDate', sortOrder: 'desc' }).slice(0, 20);
+        } else {
+            loadedAssets = searchAssets({
+                query: searchQuery,
+                tags: selectedTags,
+                sortBy,
+                sortOrder
+            });
+        }
+        setAssets(loadedAssets);
+    }, [searchQuery, selectedTags, sortBy, sortOrder, viewMode, setAssets]);
+
+    const refreshTagsAndStats = useCallback(() => {
+        setAllTags(getAllTags());
+        setStats(getAssetStats());
+    }, [setAllTags, setStats]);
+
+    const toggleTag = (tag: string) => {
+        if (selectedTags.includes(tag)) {
+            useAssetLibraryStore.getState().setSelectedTags(selectedTags.filter((t) => t !== tag));
+        } else {
+            useAssetLibraryStore.getState().setSelectedTags([...selectedTags, tag]);
+        }
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const originalImageUrl = event.target?.result as string;
+                setPendingImageData({
+                    imageUrl: originalImageUrl,
+                    fileName: file.name,
+                    fileType: file.type
+                });
+                setShowCropModal(true);
+            };
+            reader.readAsDataURL(file);
+        }
+        e.target.value = '';
+    };
+
+    const handleCropComplete = async () => {
+        if (!pendingImageData) return;
+        try {
+            await addAsset({
+                name: pendingImageData.fileName,
+                dataUrl: pendingImageData.imageUrl,
+                type: pendingImageData.fileType,
+                tags: []
+            });
+            loadAssets();
+            refreshTagsAndStats();
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('Error adding asset:', error);
+            alert('Erreur lors de l\'ajout de l\'asset');
+        }
+        setShowCropModal(false);
+        setPendingImageData(null);
+    };
+
+    const handleCropCancel = () => {
+        setShowCropModal(false);
+        setPendingImageData(null);
+    };
+
+    const handleSortByChange = (value: string) => {
+        useAssetLibraryStore.getState().setSortBy(value as typeof sortBy);
+    };
+
+    return {
+        loadAssets,
+        toggleTag,
+        handleImageUpload,
+        handleCropComplete,
+        handleCropCancel,
+        handleSortByChange,
+        refreshTagsAndStats
+    };
+}

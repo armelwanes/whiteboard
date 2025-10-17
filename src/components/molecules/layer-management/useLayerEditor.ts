@@ -45,7 +45,7 @@ export const useLayerEditor = ({
     });
     setSelectedLayerId(null);
     setSelectedCamera(null);
-  }, [scene, setSelectedLayerId]);
+  }, [scene]);
 
   const handleChange = useCallback((field: string, value: any) => {
     setEditedScene((prev: any) => ({ ...prev, [field]: value }));

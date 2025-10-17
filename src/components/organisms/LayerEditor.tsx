@@ -1,27 +1,15 @@
 import React from 'react';
 import { useSceneStore } from '../../app/scenes';
-import { 
-  useLayerEditor, 
+import {
+  useLayerEditor,
   useLayerCreationHandlers
 } from '../molecules/layer-management';
 import LayerEditorModals from './LayerEditorModals';
 import LayerEditorCanvas from './LayerEditorCanvas';
+import { useCurrentScene } from '@/app/scenes';
 
-interface LayerEditorProps {
-  scene: any;
-  onClose: () => void;
-  onSave: (scene: any) => void;
-  selectedLayerId?: string | null;
-  onSelectLayer?: (layerId: string | null) => void;
-}
-
-const LayerEditor: React.FC<LayerEditorProps> = ({ 
-  scene, 
-  onClose, 
-  onSave,
-  selectedLayerId: externalSelectedLayerId,
-  onSelectLayer: externalOnSelectLayer
-}) => {
+const LayerEditor: React.FC = () => {
+  const scene = useCurrentScene();
   const showShapeToolbar = useSceneStore((state) => state.showShapeToolbar);
   const setShowShapeToolbar = useSceneStore((state) => state.setShowShapeToolbar);
   const showAssetLibrary = useSceneStore((state) => state.showAssetLibrary);
@@ -34,27 +22,21 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
   const sceneWidth = 1920;
   const sceneHeight = 1080;
 
+  const [selectedLayerId, setSelectedLayerId] = React.useState<string | null>(null);
+  const [selectedCamera, setSelectedCamera] = React.useState<string | null>(null);
+
   const {
     editedScene,
     setEditedScene,
-    selectedLayerId,
-    setSelectedLayerId,
-    selectedCamera,
-    setSelectedCamera,
     showThumbnailMaker,
     setShowThumbnailMaker,
-    handleChange,
     handleUpdateScene,
     handleUpdateLayer,
-    handleAddLayer,
-    handleDeleteLayer,
-    handleDuplicateLayer,
-    handleMoveLayer,
-    handleLayerPropertyChange
+    handleAddLayer
   } = useLayerEditor({
     scene,
-    selectedLayerId: externalSelectedLayerId,
-    onSelectLayer: externalOnSelectLayer
+    selectedLayerId,
+    onSelectLayer: (layerId: string | null) => setSelectedLayerId(layerId)
   });
 
   const {
@@ -70,11 +52,13 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
   });
 
   const handleSave = () => {
-    onSave(editedScene);
+    handleUpdateScene(editedScene);
   };
 
-  const handleCropComplete = async (croppedImageUrl: string, imageDimensions: any) => {
-    await handleCropCompleteBase(croppedImageUrl, imageDimensions, pendingImageData, editedScene.layers.length);
+  // LayerEditorModals expects onCropComplete to take only croppedImageUrl
+  const handleCropComplete = (croppedImageUrl: string) => {
+    // If you need imageDimensions, you can retrieve from pendingImageData or elsewhere
+    handleCropCompleteBase(croppedImageUrl, undefined, pendingImageData, editedScene.layers.length);
     setShowCropModal(false);
     setPendingImageData(null);
   };
@@ -91,8 +75,6 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
   const handleAddShapeWrapper = (shapeLayer: any) => {
     handleAddShape(shapeLayer, editedScene.layers.length);
   };
-
-
 
   return (
     <div className="flex items-center justify-center w-full h-full">
@@ -116,7 +98,7 @@ const LayerEditor: React.FC<LayerEditorProps> = ({
           setShowThumbnailMaker(false);
         }}
       />
-      
+
       <LayerEditorCanvas
         scene={editedScene}
         selectedLayerId={selectedLayerId}

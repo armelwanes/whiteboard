@@ -1,4 +1,4 @@
-export { default as AnimationContainer } from './AnimationContainer';
+export {  AnimationContainer } from './AnimationContainer';
 export { default as LayerEditor } from './LayerEditor';
 export { default as SceneCanvas } from './SceneCanvas';
 export { default as KonvaSceneEditor } from './KonvaSceneEditor';
