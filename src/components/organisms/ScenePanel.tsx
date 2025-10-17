@@ -13,8 +13,12 @@ const ScenePanel: React.FC = () => {
   const { createScene, deleteScene, duplicateScene, reorderScenes } = useScenesActions();
 
   const handleAddScene = async () => {
+    const currentLength = scenes.length;
     await createScene({});
-    setSelectedSceneIndex(scenes.length);
+    // After creation, the new scene will be at the end of the array
+    // React Query will refetch and scenes array will have +1 length
+    // So we set to currentLength which will be the new scene's index
+    setSelectedSceneIndex(currentLength);
   };
 
   const handleMoveScene = async (index: number, direction: 'up' | 'down') => {
@@ -31,8 +35,10 @@ const ScenePanel: React.FC = () => {
 
   const handleDuplicateScene = async (index: number) => {
     const scene = scenes[index];
+    const currentLength = scenes.length;
     await duplicateScene(scene.id);
-    setSelectedSceneIndex(scenes.length);
+    // After duplication, the new scene will be at the end of the array
+    setSelectedSceneIndex(currentLength);
   };
 
   const handleDeleteScene = async (index: number) => {
