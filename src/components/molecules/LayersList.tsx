@@ -1,14 +1,14 @@
 import React from 'react';
 import { Eye, EyeOff, Trash2, Copy, MoveUp, MoveDown } from 'lucide-react';
-import { useCurrentScene, useSceneStore } from '@/app/scenes';
+import { useCurrentScene, useSceneStore, useScenesActions } from '@/app/scenes';
 
 const LayersList: React.FC = () => {
   const scene = useCurrentScene();
   const selectedLayerId = useSceneStore((state) => state.selectedLayerId);
   const setSelectedLayerId = useSceneStore((state) => state.setSelectedLayerId);
-  const deleteLayer = useSceneStore((state) => state.deleteLayer);
-  const duplicateLayer = useSceneStore((state) => state.duplicateLayer);
-  const moveLayer = useSceneStore((state) => state.moveLayer);
+  
+  // Use actions from useScenesActions hook instead of store
+  const { deleteLayer, moveLayer, duplicateLayer } = useScenesActions();
 
   if (!scene || !scene.layers || scene.layers.length === 0) {
     return (
@@ -113,7 +113,9 @@ const LayersList: React.FC = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (index > 0) moveLayer(layer.id, 'up');
+                      if (index > 0 && scene?.id) {
+                        moveLayer({ sceneId: scene.id, layerId: layer.id, direction: 'up' });
+                      }
                     }}
                     disabled={index === 0}
                     className="p-1 rounded bg-secondary hover:bg-secondary/80 disabled:opacity-30 disabled:cursor-not-allowed"
@@ -125,7 +127,9 @@ const LayersList: React.FC = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (index < sortedLayers.length - 1) moveLayer(layer.id, 'down');
+                      if (index < sortedLayers.length - 1 && scene?.id) {
+                        moveLayer({ sceneId: scene.id, layerId: layer.id, direction: 'down' });
+                      }
                     }}
                     disabled={index === sortedLayers.length - 1}
                     className="p-1 rounded bg-secondary hover:bg-secondary/80 disabled:opacity-30 disabled:cursor-not-allowed"
@@ -137,7 +141,9 @@ const LayersList: React.FC = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      duplicateLayer(layer.id);
+                      if (scene?.id) {
+                        duplicateLayer({ sceneId: scene.id, layerId: layer.id });
+                      }
                     }}
                     className="p-1 rounded bg-secondary hover:bg-secondary/80"
                     title="Dupliquer"
@@ -148,8 +154,8 @@ const LayersList: React.FC = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (window.confirm('Supprimer cette couche ?')) {
-                        deleteLayer(scene.id, layer.id);
+                      if (window.confirm('Supprimer cette couche ?') && scene?.id) {
+                        deleteLayer({ sceneId: scene.id, layerId: layer.id });
                       }
                     }}
                     className="p-1 rounded bg-red-600 hover:bg-red-700"

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSceneStore } from '../../app/scenes';
+import { useSceneStore, useScenesActions } from '../../app/scenes';
 import {
   useLayerEditor,
   useLayerCreationHandlers
@@ -18,6 +18,9 @@ const LayerEditor: React.FC = () => {
   const setShowCropModal = useSceneStore((state) => state.setShowCropModal);
   const pendingImageData = useSceneStore((state) => state.pendingImageData);
   const setPendingImageData = useSceneStore((state) => state.setPendingImageData);
+
+  // Use actions from useScenesActions hook for persistence
+  const { updateScene } = useScenesActions();
 
   const sceneWidth = 1920;
   const sceneHeight = 1080;
@@ -51,8 +54,24 @@ const LayerEditor: React.FC = () => {
     onCloseShapeToolbar: () => setShowShapeToolbar(false)
   });
 
-  const handleSave = () => {
-    handleUpdateScene(editedScene);
+  const handleSave = async () => {
+    if (!scene?.id) return;
+    
+    // Persist the edited scene to the backend
+    await updateScene({ 
+      id: scene.id, 
+      data: {
+        layers: editedScene.layers,
+        sceneCameras: editedScene.sceneCameras,
+        backgroundImage: editedScene.backgroundImage,
+        duration: editedScene.duration,
+        title: editedScene.title,
+        content: editedScene.content,
+        animation: editedScene.animation,
+        multiTimeline: editedScene.multiTimeline,
+        audio: editedScene.audio,
+      }
+    });
   };
 
   // LayerEditorModals expects onCropComplete to take only croppedImageUrl

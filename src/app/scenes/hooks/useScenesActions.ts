@@ -68,7 +68,7 @@ export const useScenesActions = () => {
   const deleteLayer = useMutation({
     mutationFn: ({ sceneId, layerId }: { sceneId: string; layerId: string }) => 
       scenesService.deleteLayer(sceneId, layerId),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       invalidateScenes();
     },
   });
@@ -76,6 +76,59 @@ export const useScenesActions = () => {
   const addCamera = useMutation({
     mutationFn: ({ sceneId, camera }: { sceneId: string; camera: Camera }) => 
       scenesService.addCamera(sceneId, camera),
+    onSuccess: () => {
+      invalidateScenes();
+    },
+  });
+
+  const moveLayer = useMutation({
+    mutationFn: async ({ sceneId, layerId, direction }: { sceneId: string; layerId: string; direction: 'up' | 'down' }) => {
+      const scene = await scenesService.detail(sceneId);
+      if (!scene || !scene.layers) return scene;
+      
+      const layers = [...scene.layers];
+      const idx = layers.findIndex(l => l.id === layerId);
+      if (idx === -1) return scene;
+      
+      const newIdx = direction === 'up' ? Math.max(0, idx - 1) : Math.min(layers.length - 1, idx + 1);
+      if (newIdx === idx) return scene;
+      
+      // Move layer
+      const [moved] = layers.splice(idx, 1);
+      layers.splice(newIdx, 0, moved);
+      
+      // Update z_index for all layers
+      layers.forEach((l, i) => {
+        l.z_index = i + 1;
+      });
+      
+      return scenesService.update(sceneId, { ...scene, layers });
+    },
+    onSuccess: () => {
+      invalidateScenes();
+    },
+  });
+
+  const duplicateLayer = useMutation({
+    mutationFn: async ({ sceneId, layerId }: { sceneId: string; layerId: string }) => {
+      const scene = await scenesService.detail(sceneId);
+      if (!scene || !scene.layers) return scene;
+      
+      const layer = scene.layers.find(l => l.id === layerId);
+      if (!layer) return scene;
+      
+      const newLayer = {
+        ...layer,
+        id: `layer-${Date.now()}`,
+        name: `${layer.name || 'Layer'} (Copie)`,
+        z_index: scene.layers.length + 1,
+      };
+      
+      return scenesService.update(sceneId, {
+        ...scene,
+        layers: [...scene.layers, newLayer],
+      });
+    },
     onSuccess: () => {
       invalidateScenes();
     },
@@ -96,6 +149,8 @@ export const useScenesActions = () => {
     updateLayer: updateLayer.mutateAsync,
     deleteLayer: deleteLayer.mutateAsync,
     addCamera: addCamera.mutateAsync,
+    moveLayer: moveLayer.mutateAsync,
+    duplicateLayer: duplicateLayer.mutateAsync,
     invalidate: invalidateScenes,
   };
 };

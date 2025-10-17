@@ -30,21 +30,21 @@ const PropertiesPanelHeader: React.FC<PropertiesPanelHeaderProps> = ({
 );
 import AudioManager from '../audio/AudioManager';
 import { LayersListPanel, LayerPropertiesForm, ToolbarActions } from '../molecules';
-import { useCurrentScene, useSceneStore } from '@/app/scenes';
+import { useCurrentScene, useSceneStore, useScenesActions } from '@/app/scenes';
 import React, { useRef } from 'react';
 
 const PropertiesPanel: React.FC = () => {
   const scene = useCurrentScene();
   const selectedLayerId = useSceneStore((state) => state.selectedLayerId);
   const setSelectedLayerId = useSceneStore((state) => state.setSelectedLayerId);
-  const updateScene = useSceneStore((state) => state.updateScene);
-  const updateLayer = useSceneStore((state) => state.updateLayer);
-  const deleteLayer = useSceneStore((state) => state.deleteLayer);
-  const duplicateLayer = useSceneStore((state) => state.duplicateLayer);
-  const moveLayer = useSceneStore((state) => state.moveLayer);
-  // Asset library actions
   const setShowAssetLibrary = useSceneStore((state) => state.setShowAssetLibrary);
+  
+  // Use actions from useScenesActions hook instead of store
+  const { updateScene, updateLayer, deleteLayer, moveLayer, duplicateLayer } = useScenesActions();
+  
+  // Asset library actions
   const openAssetLibrary = () => setShowAssetLibrary(true);
+  
   // Image upload
   const fileInputRef = useRef<HTMLInputElement>(null!);
   const imageUpload = () => {
@@ -62,7 +62,7 @@ const PropertiesPanel: React.FC = () => {
     reader.onload = (event) => {
       const result = event.target?.result;
       if (typeof result === 'string' && scene?.id) {
-        updateScene(scene.id, { backgroundImage: result });
+        updateScene({ id: scene.id, data: { backgroundImage: result } });
       }
     };
     reader.readAsDataURL(file);
@@ -88,12 +88,12 @@ const PropertiesPanel: React.FC = () => {
 
   const handleSceneChange = (field: string, value: any) => {
     if (!scene.id) return;
-    updateScene(scene.id, { [field]: value });
+    updateScene({ id: scene.id, data: { [field]: value } });
   };
 
   const handleLayerPropertyChange = (layerId: string, property: string, value: any) => {
     if (!scene.id) return;
-    updateLayer(scene.id, layerId, { [property]: value });
+    updateLayer({ sceneId: scene.id, layerId, data: { [property]: value } });
   };
 
   return (
@@ -116,11 +116,17 @@ const PropertiesPanel: React.FC = () => {
             layers={scene.layers || []}
             selectedLayerId={selectedLayerId}
             onSelectLayer={setSelectedLayerId}
-            onMoveLayer={moveLayer}
-            onDuplicateLayer={duplicateLayer}
+            onMoveLayer={(layerId, direction) => {
+              if (!scene.id) return;
+              moveLayer({ sceneId: scene.id, layerId, direction });
+            }}
+            onDuplicateLayer={(layerId) => {
+              if (!scene.id) return;
+              duplicateLayer({ sceneId: scene.id, layerId });
+            }}
             onDeleteLayer={(layerId: string) => {
               if (!scene.id) return;
-              deleteLayer(scene.id, layerId);
+              deleteLayer({ sceneId: scene.id, layerId });
             }}
           />
 
@@ -137,7 +143,7 @@ const PropertiesPanel: React.FC = () => {
             scene={scene}
             onSceneUpdate={(updates: any) => {
               if (!scene.id) return;
-              updateScene(scene.id, updates);
+              updateScene({ id: scene.id, data: updates });
             }}
             currentTime={0}
             isPlaying={false}
