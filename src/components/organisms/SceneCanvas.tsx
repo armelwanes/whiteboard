@@ -72,12 +72,20 @@ const SceneCanvas = ({
     const defaultCamera = sceneCameras.find(cam => cam.isDefault);
     const defaultPosition = defaultCamera ? defaultCamera.position : { x: 0.5, y: 0.5 };
     
+    // Calculate camera dimensions proportional to scene zoom
+    // At sceneZoom = 1.0, camera is 800x450 (16:9 aspect ratio, matching default)
+    // At other zoom levels, adjust dimensions to maintain consistent visual size
+    const baseWidth = 800;
+    const baseHeight = 450;
+    const adjustedWidth = baseWidth / sceneZoom;
+    const adjustedHeight = baseHeight / sceneZoom;
+    
     const newCamera = {
       id: `camera-${Date.now()}`,
       name: `Camera ${sceneCameras.length}`,
       position: { x: defaultPosition.x, y: defaultPosition.y }, // Start at default camera position
-      width: 1920,
-      height: 1080,
+      width: adjustedWidth,
+      height: adjustedHeight,
       zoom: 1.0,
       duration: 2.0,
       transition_duration: 1.0,
@@ -93,7 +101,7 @@ const SceneCanvas = ({
     
     // Persist to scene
     onUpdateScene({ sceneCameras: updatedCameras });
-  }, [sceneCameras, onUpdateScene]);
+  }, [sceneCameras, sceneZoom, onUpdateScene]);
 
   // Update camera properties
   const handleUpdateCamera = useCallback((cameraId, updates) => {
