@@ -1,13 +1,51 @@
 import React, { useRef } from 'react';
 import { Button, Card } from '../atoms';
 import { Plus, ArrowUp, ArrowDown, Copy, Trash2, Download, Upload } from 'lucide-react';
-import { useScenes, useSceneStore } from '@/app/scenes';
+import { useScenes, useSceneStore, useScenesActions } from '@/app/scenes';
 
 const ScenePanel: React.FC = () => {
   const { scenes } = useScenes();
   const selectedSceneIndex = useSceneStore((state) => state.selectedSceneIndex);
   const setSelectedSceneIndex = useSceneStore((state) => state.setSelectedSceneIndex);
   const importInputRef = useRef<HTMLInputElement>(null);
+  
+  // Use actions from useScenesActions hook
+  const { createScene, deleteScene, duplicateScene, reorderScenes } = useScenesActions();
+
+  const handleAddScene = async () => {
+    await createScene({});
+    setSelectedSceneIndex(scenes.length);
+  };
+
+  const handleMoveScene = async (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= scenes.length) return;
+
+    const reorderedScenes = [...scenes];
+    const [movedScene] = reorderedScenes.splice(index, 1);
+    reorderedScenes.splice(newIndex, 0, movedScene);
+
+    await reorderScenes(reorderedScenes.map(s => s.id));
+    setSelectedSceneIndex(newIndex);
+  };
+
+  const handleDuplicateScene = async (index: number) => {
+    const scene = scenes[index];
+    await duplicateScene(scene.id);
+    setSelectedSceneIndex(scenes.length);
+  };
+
+  const handleDeleteScene = async (index: number) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette scène ?')) return;
+    
+    const scene = scenes[index];
+    await deleteScene(scene.id);
+    
+    // Adjust selected index after deletion
+    if (selectedSceneIndex >= scenes.length - 1) {
+      setSelectedSceneIndex(Math.max(0, scenes.length - 2));
+    }
+  };
 
   return (
     <div className="bg-white border-r border-border flex flex-col shadow-sm">
@@ -23,7 +61,7 @@ const ScenePanel: React.FC = () => {
           </div>
         </div>
         <Button
-          onClick={() => { }}
+          onClick={handleAddScene}
           className="w-full gap-2 mb-2"
           size="sm"
         >
@@ -117,7 +155,7 @@ const ScenePanel: React.FC = () => {
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      // onMoveScene(index, 'up');
+                      handleMoveScene(index, 'up');
                     }}
                     disabled={index === 0}
                     variant="outline"
@@ -130,7 +168,7 @@ const ScenePanel: React.FC = () => {
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      // onMoveScene(index, 'down');
+                      handleMoveScene(index, 'down');
                     }}
                     disabled={index === scenes.length - 1}
                     variant="outline"
@@ -143,7 +181,7 @@ const ScenePanel: React.FC = () => {
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      // onDuplicateScene(index);
+                      handleDuplicateScene(index);
                     }}
                     variant="outline"
                     size="sm"
@@ -155,7 +193,7 @@ const ScenePanel: React.FC = () => {
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      // onDeleteScene(index);
+                      handleDeleteScene(index);
                     }}
                     variant="destructive"
                     size="sm"
