@@ -1,10 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Stage, Layer as KonvaLayer, Rect } from 'react-konva';
+import { Eye } from 'lucide-react';
 import { 
-  Image as ImageIcon, Type, Download, Eye, Upload, 
-  Palette, Trash2, Layers, X, Plus
-} from 'lucide-react';
-import { ThumbnailImageLayer, ThumbnailTextLayer } from '../molecules';
+  ThumbnailImageLayer, 
+  ThumbnailTextLayer,
+  ThumbnailHeader,
+  ThumbnailActions,
+  ThumbnailAddElements,
+  ThumbnailBackground,
+  ThumbnailLayersList,
+  ThumbnailTextProperties
+} from '../molecules';
 
 /**
  * Thumbnail Maker Component
@@ -152,36 +158,10 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
     });
   };
 
-  const colorPresets = [
-    { name: 'Rouge', color: '#dc2626' },
-    { name: 'Bleu', color: '#1e40af' },
-    { name: 'Vert', color: '#059669' },
-    { name: 'Violet', color: '#7c3aed' },
-    { name: 'Orange', color: '#ea580c' },
-    { name: 'Jaune', color: '#fbbf24' },
-  ];
-
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/20 rounded-lg">
-              <ImageIcon className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white">Éditeur de Miniature</h2>
-              <p className="text-sm text-white/80">Éditeur interactif - Drag & Drop - 1280x720</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
+        <ThumbnailHeader onClose={onClose} />
 
         <div className="flex-1 overflow-hidden flex">
           {/* Left Panel - Canvas */}
@@ -276,247 +256,41 @@ const ThumbnailMaker = ({ scene, onClose, onSave }) => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-3">
-                <button
-                  onClick={handleDownload}
-                  className="flex-1 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-lg"
-                >
-                  <Download className="w-5 h-5" />
-                  Télécharger PNG
-                </button>
-                {onSave && (
-                  <button
-                    onClick={handleSave}
-                    className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-lg"
-                  >
-                    <ImageIcon className="w-5 h-5" />
-                    Enregistrer
-                  </button>
-                )}
-              </div>
+              <ThumbnailActions 
+                onDownload={handleDownload}
+                onSave={onSave ? handleSave : undefined}
+              />
             </div>
           </div>
 
           {/* Right Panel - Controls */}
           <div className="w-96 bg-gray-850 border-l border-border overflow-auto">
             <div className="p-6 space-y-6">
-              {/* Add Elements */}
-              <div className="bg-secondary/30 rounded-lg p-4 border border-border">
-                <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                  <Plus className="w-4 h-4" />
-                  Ajouter des éléments
-                </h3>
-                
-                <div className="space-y-2">
-                  <button
-                    onClick={() => imageUploadRef.current?.click()}
-                    className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white py-2 px-4 rounded-lg transition-colors"
-                  >
-                    <Upload className="w-4 h-4" />
-                    Importer Image
-                  </button>
-                  <input
-                    ref={imageUploadRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  
-                  <button
-                    onClick={handleAddText}
-                    className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition-colors"
-                  >
-                    <Type className="w-4 h-4" />
-                    Ajouter Texte
-                  </button>
-                </div>
-              </div>
+              <ThumbnailAddElements
+                onImageUpload={() => imageUploadRef.current?.click()}
+                onAddText={handleAddText}
+                imageUploadRef={imageUploadRef}
+                onFileChange={handleImageUpload}
+              />
 
-              {/* Background */}
-              <div className="bg-secondary/30 rounded-lg p-4 border border-border">
-                <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                  <Palette className="w-4 h-4" />
-                  Arrière-plan
-                </h3>
-                
-                <div className="mb-3">
-                  <label className="block text-foreground text-sm mb-2">Couleur de fond</label>
-                  <input
-                    type="color"
-                    value={backgroundColor}
-                    onChange={(e) => setBackgroundColor(e.target.value)}
-                    className="w-full h-10 rounded cursor-pointer"
-                  />
-                </div>
-                
-                <div className="grid grid-cols-3 gap-2">
-                  {colorPresets.map((preset) => (
-                    <button
-                      key={preset.name}
-                      onClick={() => setBackgroundColor(preset.color)}
-                      className="h-10 rounded-lg hover:ring-2 ring-white transition-all"
-                      style={{ background: preset.color }}
-                      title={preset.name}
-                    />
-                  ))}
-                </div>
-              </div>
+              <ThumbnailBackground
+                backgroundColor={backgroundColor}
+                onColorChange={setBackgroundColor}
+              />
 
-              {/* Layers List */}
-              <div className="bg-secondary/30 rounded-lg p-4 border border-border">
-                <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                  <Layers className="w-4 h-4" />
-                  Calques ({layers.length})
-                </h3>
-                
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {layers.slice().reverse().map((layer, index) => (
-                    <div
-                      key={layer.id}
-                      onClick={() => setSelectedLayerId(layer.id)}
-                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                        layer.id === selectedLayerId
-                          ? 'bg-primary text-white'
-                          : 'bg-secondary text-foreground hover:bg-secondary/80'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          {layer.type === 'image' ? (
-                            <ImageIcon className="w-4 h-4" />
-                          ) : (
-                            <Type className="w-4 h-4" />
-                          )}
-                          <span className="text-sm font-medium">
-                            {layer.type === 'image' ? 'Image' : layer.text?.substring(0, 20) || 'Texte'}
-                          </span>
-                        </div>
-                        <div className="flex gap-1">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleMoveLayer(layer.id, 'up');
-                            }}
-                            className="p-1 hover:bg-white/10 rounded"
-                            disabled={index === 0}
-                          >
-                            <span className="text-xs">▲</span>
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleMoveLayer(layer.id, 'down');
-                            }}
-                            className="p-1 hover:bg-white/10 rounded"
-                            disabled={index === layers.length - 1}
-                          >
-                            <span className="text-xs">▼</span>
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteLayer(layer.id);
-                            }}
-                            className="p-1 hover:bg-red-600 rounded"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                {layers.length === 0 && (
-                  <p className="text-muted-foreground text-sm text-center py-4">
-                    Aucun calque. Ajoutez une image ou du texte.
-                  </p>
-                )}
-              </div>
+              <ThumbnailLayersList
+                layers={layers}
+                selectedLayerId={selectedLayerId}
+                onSelectLayer={setSelectedLayerId}
+                onMoveLayer={handleMoveLayer}
+                onDeleteLayer={handleDeleteLayer}
+              />
 
-              {/* Selected Layer Properties */}
               {selectedLayer && selectedLayer.type === 'text' && (
-                <div className="bg-secondary/30 rounded-lg p-4 border border-border">
-                  <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                    <Type className="w-4 h-4" />
-                    Propriétés du texte
-                  </h3>
-                  
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-foreground text-sm mb-2">Texte</label>
-                      <input
-                        type="text"
-                        value={selectedLayer.text}
-                        onChange={(e) => handleTextChange('text', e.target.value)}
-                        className="w-full bg-secondary text-white border border-border rounded-lg px-3 py-2"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-foreground text-sm mb-2">
-                        Taille: {Math.round(selectedLayer.fontSize)}px
-                      </label>
-                      <input
-                        type="range"
-                        min="12"
-                        max="120"
-                        value={selectedLayer.fontSize}
-                        onChange={(e) => handleTextChange('fontSize', parseInt(e.target.value))}
-                        className="w-full accent-blue-500"
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-foreground text-sm mb-2">Couleur</label>
-                        <input
-                          type="color"
-                          value={selectedLayer.fill}
-                          onChange={(e) => handleTextChange('fill', e.target.value)}
-                          className="w-full h-10 rounded cursor-pointer"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-foreground text-sm mb-2">Contour</label>
-                        <input
-                          type="color"
-                          value={selectedLayer.stroke}
-                          onChange={(e) => handleTextChange('stroke', e.target.value)}
-                          className="w-full h-10 rounded cursor-pointer"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-foreground text-sm mb-2">
-                        Épaisseur contour: {selectedLayer.strokeWidth}px
-                      </label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="20"
-                        value={selectedLayer.strokeWidth}
-                        onChange={(e) => handleTextChange('strokeWidth', parseInt(e.target.value))}
-                        className="w-full accent-blue-500"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="flex items-center gap-2 text-foreground text-sm cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedLayer.shadowEnabled}
-                          onChange={(e) => handleTextChange('shadowEnabled', e.target.checked)}
-                          className="w-4 h-4 accent-blue-500"
-                        />
-                        Ombre portée
-                      </label>
-                    </div>
-                  </div>
-                </div>
+                <ThumbnailTextProperties
+                  layer={selectedLayer}
+                  onTextChange={handleTextChange}
+                />
               )}
 
               {/* Utilities */}
