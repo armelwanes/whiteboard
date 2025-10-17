@@ -6,7 +6,7 @@ import { X, Check, Crop as CropIcon, Eraser, Crop } from 'lucide-react';
 
 interface ImageCropModalProps {
   imageUrl: string;
-  onCropComplete: (croppedImageUrl: string) => void;
+  onCropComplete: (croppedImageUrl: string, imageDimensions?: { width: number; height: number }) => void;
   onCancel: () => void;
 }
 

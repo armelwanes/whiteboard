@@ -1,5 +1,11 @@
+import React, { useRef, useState } from 'react';
 import ScenePropertiesPanel from '../atoms/ScenePropertiesPanel';
-import { ImageCropModal } from '../molecules';
+import AudioManager from '../audio/AudioManager';
+import { LayersListPanel, LayerPropertiesForm, ToolbarActions, ImageCropModal } from '../molecules';
+import { useCurrentScene, useSceneStore, useScenesActions } from '@/app/scenes';
+import { useLayerCreation } from '../molecules/layer-management';
+import { addAsset } from '@/utils/assetManager';
+
 interface PropertiesPanelHeaderProps {
   fileInputRef: React.RefObject<HTMLInputElement>;
   openAssetLibrary: () => void;
@@ -23,12 +29,6 @@ const PropertiesPanelHeader: React.FC<PropertiesPanelHeaderProps> = ({
     />
   </div>
 );
-import AudioManager from '../audio/AudioManager';
-import { LayersListPanel, LayerPropertiesForm, ToolbarActions } from '../molecules';
-import { useCurrentScene, useSceneStore, useScenesActions } from '@/app/scenes';
-import React, { useRef, useState } from 'react';
-import { useLayerCreation } from '../molecules/layer-management';
-import { addAsset } from '@/utils/assetManager';
 
 const PropertiesPanel: React.FC = () => {
   const scene = useCurrentScene();
