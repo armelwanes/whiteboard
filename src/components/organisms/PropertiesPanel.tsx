@@ -1,37 +1,34 @@
 import ScenePropertiesPanel from '../atoms/ScenePropertiesPanel';
+import { ImageCropModal } from '../molecules';
 interface PropertiesPanelHeaderProps {
   fileInputRef: React.RefObject<HTMLInputElement>;
   openAssetLibrary: () => void;
-  imageUpload: () => void;
-  handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onAddText: () => void;
 }
 
 const PropertiesPanelHeader: React.FC<PropertiesPanelHeaderProps> = ({
   fileInputRef,
   openAssetLibrary,
-  imageUpload,
-  handleFileChange
+  handleImageUpload,
+  onAddText
 }) => (
   <div className="bg-secondary/30 px-6 py-4 border-b border-border flex items-center justify-between flex-shrink-0">
     <h2 className="text-xl font-bold text-foreground">Propriétés</h2>
     <ToolbarActions
       fileInputRef={fileInputRef}
       onOpenAssetLibrary={openAssetLibrary}
-      onImageUpload={imageUpload}
-    />
-    <input
-      type="file"
-      accept="image/*"
-      ref={fileInputRef}
-      style={{ display: 'none' }}
-      onChange={handleFileChange}
+      onImageUpload={handleImageUpload}
+      onAddText={onAddText}
     />
   </div>
 );
 import AudioManager from '../audio/AudioManager';
 import { LayersListPanel, LayerPropertiesForm, ToolbarActions } from '../molecules';
 import { useCurrentScene, useSceneStore, useScenesActions } from '@/app/scenes';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import { useLayerCreation } from '../molecules/layer-management';
+import { addAsset } from '@/utils/assetManager';
 
 const PropertiesPanel: React.FC = () => {
   const scene = useCurrentScene();
@@ -40,33 +37,104 @@ const PropertiesPanel: React.FC = () => {
   const setShowAssetLibrary = useSceneStore((state) => state.setShowAssetLibrary);
   
   // Use actions from useScenesActions hook instead of store
-  const { updateScene, updateLayer, deleteLayer, moveLayer, duplicateLayer } = useScenesActions();
+  const { updateScene, updateLayer, deleteLayer, moveLayer, duplicateLayer, addLayer } = useScenesActions();
+  
+  // Layer creation for text and images
+  const { createTextLayer, createImageLayer } = useLayerCreation({
+    sceneWidth: 1920,
+    sceneHeight: 1080,
+    selectedCamera: null
+  });
+
+  // State for image crop modal
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [pendingImageData, setPendingImageData] = useState<{
+    imageUrl: string;
+    fileName: string;
+    fileType: string;
+    originalUrl: string;
+  } | null>(null);
   
   // Asset library actions
   const openAssetLibrary = () => setShowAssetLibrary(true);
   
-  // Image upload
+  // Image upload - now with crop functionality
   const fileInputRef = useRef<HTMLInputElement>(null!);
-  const imageUpload = () => {
-    fileInputRef.current?.click();
-  };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       alert('Veuillez sélectionner une image valide');
       return;
     }
+    
     const reader = new FileReader();
     reader.onload = (event) => {
       const result = event.target?.result;
-      if (typeof result === 'string' && scene?.id) {
-        updateScene({ id: scene.id, data: { backgroundImage: result } });
+      if (typeof result === 'string') {
+        setPendingImageData({
+          imageUrl: result,
+          fileName: file.name,
+          fileType: file.type,
+          originalUrl: result
+        });
+        setShowCropModal(true);
       }
     };
     reader.readAsDataURL(file);
     e.target.value = '';
+  };
+
+  const handleCropComplete = async (croppedImageUrl: string, imageDimensions?: { width: number; height: number }) => {
+    if (!pendingImageData || !scene?.id) return;
+
+    try {
+      // Save asset to library
+      await addAsset({
+        name: pendingImageData.fileName,
+        dataUrl: pendingImageData.originalUrl,
+        type: pendingImageData.fileType,
+        tags: []
+      });
+
+      // Create image layer
+      const newLayer = createImageLayer(
+        croppedImageUrl,
+        pendingImageData.fileName,
+        imageDimensions || null,
+        scene.layers?.length || 0
+      );
+
+      // Add layer to scene
+      await addLayer({ sceneId: scene.id, layer: newLayer });
+    } catch (error) {
+      console.error('Error adding image layer:', error);
+      alert('Erreur lors de l\'ajout de l\'image');
+    } finally {
+      setShowCropModal(false);
+      setPendingImageData(null);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setShowCropModal(false);
+    setPendingImageData(null);
+  };
+
+  // Text addition
+  const handleAddText = async () => {
+    if (!scene?.id) return;
+    
+    try {
+      const newTextLayer = createTextLayer(scene.layers?.length || 0);
+      await addLayer({ sceneId: scene.id, layer: newTextLayer });
+      // Select the newly created text layer
+      setSelectedLayerId(newTextLayer.id);
+    } catch (error) {
+      console.error('Error adding text layer:', error);
+      alert('Erreur lors de l\'ajout du texte');
+    }
   };
 
   if (!scene) {
@@ -98,11 +166,20 @@ const PropertiesPanel: React.FC = () => {
 
   return (
     <div className="bg-white flex flex-col border-l border-border overflow-hidden">
+      {/* Crop Modal */}
+      {showCropModal && pendingImageData && (
+        <ImageCropModal
+          imageUrl={pendingImageData.imageUrl}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
+
       <PropertiesPanelHeader
         fileInputRef={fileInputRef}
         openAssetLibrary={openAssetLibrary}
-        imageUpload={imageUpload}
-        handleFileChange={handleFileChange}
+        handleImageUpload={handleImageUpload}
+        onAddText={handleAddText}
       />
 
       {/* Content - Scrollable */}
