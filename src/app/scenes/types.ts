@@ -48,6 +48,9 @@ export interface Camera {
   name: string;
   position: Position;
   scale: number;
+  zoom?: number;
+  width?: number;
+  height?: number;
   animation?: CameraAnimation;
   [key: string]: any;
 }

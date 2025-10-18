@@ -26,7 +26,7 @@ const LayerEditor: React.FC = () => {
   const sceneHeight = 1080;
 
   const [selectedLayerId, setSelectedLayerId] = React.useState<string | null>(null);
-  const [selectedCamera, setSelectedCamera] = React.useState<string | null>(null);
+  const [selectedCamera, setSelectedCamera] = React.useState<any>(null);
 
   const {
     editedScene,
