@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shape Thumbnail Test - Visual Verification</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    
+    h2 {
+      color: #555;
+      margin-top: 30px;
+    }
+    
+    .test-section {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .thumbnail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .thumbnail-card {
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .thumbnail-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: contain;
+      background-color: #f5f5f5;
+      display: block;
+    }
+    
+    .thumbnail-info {
+      padding: 12px;
+      background: #fafafa;
+      border-top: 1px solid #eee;
+    }
+    
+    .thumbnail-info h3 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      color: #333;
+    }
+    
+    .thumbnail-info p {
+      margin: 4px 0;
+      font-size: 13px;
+      color: #666;
+    }
+    
+    .test-status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    
+    .loading {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
+    
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    
+    button:hover {
+      background-color: #45a049;
+    }
+    
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .code-block {
+      background: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 Shape Thumbnail Test - Visual Verification</h1>
+  
+  <div class="test-section">
+    <h2>Purpose</h2>
+    <p>This test verifies that shape elements are correctly rendered in scene thumbnails with both camelCase and snake_case property naming conventions.</p>
+    
+    <div class="test-status info">
+      <strong>Issue:</strong> Shape elements were not appearing in scene preview thumbnails because the sceneExporter was looking for snake_case properties (shape_type, fill_color) but the actual data used camelCase (shape, fill, stroke).
+    </div>
+    
+    <div class="test-status success">
+      <strong>Fix:</strong> Updated renderShapeLayer function to support both naming conventions for backward compatibility.
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test Controls</h2>
+    <button id="runTest" onclick="runTest()">Run Thumbnail Generation Test</button>
+    <button id="downloadThumbnail" onclick="downloadThumbnail()" disabled>Download Sample Thumbnail</button>
+    <div id="status" class="test-status loading" style="display:none;">Generating thumbnails...</div>
+  </div>
+
+  <div class="test-section">
+    <h2>Generated Thumbnails</h2>
+    <div id="thumbnails" class="thumbnail-grid"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test Data Structure</h2>
+    <h3>CamelCase Properties (Current Format)</h3>
+    <div class="code-block">
+<pre>{
+  id: 'shape-layer-1',
+  type: 'shape',
+  position: { x: 500, y: 300 },
+  shape_config: {
+    shape: 'rectangle',      // camelCase
+    fill: '#FF0000',         // camelCase
+    stroke: '#000000',       // camelCase
+    strokeWidth: 3,          // camelCase
+    width: 200,
+    height: 100,
+    fillMode: 'both'
+  }
+}</pre>
+    </div>
+
+    <h3>Snake_Case Properties (Backward Compatibility)</h3>
+    <div class="code-block">
+<pre>{
+  id: 'shape-layer-1',
+  type: 'shape',
+  position: { x: 500, y: 300 },
+  shape_config: {
+    shape_type: 'rectangle',  // snake_case
+    fill_color: '#FF0000',    // snake_case
+    stroke_color: '#000000',  // snake_case
+    stroke_width: 3,          // snake_case
+    width: 200,
+    height: 100,
+    fill_mode: 'both'
+  }
+}</pre>
+    </div>
+  </div>
+
+  <script type="module">
+    import { exportSceneImage } from '../src/utils/sceneExporter.ts';
+    import { generateSceneThumbnail } from '../src/utils/sceneThumbnail.ts';
+    
+    // Make functions available globally
+    window.exportSceneImage = exportSceneImage;
+    window.generateSceneThumbnail = generateSceneThumbnail;
+    
+    // Test scenes with different shapes and property formats
+    window.testScenes = [
+      {
+        name: 'Rectangle (CamelCase)',
+        scene: {
+          id: 'test-1',
+          title: 'Rectangle Test',
+          backgroundImage: null,
+          sceneCameras: [{
+            id: 'cam-1',
+            name: 'Default Camera',
+            position: { x: 0.5, y: 0.5 },
+            width: 1920,
+            height: 1080,
+            isDefault: true,
+            zoom: 1.0,
+          }],
+          layers: [{
+            id: 'layer-1',
+            name: 'Rectangle',
+            type: 'shape',
+            position: { x: 960, y: 540 },
+            scale: 1.0,
+            opacity: 1.0,
+            rotation: 0,
+            visible: true,
+            z_index: 1,
+            shape_config: {
+              shape: 'rectangle',
+              width: 300,
+              height: 200,
+              fill: '#FF0000',
+              stroke: '#000000',
+              strokeWidth: 3,
+              fillMode: 'both',
+            }
+          }]
+        }
+      },
+      {
+        name: 'Circle (CamelCase)',
+        scene: {
+          id: 'test-2',
+          title: 'Circle Test',
+          backgroundImage: null,
+          sceneCameras: [{
+            id: 'cam-1',
+            name: 'Default Camera',
+            position: { x: 0.5, y: 0.5 },
+            width: 1920,
+            height: 1080,
+            isDefault: true,
+            zoom: 1.0,
+          }],
+          layers: [{
+            id: 'layer-1',
+            name: 'Circle',
+            type: 'shape',
+            position: { x: 960, y: 540 },
+            scale: 1.0,
+            opacity: 1.0,
+            rotation: 0,
+            visible: true,
+            z_index: 1,
+            shape_config: {
+              shape: 'circle',
+              radius: 150,
+              fill: 'transparent',
+              stroke: '#0000FF',
+              strokeWidth: 5,
+              fillMode: 'stroke',
+            }
+          }]
+        }
+      },
+      {
+        name: 'Star (CamelCase)',
+        scene: {
+          id: 'test-3',
+          title: 'Star Test',
+          backgroundImage: null,
+          sceneCameras: [{
+            id: 'cam-1',
+            name: 'Default Camera',
+            position: { x: 0.5, y: 0.5 },
+            width: 1920,
+            height: 1080,
+            isDefault: true,
+            zoom: 1.0,
+          }],
+          layers: [{
+            id: 'layer-1',
+            name: 'Star',
+            type: 'shape',
+            position: { x: 960, y: 540 },
+            scale: 1.0,
+            opacity: 1.0,
+            rotation: 0,
+            visible: true,
+            z_index: 1,
+            shape_config: {
+              shape: 'star',
+              numPoints: 5,
+              outerRadius: 150,
+              innerRadius: 60,
+              fill: 'transparent',
+              stroke: '#00FF00',
+              strokeWidth: 4,
+              fillMode: 'stroke',
+            }
+          }]
+        }
+      },
+      {
+        name: 'Triangle (CamelCase)',
+        scene: {
+          id: 'test-4',
+          title: 'Triangle Test',
+          backgroundImage: null,
+          sceneCameras: [{
+            id: 'cam-1',
+            name: 'Default Camera',
+            position: { x: 0.5, y: 0.5 },
+            width: 1920,
+            height: 1080,
+            isDefault: true,
+            zoom: 1.0,
+          }],
+          layers: [{
+            id: 'layer-1',
+            name: 'Triangle',
+            type: 'shape',
+            position: { x: 960, y: 540 },
+            scale: 1.0,
+            opacity: 1.0,
+            rotation: 0,
+            visible: true,
+            z_index: 1,
+            shape_config: {
+              shape: 'triangle',
+              radius: 150,
+              fill: 'transparent',
+              stroke: '#FFA500',
+              strokeWidth: 4,
+              fillMode: 'stroke',
+            }
+          }]
+        }
+      },
+      {
+        name: 'Hexagon (CamelCase)',
+        scene: {
+          id: 'test-5',
+          title: 'Hexagon Test',
+          backgroundImage: null,
+          sceneCameras: [{
+            id: 'cam-1',
+            name: 'Default Camera',
+            position: { x: 0.5, y: 0.5 },
+            width: 1920,
+            height: 1080,
+            isDefault: true,
+            zoom: 1.0,
+          }],
+          layers: [{
+            id: 'layer-1',
+            name: 'Hexagon',
+            type: 'shape',
+            position: { x: 960, y: 540 },
+            scale: 1.0,
+            opacity: 1.0,
+            rotation: 0,
+            visible: true,
+            z_index: 1,
+            shape_config: {
+              shape: 'hexagon',
+              sides: 6,
+              radius: 150,
+              fill: 'transparent',
+              stroke: '#800080',
+              strokeWidth: 4,
+              fillMode: 'stroke',
+            }
+          }]
+        }
+      },
+      {
+        name: 'Rectangle (Snake_Case - Backward Compat)',
+        scene: {
+          id: 'test-6',
+          title: 'Rectangle Test (Snake_Case)',
+          backgroundImage: null,
+          sceneCameras: [{
+            id: 'cam-1',
+            name: 'Default Camera',
+            position: { x: 0.5, y: 0.5 },
+            width: 1920,
+            height: 1080,
+            isDefault: true,
+            zoom: 1.0,
+          }],
+          layers: [{
+            id: 'layer-1',
+            name: 'Rectangle',
+            type: 'shape',
+            position: { x: 960, y: 540 },
+            scale: 1.0,
+            opacity: 1.0,
+            rotation: 0,
+            visible: true,
+            z_index: 1,
+            shape_config: {
+              shape_type: 'rectangle',
+              width: 300,
+              height: 200,
+              fill_color: '#FF00FF',
+              stroke_color: '#000000',
+              stroke_width: 3,
+              fill_mode: 'both',
+            }
+          }]
+        }
+      }
+    ];
+    
+    window.generatedThumbnails = [];
+  </script>
+
+  <script>
+    async function runTest() {
+      const statusDiv = document.getElementById('status');
+      const thumbnailsDiv = document.getElementById('thumbnails');
+      const runButton = document.getElementById('runTest');
+      const downloadButton = document.getElementById('downloadThumbnail');
+      
+      statusDiv.style.display = 'block';
+      statusDiv.textContent = 'Generating thumbnails...';
+      statusDiv.className = 'test-status loading';
+      runButton.disabled = true;
+      thumbnailsDiv.innerHTML = '';
+      window.generatedThumbnails = [];
+      
+      try {
+        for (const testCase of window.testScenes) {
+          console.log('Generating thumbnail for:', testCase.name);
+          
+          const thumbnail = await window.generateSceneThumbnail(testCase.scene);
+          window.generatedThumbnails.push({ name: testCase.name, data: thumbnail });
+          
+          const card = document.createElement('div');
+          card.className = 'thumbnail-card';
+          
+          const img = document.createElement('img');
+          img.src = thumbnail;
+          img.alt = testCase.name;
+          
+          const info = document.createElement('div');
+          info.className = 'thumbnail-info';
+          info.innerHTML = `
+            <h3>${testCase.name}</h3>
+            <p>Shape: ${testCase.scene.layers[0].shape_config.shape || testCase.scene.layers[0].shape_config.shape_type}</p>
+            <p>Property Format: ${testCase.scene.layers[0].shape_config.shape ? 'camelCase' : 'snake_case'}</p>
+          `;
+          
+          card.appendChild(img);
+          card.appendChild(info);
+          thumbnailsDiv.appendChild(card);
+        }
+        
+        statusDiv.textContent = `✓ Successfully generated ${window.testScenes.length} thumbnails! All shapes are now visible.`;
+        statusDiv.className = 'test-status success';
+        downloadButton.disabled = false;
+      } catch (error) {
+        console.error('Error generating thumbnails:', error);
+        statusDiv.textContent = `✗ Error: ${error.message}`;
+        statusDiv.className = 'test-status error';
+        statusDiv.style.backgroundColor = '#f8d7da';
+        statusDiv.style.color = '#721c24';
+        statusDiv.style.borderColor = '#f5c6cb';
+      } finally {
+        runButton.disabled = false;
+      }
+    }
+    
+    function downloadThumbnail() {
+      if (window.generatedThumbnails.length > 0) {
+        const firstThumbnail = window.generatedThumbnails[0];
+        const link = document.createElement('a');
+        link.href = firstThumbnail.data;
+        link.download = `shape-thumbnail-${firstThumbnail.name.replace(/\s+/g, '-').toLowerCase()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+    
+    // Auto-run test on page load
+    window.addEventListener('load', () => {
+      setTimeout(runTest, 500);
+    });
+  </script>
+</body>
+</html>

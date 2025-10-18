@@ -277,23 +277,27 @@ const renderShapeLayer = (ctx, layer, cameraX, cameraY) => {
   const opacity = layer.opacity !== undefined ? layer.opacity : 1.0;
   const rotation = layer.rotation || 0;
 
-  // Parse fill color
+  // Parse fill color - support both camelCase (fill) and snake_case (fill_color)
   let fillStyle = '#000000';
   if (Array.isArray(shapeConfig.fill_color)) {
     fillStyle = `rgba(${shapeConfig.fill_color.join(',')})`;
   } else if (typeof shapeConfig.fill_color === 'string') {
     fillStyle = shapeConfig.fill_color;
-  } else if (shapeConfig.fill) {
+  } else if (Array.isArray(shapeConfig.fill)) {
+    fillStyle = `rgba(${shapeConfig.fill.join(',')})`;
+  } else if (typeof shapeConfig.fill === 'string') {
     fillStyle = shapeConfig.fill;
   }
 
-  // Parse stroke color
+  // Parse stroke color - support both camelCase (stroke) and snake_case (stroke_color)
   let strokeStyle = '#000000';
   if (Array.isArray(shapeConfig.stroke_color)) {
     strokeStyle = `rgba(${shapeConfig.stroke_color.join(',')})`;
   } else if (typeof shapeConfig.stroke_color === 'string') {
     strokeStyle = shapeConfig.stroke_color;
-  } else if (shapeConfig.stroke) {
+  } else if (Array.isArray(shapeConfig.stroke)) {
+    strokeStyle = `rgba(${shapeConfig.stroke.join(',')})`;
+  } else if (typeof shapeConfig.stroke === 'string') {
     strokeStyle = shapeConfig.stroke;
   }
 
@@ -312,9 +316,28 @@ const renderShapeLayer = (ctx, layer, cameraX, cameraY) => {
   ctx.strokeStyle = strokeStyle;
   ctx.lineWidth = (shapeConfig.stroke_width || shapeConfig.strokeWidth || 1) * scale;
 
+  // Support both shape_type (snake_case) and shape (camelCase)
   const shapeType = shapeConfig.shape_type || shapeConfig.shape || 'rectangle';
-  const width = (shapeConfig.width || 100) * scale;
-  const height = (shapeConfig.height || 100) * scale;
+  
+  // Get dimensions from shape config - support multiple formats
+  let width, height, radius;
+  
+  if (shapeConfig.width !== undefined) {
+    width = shapeConfig.width * scale;
+    height = (shapeConfig.height || shapeConfig.width) * scale;
+  } else if (shapeConfig.radius !== undefined) {
+    radius = shapeConfig.radius * scale;
+    width = radius * 2;
+    height = radius * 2;
+  } else if (shapeConfig.outerRadius !== undefined) {
+    radius = shapeConfig.outerRadius * scale;
+    width = radius * 2;
+    height = radius * 2;
+  } else {
+    width = 100 * scale;
+    height = 100 * scale;
+  }
+  
   const fillMode = shapeConfig.fillMode || shapeConfig.fill_mode || 'both';
 
   switch (shapeType) {
@@ -330,7 +353,8 @@ const renderShapeLayer = (ctx, layer, cameraX, cameraY) => {
 
     case 'circle':
       ctx.beginPath();
-      ctx.arc(0, 0, width / 2, 0, 2 * Math.PI);
+      const circleRadius = radius || (width / 2);
+      ctx.arc(0, 0, circleRadius, 0, 2 * Math.PI);
       if (fillMode !== 'stroke') {
         ctx.fill();
       }
@@ -338,6 +362,20 @@ const renderShapeLayer = (ctx, layer, cameraX, cameraY) => {
         ctx.stroke();
       }
       break;
+      
+    case 'ellipse': {
+      ctx.beginPath();
+      const radiusX = (shapeConfig.radiusX || width / 2) * scale;
+      const radiusY = (shapeConfig.radiusY || height / 2) * scale;
+      ctx.ellipse(0, 0, radiusX, radiusY, 0, 0, 2 * Math.PI);
+      if (fillMode !== 'stroke') {
+        ctx.fill();
+      }
+      if (fillMode !== 'fill') {
+        ctx.stroke();
+      }
+      break;
+    }
 
     case 'line':
       ctx.beginPath();
@@ -346,11 +384,12 @@ const renderShapeLayer = (ctx, layer, cameraX, cameraY) => {
       ctx.stroke();
       break;
 
-    case 'triangle':
+    case 'triangle': {
       ctx.beginPath();
-      ctx.moveTo(0, -height / 2);
-      ctx.lineTo(width / 2, height / 2);
-      ctx.lineTo(-width / 2, height / 2);
+      const triRadius = radius || (width / 2);
+      ctx.moveTo(0, -triRadius);
+      ctx.lineTo(triRadius * Math.cos(Math.PI / 6), triRadius * Math.sin(Math.PI / 6));
+      ctx.lineTo(-triRadius * Math.cos(Math.PI / 6), triRadius * Math.sin(Math.PI / 6));
       ctx.closePath();
       if (fillMode !== 'stroke') {
         ctx.fill();
@@ -359,17 +398,43 @@ const renderShapeLayer = (ctx, layer, cameraX, cameraY) => {
         ctx.stroke();
       }
       break;
+    }
+    
+    case 'hexagon':
+    case 'polygon': {
+      const sides = shapeConfig.sides || 6;
+      const polyRadius = radius || (width / 2);
+      ctx.beginPath();
+      for (let i = 0; i < sides; i++) {
+        const angle = (i * 2 * Math.PI) / sides - Math.PI / 2;
+        const px = polyRadius * Math.cos(angle);
+        const py = polyRadius * Math.sin(angle);
+        if (i === 0) {
+          ctx.moveTo(px, py);
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.closePath();
+      if (fillMode !== 'stroke') {
+        ctx.fill();
+      }
+      if (fillMode !== 'fill') {
+        ctx.stroke();
+      }
+      break;
+    }
 
     case 'star': {
-      const outerRadius = width / 2;
-      const innerRadius = outerRadius * 0.5;
-      const points = 5;
+      const numPoints = shapeConfig.numPoints || 5;
+      const outerRadius = (shapeConfig.outerRadius || width / 2) * scale;
+      const innerRadius = (shapeConfig.innerRadius || outerRadius * 0.5) * scale;
       ctx.beginPath();
-      for (let i = 0; i < points * 2; i++) {
-        const angle = (i * Math.PI) / points - Math.PI / 2;
-        const radius = i % 2 === 0 ? outerRadius : innerRadius;
-        const px = Math.cos(angle) * radius;
-        const py = Math.sin(angle) * radius;
+      for (let i = 0; i < numPoints * 2; i++) {
+        const angle = (i * Math.PI) / numPoints - Math.PI / 2;
+        const r = i % 2 === 0 ? outerRadius : innerRadius;
+        const px = Math.cos(angle) * r;
+        const py = Math.sin(angle) * r;
         if (i === 0) {
           ctx.moveTo(px, py);
         } else {
