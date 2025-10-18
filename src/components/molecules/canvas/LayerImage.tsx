@@ -57,6 +57,7 @@ export const LayerImage: React.FC<LayerImageProps> = ({
         y={layer.position?.y || 0}
         scaleX={layer.scale || 1.0}
         scaleY={layer.scale || 1.0}
+        rotation={layer.rotation || 0}
         opacity={layer.opacity || 1.0}
         draggable
         dragBoundFunc={dragBoundFunc}
@@ -85,6 +86,7 @@ export const LayerImage: React.FC<LayerImageProps> = ({
               y: node.y(),
             },
             scale: scaleX,
+            rotation: node.rotation(),
           });
           
           node.scaleX(1);
@@ -94,6 +96,7 @@ export const LayerImage: React.FC<LayerImageProps> = ({
       {isSelected && (
         <Transformer
           ref={transformerRef}
+          rotateEnabled={true}
           boundBoxFunc={(oldBox, newBox) => {
             if (newBox.width < 5 || newBox.height < 5) {
               return oldBox;

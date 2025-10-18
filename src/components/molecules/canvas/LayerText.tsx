@@ -94,6 +94,7 @@ export const LayerText: React.FC<LayerTextProps> = ({
         fill={fill}
         align={align}
         lineHeight={lineHeight}
+        rotation={layer.rotation || 0}
         scaleX={layer.scale || 1.0}
         scaleY={layer.scale || 1.0}
         opacity={layer.opacity || 1.0}
@@ -126,6 +127,7 @@ export const LayerText: React.FC<LayerTextProps> = ({
               y: node.y(),
             },
             scale: scaleX,
+            rotation: node.rotation(),
           });
           
           node.scaleX(1);
@@ -135,6 +137,7 @@ export const LayerText: React.FC<LayerTextProps> = ({
       {isSelected && (
         <Transformer
           ref={transformerRef}
+          rotateEnabled={true}
           boundBoxFunc={(oldBox, newBox) => {
             if (newBox.width < 10 || newBox.height < 10) {
               return oldBox;

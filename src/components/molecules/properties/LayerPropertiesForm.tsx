@@ -98,6 +98,21 @@ export const LayerPropertiesForm: React.FC<LayerPropertiesFormProps> = ({
 
           <div className="mb-3">
             <label className="block text-foreground text-xs mb-1.5">
+              Rotation: {Math.round(layer.rotation || 0)}°
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="360"
+              step="1"
+              value={layer.rotation || 0}
+              onChange={(e) => onPropertyChange(layer.id, 'rotation', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="block text-foreground text-xs mb-1.5">
               Skip Rate (Vitesse de dessin)
             </label>
             <input
@@ -197,6 +212,23 @@ export const LayerPropertiesForm: React.FC<LayerPropertiesFormProps> = ({
           className="w-full"
         />
       </div>
+
+      {(layer.type === 'image' || layer.type === 'shape') && (
+        <div className="mb-3">
+          <label className="block text-foreground text-xs mb-1.5">
+            Rotation: {Math.round(layer.rotation || 0)}°
+          </label>
+          <input
+            type="range"
+            min="0"
+            max="360"
+            step="1"
+            value={layer.rotation || 0}
+            onChange={(e) => onPropertyChange(layer.id, 'rotation', parseInt(e.target.value))}
+            className="w-full"
+          />
+        </div>
+      )}
 
       <div className="mb-3">
         <label className="block text-foreground text-xs mb-1.5">
