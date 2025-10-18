@@ -79,13 +79,19 @@ export const useLayerCreation = ({
     
     let calculatedScale = 1.0;
     if (imageDimensions) {
-      const maxWidth = cameraWidth * 0.8;
-      const maxHeight = cameraHeight * 0.8;
+      // Account for camera zoom when calculating the viewport size in scene coordinates
+      const viewportWidth = cameraWidth / cameraZoom;
+      const viewportHeight = cameraHeight / cameraZoom;
+      
+      // Fit image within 80% of the camera's actual viewport
+      const maxWidth = viewportWidth * 0.8;
+      const maxHeight = viewportHeight * 0.8;
       
       const scaleX = maxWidth / imageDimensions.width;
       const scaleY = maxHeight / imageDimensions.height;
       
-      calculatedScale = Math.min(scaleX, scaleY, 1.0) * cameraZoom;
+      // Use the minimum scale to ensure the image fits within the viewport
+      calculatedScale = Math.min(scaleX, scaleY, 1.0);
     }
     
     const scaledImageWidth = imageDimensions ? imageDimensions.width * calculatedScale : 0;
