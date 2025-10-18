@@ -1,9 +1,10 @@
 import React from 'react';
-import { Upload, Type } from 'lucide-react';
+import { Upload, Type, Square } from 'lucide-react';
 
 interface ThumbnailAddElementsProps {
   onImageUpload: () => void;
   onAddText: () => void;
+  onAddShape?: () => void;
   imageUploadRef: React.RefObject<HTMLInputElement>;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
@@ -11,6 +12,7 @@ interface ThumbnailAddElementsProps {
 export const ThumbnailAddElements: React.FC<ThumbnailAddElementsProps> = ({
   onImageUpload,
   onAddText,
+  onAddShape,
   imageUploadRef,
   onFileChange
 }) => {
@@ -44,6 +46,16 @@ export const ThumbnailAddElements: React.FC<ThumbnailAddElementsProps> = ({
           <Type className="w-4 h-4" />
           Ajouter Texte
         </button>
+        
+        {onAddShape && (
+          <button
+            onClick={onAddShape}
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
+          >
+            <Square className="w-4 h-4" />
+            Ajouter Forme
+          </button>
+        )}
       </div>
     </div>
   );

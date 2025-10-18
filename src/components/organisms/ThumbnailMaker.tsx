@@ -146,6 +146,32 @@ const ThumbnailMaker = ({ scene, onClose, onSave }: ThumbnailMakerProps) => {
     setSelectedLayerId(newLayer.id);
   };
   
+  const handleAddShape = () => {
+    const newLayer: ThumbnailLayer = {
+      id: `shape-${Date.now()}`,
+      type: 'shape',
+      x: WIDTH / 2,
+      y: HEIGHT / 2,
+      scaleX: 1,
+      scaleY: 1,
+      rotation: 0,
+      shape_config: {
+        shape: 'rectangle',
+        width: 200,
+        height: 150,
+        fill: 'transparent',
+        stroke: '#000000',
+        strokeWidth: 3,
+        opacity: 1,
+        rotation: 0,
+        cornerRadius: 0,
+        fillMode: 'stroke',
+      },
+    };
+    setLayers([...layers, newLayer]);
+    setSelectedLayerId(newLayer.id);
+  };
+  
   const handleDeleteLayer = (layerId: string) => {
     setLayers(layers.filter(l => l.id !== layerId));
     if (selectedLayerId === layerId) {
@@ -327,6 +353,7 @@ const ThumbnailMaker = ({ scene, onClose, onSave }: ThumbnailMakerProps) => {
               <ThumbnailAddElements
                 onImageUpload={() => imageUploadRef.current?.click()}
                 onAddText={handleAddText}
+                onAddShape={handleAddShape}
                 imageUploadRef={imageUploadRef as React.RefObject<HTMLInputElement>} 
                 onFileChange={handleImageUpload}
               />
