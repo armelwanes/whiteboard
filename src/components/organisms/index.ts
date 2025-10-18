@@ -9,3 +9,4 @@ export { default as Toolbar } from './Toolbar';
 export { default as ShapeToolbar } from './ShapeToolbar';
 export { default as AssetLibrary } from './AssetLibrary';
 export { default as ExportPanel } from './ExportPanel';
+export { default as ContextTabs } from './ContextTabs';

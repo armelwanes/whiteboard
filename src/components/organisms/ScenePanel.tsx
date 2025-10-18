@@ -54,16 +54,16 @@ const ScenePanel: React.FC = () => {
   };
 
   return (
-    <div className="bg-white border-r border-border flex flex-col shadow-sm">
-      {/* Header */}
-      <div className="p-4 border-b border-border bg-secondary/30">
+    <div className="bg-white flex h-full shadow-sm">
+      {/* Header - Now on the left side */}
+      <div className="w-64 p-3 border-r border-border bg-secondary/30 flex flex-col flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="text-foreground font-bold text-lg">Scènes</h2>
+            <h2 className="text-foreground font-bold text-base">Scènes</h2>
             <p className="text-muted-foreground text-xs mt-0.5">{scenes.length} scène{scenes.length > 1 ? 's' : ''}</p>
           </div>
-          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-primary font-bold text-base">{scenes.length}</span>
+          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <span className="text-primary font-bold text-sm">{scenes.length}</span>
           </div>
         </div>
         <Button
@@ -83,7 +83,6 @@ const ScenePanel: React.FC = () => {
             title="Exporter la configuration"
           >
             <Download className="w-3.5 h-3.5" />
-            Export
           </Button>
           <Button
             onClick={() => importInputRef.current?.click()}
@@ -93,7 +92,6 @@ const ScenePanel: React.FC = () => {
             title="Importer une configuration"
           >
             <Upload className="w-3.5 h-3.5" />
-            Import
           </Button>
           <input
             ref={importInputRef}
@@ -105,65 +103,61 @@ const ScenePanel: React.FC = () => {
         </div>
       </div>
 
-      {/* Scenes List */}
-      <div className="flex-1 overflow-y-auto p-3">
+      {/* Scenes List - Now horizontal */}
+      <div className="flex-1 overflow-x-auto p-3">
+        <div className="flex gap-3 h-full">
         {scenes.map((scene: any, index: number) => (
           <Card
             key={scene.id}
-            className={`mb-2 cursor-pointer transition-all hover:shadow-md ${selectedSceneIndex === index
+            className={`flex-shrink-0 w-56 cursor-pointer transition-all hover:shadow-md ${selectedSceneIndex === index
                 ? 'border-primary shadow-md bg-primary/5'
                 : 'border-border hover:border-primary/50'
               }`}
             onClick={() => setSelectedSceneIndex(index)}
           >
             <div className="p-2.5">
-              {/* Thumbnail and Info */}
-              <div className="flex gap-2 mb-2">
-                {/* Thumbnail */}
-                <div className="flex-shrink-0 w-16 h-12 bg-secondary rounded-lg flex items-center justify-center text-muted-foreground text-xs overflow-hidden shadow-sm border border-border">
-                  {scene.sceneImage ? (
-                    <img
-                      src={scene.sceneImage}
-                      alt={scene.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : scene.backgroundImage ? (
-                    <img
-                      src={scene.backgroundImage}
-                      alt={scene.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-xl">📄</span>
-                  )}
-                </div>
+              {/* Thumbnail */}
+              <div className="w-full h-32 bg-secondary rounded-lg flex items-center justify-center text-muted-foreground text-xs overflow-hidden shadow-sm border border-border mb-2">
+                {scene.sceneImage ? (
+                  <img
+                    src={scene.sceneImage}
+                    alt={scene.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : scene.backgroundImage ? (
+                  <img
+                    src={scene.backgroundImage}
+                    alt={scene.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-3xl">📄</span>
+                )}
+              </div>
 
-                {/* Scene Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-foreground font-semibold text-xs truncate">
-                      {index + 1}. {scene.title}
-                    </h3>
-                  </div>
-                  <p className="text-muted-foreground text-xs truncate mb-1.5 leading-relaxed">
-                    {scene.content}
-                  </p>
-                  <div className="flex items-center gap-2 text-muted-foreground text-xs">
+              {/* Scene Info */}
+              <div className="mb-2">
+                <h3 className="text-foreground font-semibold text-xs truncate mb-1">
+                  {index + 1}. {scene.title}
+                </h3>
+                <p className="text-muted-foreground text-xs truncate mb-1.5 leading-relaxed">
+                  {scene.content}
+                </p>
+                <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                  <span className="flex items-center gap-1">
+                    ⏱ {scene.duration}s
+                  </span>
+                  {scene.layers && scene.layers.length > 0 && (
                     <span className="flex items-center gap-1">
-                      ⏱ {scene.duration}s
+                      🖼️ {scene.layers.length}
                     </span>
-                    {scene.layers && scene.layers.length > 0 && (
-                      <span className="flex items-center gap-1">
-                        🖼️ {scene.layers.length}
-                      </span>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
 
               {/* Scene Actions */}
               {selectedSceneIndex === index && (
-                <div className="flex gap-1 pt-2 border-t border-border">
+                <div className="grid grid-cols-4 gap-1 pt-2 border-t border-border">
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -172,8 +166,8 @@ const ScenePanel: React.FC = () => {
                     disabled={index === 0}
                     variant="outline"
                     size="sm"
-                    className="flex-1"
-                    title="Déplacer vers le haut"
+                    className="p-1"
+                    title="Déplacer vers la gauche"
                   >
                     <ArrowUp className="w-3 h-3" />
                   </Button>
@@ -185,8 +179,8 @@ const ScenePanel: React.FC = () => {
                     disabled={index === scenes.length - 1}
                     variant="outline"
                     size="sm"
-                    className="flex-1"
-                    title="Déplacer vers le bas"
+                    className="p-1"
+                    title="Déplacer vers la droite"
                   >
                     <ArrowDown className="w-3 h-3" />
                   </Button>
@@ -197,7 +191,7 @@ const ScenePanel: React.FC = () => {
                     }}
                     variant="outline"
                     size="sm"
-                    className="flex-1"
+                    className="p-1"
                     title="Dupliquer"
                   >
                     <Copy className="w-3 h-3" />
@@ -209,7 +203,7 @@ const ScenePanel: React.FC = () => {
                     }}
                     variant="destructive"
                     size="sm"
-                    className="flex-1"
+                    className="p-1"
                     title="Supprimer"
                   >
                     <Trash2 className="w-3 h-3" />
@@ -219,6 +213,7 @@ const ScenePanel: React.FC = () => {
             </div>
           </Card>
         ))}
+        </div>
       </div>
     </div>
   );
