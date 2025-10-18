@@ -3,6 +3,7 @@ import API_ENDPOINTS from '../../../config/api';
 import { STORAGE_KEYS } from '../../../config/constants';
 import { createMultiTimeline } from '../../../utils/multiTimelineSystem';
 import { createSceneAudioConfig } from '../../../utils/audioManager';
+import { createCamera } from '../../../utils/cameraAnimator';
 import { Scene, ScenePayload, Layer, Camera } from '../types';
 
 class ScenesService extends BaseService<Scene> {
@@ -11,6 +12,16 @@ class ScenesService extends BaseService<Scene> {
   }
 
   async create(payload: ScenePayload = {}): Promise<Scene> {
+    const defaultCamera = createCamera({
+      id: `camera-${Date.now()}`,
+      name: 'Vue par défaut',
+      isDefault: true,
+      width: 800,
+      height: 600,
+      position: { x: 0.5, y: 0.5 },
+      zoom: 0.8,
+    });
+
     const defaultScene: Partial<Scene> = {
       id: `scene-${Date.now()}`,
       title: 'Nouvelle Scène',
@@ -20,7 +31,7 @@ class ScenesService extends BaseService<Scene> {
       animation: 'fade',
       layers: [],
       cameras: [],
-      sceneCameras: [],
+      sceneCameras: [defaultCamera],
       multiTimeline: createMultiTimeline(5),
       audio: createSceneAudioConfig(),
       ...payload,
@@ -33,10 +44,26 @@ class ScenesService extends BaseService<Scene> {
     await this.delay();
     const scene = await this.detail(id);
     
+    // Ensure sceneCameras has at least a default camera
+    let sceneCameras = scene.sceneCameras || [];
+    if (sceneCameras.length === 0) {
+      const defaultCamera = createCamera({
+        id: `camera-${Date.now()}`,
+        name: 'Vue par défaut',
+        isDefault: true,
+        width: 800,
+        height: 600,
+        position: { x: 0.5, y: 0.5 },
+        zoom: 0.8,
+      });
+      sceneCameras = [defaultCamera];
+    }
+
     const duplicatedScene: Partial<Scene> = {
       ...scene,
       id: `scene-${Date.now()}`,
       title: `${scene.title} (Copie)`,
+      sceneCameras,
       multiTimeline: scene.multiTimeline || createMultiTimeline(scene.duration),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

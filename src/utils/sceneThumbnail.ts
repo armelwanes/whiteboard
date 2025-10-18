@@ -24,11 +24,11 @@ export const generateSceneThumbnail = async (scene: Scene, options: {
   } = options;
 
   try {
-    // Check if scene has a default camera
-    const defaultCamera = scene.sceneCameras?.find(cam => cam.isDefault);
+    // Check if scene has a default camera with required properties
+    const defaultCamera = scene.sceneCameras?.find((cam: any) => cam.isDefault);
     
-    if (!defaultCamera) {
-      console.warn('Scene has no default camera, cannot generate thumbnail');
+    if (!defaultCamera || !defaultCamera.width || !defaultCamera.height) {
+      console.warn('Scene has no default camera with dimensions, cannot generate thumbnail');
       return '';
     }
 
