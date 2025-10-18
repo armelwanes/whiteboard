@@ -14,7 +14,6 @@ const LayerEditor: React.FC = () => {
   const showShapeToolbar = useSceneStore((state) => state.showShapeToolbar);
   const setShowShapeToolbar = useSceneStore((state) => state.setShowShapeToolbar);
   const showAssetLibrary = useSceneStore((state) => state.showAssetLibrary);
-  const setShowAssetLibrary = useSceneStore((state) => state.setShowAssetLibrary);
   const showCropModal = useSceneStore((state) => state.showCropModal);
   const setShowCropModal = useSceneStore((state) => state.setShowCropModal);
   const pendingImageData = useSceneStore((state) => state.pendingImageData);
@@ -53,8 +52,7 @@ const LayerEditor: React.FC = () => {
 
   const {
     handleAddShape,
-    handleCropComplete: handleCropCompleteBase,
-    handleSelectAssetFromLibrary: handleSelectAssetBase
+    handleCropComplete: handleCropCompleteBase
   } = useLayerCreationHandlers({
     sceneWidth,
     sceneHeight,
@@ -95,10 +93,6 @@ const LayerEditor: React.FC = () => {
     setPendingImageData(null);
   };
 
-  const handleSelectAssetFromLibrary = (asset: any) => {
-    handleSelectAssetBase(asset, editedScene.layers.length);
-  };
-
   const handleAddShapeWrapper = (shapeLayer: any) => {
     handleAddShape(shapeLayer, editedScene.layers.length);
   };
@@ -113,11 +107,8 @@ const LayerEditor: React.FC = () => {
         pendingImageData={pendingImageData}
         scene={editedScene}
         onCloseShapeToolbar={() => setShowShapeToolbar(false)}
-        onCloseAssetLibrary={() => setShowAssetLibrary(false)}
-        onCloseCropModal={() => setShowCropModal(false)}
-        onCloseThumbnailMaker={() => setShowThumbnailMaker(false)}
+  onCloseThumbnailMaker={() => setShowThumbnailMaker(false)}
         onAddShape={handleAddShapeWrapper}
-        onSelectAsset={handleSelectAssetFromLibrary}
         onCropComplete={handleCropComplete}
         onCropCancel={handleCropCancel}
         onSaveThumbnail={(updatedScene) => {

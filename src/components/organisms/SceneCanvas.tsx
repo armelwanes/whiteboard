@@ -2,6 +2,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Stage, Layer as KonvaLayer } from 'react-konva';
 import { CameraToolbar, KonvaCamera, LayerImage, LayerText } from '../molecules';
+import { useScenesActions } from '@/app/scenes';
+import CameraManagerModal from './CameraManagerModal';
 import { createDefaultCamera } from '../../utils/cameraAnimator';
 import LayerShape from '../LayerShape';
 import type { Scene, Layer, Camera } from '../../app/scenes/types';
@@ -56,6 +58,8 @@ const SceneCanvas: React.FC<SceneCanvasProps> = ({
   });
   const [selectedCameraId, setSelectedCameraId] = useState<string>('default-camera');
   const [hasInitialCentered, setHasInitialCentered] = useState(false);
+  const [showCameraManager, setShowCameraManager] = useState(false);
+  const { updateScene } = useScenesActions();
   
   // Notify parent when camera selection changes
   React.useEffect(() => {
@@ -64,7 +68,7 @@ const SceneCanvas: React.FC<SceneCanvasProps> = ({
       onSelectCamera(selectedCamera);
     }
   }, [selectedCameraId, sceneCameras, onSelectCamera]);
-  const [sceneZoom, setSceneZoom] = useState(1.0);
+  const [sceneZoom, setSceneZoom] = useState(0.8);
   const [hasCalculatedInitialZoom, setHasCalculatedInitialZoom] = useState(false);
   const canvasRef = useRef(null);
   const stageRef = useRef(null);
@@ -88,7 +92,7 @@ const SceneCanvas: React.FC<SceneCanvasProps> = ({
   React.useEffect(() => {
     if (!hasCalculatedInitialZoom && scrollContainerRef.current) {
       const fitZoom = calculateFitZoom();
-      setSceneZoom(fitZoom);
+      setSceneZoom(Math.max(fitZoom, 1.0));
       setHasCalculatedInitialZoom(true);
     }
   }, [hasCalculatedInitialZoom, calculateFitZoom]);
@@ -130,25 +134,9 @@ const SceneCanvas: React.FC<SceneCanvasProps> = ({
     onUpdateScene({ sceneCameras: updatedCameras });
   }, [sceneCameras, onUpdateScene]);
 
-  // Delete camera
-  const handleDeleteCamera = useCallback((cameraId: string) => {
-    const cameraToDelete = sceneCameras.find((cam: Camera) => cam.id === cameraId);
-    if (cameraToDelete && cameraToDelete.isDefault) {
-      alert('La caméra par défaut ne peut pas être supprimée');
-      return;
-    }
-    const updatedCameras = sceneCameras.filter((cam: Camera) => cam.id !== cameraId);
-    setSceneCameras(updatedCameras);
-    if (selectedCameraId === cameraId) {
-      setSelectedCameraId('default-camera');
-    }
-    onUpdateScene({ sceneCameras: updatedCameras });
-  }, [sceneCameras, selectedCameraId, onUpdateScene]);
+  // Camera deletion is handled elsewhere; toolbar no longer exposes delete
 
-  // Zoom specific camera
-  const handleZoomCamera = useCallback((cameraId: string, newZoom: number) => {
-    handleUpdateCamera(cameraId, { zoom: newZoom });
-  }, [handleUpdateCamera]);
+  // Zoom specific camera: handled via handleUpdateCamera when needed
 
   // Toggle lock/unlock camera
   const handleToggleLock = useCallback((cameraId: string) => {
@@ -206,18 +194,34 @@ const SceneCanvas: React.FC<SceneCanvasProps> = ({
         cameras={sceneCameras}
         selectedCameraId={selectedCameraId}
         onAddCamera={handleAddCamera}
-        onSelectCamera={setSelectedCameraId}
-        onZoomCamera={(delta: number) => {
-          if (selectedCameraId) {
-            const cam = sceneCameras.find(c => c.id === selectedCameraId);
-            if (cam) handleZoomCamera(cam.id, (cam.zoom ?? 1) + delta);
-          }
-        }}
-        onToggleLock={handleToggleLock}
+        onSelectCamera={(id: string | null) => setSelectedCameraId(id || 'default-camera')}
+        onZoomCamera={() => {}}
+  onToggleLock={handleToggleLock}
         sceneZoom={sceneZoom}
         onSceneZoom={setSceneZoom}
         onFitToViewport={() => setSceneZoom(calculateFitZoom())}
+        onOpenCameraManager={() => setShowCameraManager(true)}
       />
+      {showCameraManager && (
+        <CameraManagerModal
+          cameras={sceneCameras}
+          onClose={() => setShowCameraManager(false)}
+          onSave={async (updated: any[]) => {
+            // apply updated cameras to local state and notify parent
+            setSceneCameras(updated.map((c: any) => ({ ...c })));
+            onUpdateScene({ sceneCameras: updated });
+
+            // Persist immediately if scene id is available
+            try {
+              if (scene && scene.id) {
+                await updateScene({ id: scene.id, data: { sceneCameras: updated } });
+              }
+            } catch (err) {
+              console.error('Failed to persist cameras:', err);
+            }
+          }}
+        />
+      )}
       {/* Main Content Area */}
       <div className="flex flex-1 min-h-0 bg-white" style={{ height: '100%' }}>
         {/* Canvas Area - Centered viewport */}

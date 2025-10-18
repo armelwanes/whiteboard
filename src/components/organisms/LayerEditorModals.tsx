@@ -12,11 +12,8 @@ interface LayerEditorModalsProps {
   pendingImageData: any;
   scene: any;
   onCloseShapeToolbar: () => void;
-  onCloseAssetLibrary: () => void;
-  onCloseCropModal: () => void;
   onCloseThumbnailMaker: () => void;
   onAddShape: (shapeLayer: any) => void;
-  onSelectAsset: (asset: any) => void;
   onCropComplete: (croppedImageUrl: string) => void;
   onCropCancel: () => void;
   onSaveThumbnail: (updatedScene: any) => void;
@@ -29,7 +26,9 @@ const LayerEditorModals: React.FC<LayerEditorModalsProps> = ({
   showThumbnailMaker,
   pendingImageData,
   scene,
+  onCloseShapeToolbar,
   onCloseThumbnailMaker,
+  onAddShape,
   onCropComplete,
   onCropCancel,
   onSaveThumbnail
@@ -37,7 +36,7 @@ const LayerEditorModals: React.FC<LayerEditorModalsProps> = ({
   return (
     <>
       {showShapeToolbar && (
-        <ShapeToolbar />
+        <ShapeToolbar onAddShape={ (shapeLayer: any) => onAddShape(shapeLayer) } onClose={onCloseShapeToolbar} />
       )}
 
       {showAssetLibrary && (

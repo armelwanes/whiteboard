@@ -20,11 +20,15 @@ import { useCurrentScene } from '@/app/scenes';
  */
 
 
-const ShapeToolbar: React.FC = () => {
+interface ShapeToolbarProps {
+  onAddShape?: (layer: any) => void;
+  onClose?: () => void;
+}
+
+const ShapeToolbar: React.FC<ShapeToolbarProps> = ({ onAddShape, onClose }) => {
   const currentScene = useCurrentScene();
   const [selectedCategory, setSelectedCategory] = useState<keyof typeof shapeCategories>('basic');
   const setShowShapeToolbar = useSceneStore((state) => state.setShowShapeToolbar);
-  const addLayer = useSceneStore((state) => state.addLayer);
 
   const shapeCategories = {
     basic: {
@@ -149,14 +153,24 @@ const ShapeToolbar: React.FC = () => {
   const handleShapeClick = async (shapeType: string) => {
     if (!currentScene) return;
     const baseLayer = createShapeLayer(shapeType);
-    // Adapt to Layer type expected by addLayer
     const newLayer = {
       ...baseLayer,
       mode: LayerMode.STATIC,
       z_index: 0,
       type: LayerType.SHAPE,
     };
-    await addLayer(currentScene.id, newLayer);
+    if (onAddShape) {
+      onAddShape(newLayer);
+    } else {
+      // Fallback: try to use scenes actions via store if available
+      console.warn('onAddShape not provided to ShapeToolbar; shape not added');
+    }
+    // close toolbar after adding
+    if (onClose) {
+      onClose();
+    } else {
+      setShowShapeToolbar(false);
+    }
   };
 
   return (

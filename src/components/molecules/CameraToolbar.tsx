@@ -12,11 +12,12 @@ interface CameraToolbarProps {
   cameras?: any[];
   selectedCameraId: string | null;
   onAddCamera: () => void;
-  onSelectCamera: (id: string) => void;
-  onZoomCamera: (delta: number) => void;
-  onDeleteCamera?: () => void;
+  onSelectCamera: (id: string | null) => void;
+  // removed onZoomCamera - scene-level zoom handled via onSceneZoom
+  // deletion of cameras is not exposed in the toolbar
   onToggleCameraLock?: () => void;
   onFitToViewport?: () => void;
+  onOpenCameraManager?: () => void;
   [key: string]: any;
 }
 
@@ -29,8 +30,9 @@ const CameraToolbar: React.FC<CameraToolbarProps> = ({
   selectedCameraId,
   onAddCamera,
   onSelectCamera,
-  onZoomCamera,
+  
   onToggleLock,
+  onOpenCameraManager,
   sceneZoom = 1.0,
   onSceneZoom,
   onFitToViewport,
@@ -75,6 +77,13 @@ const CameraToolbar: React.FC<CameraToolbarProps> = ({
         >
           <Plus className="w-4 h-4" />
          
+        </button>
+        <button
+          onClick={() => onOpenCameraManager && onOpenCameraManager() }
+          className="bg-secondary ml-2 text-foreground font-semibold py-2 px-3 rounded-lg flex items-center gap-2 transition-colors text-sm shadow-sm"
+          title="Gérer les caméras"
+        >
+          Gérer
         </button>
       </div>
 

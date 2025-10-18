@@ -109,7 +109,7 @@ export const createDefaultCamera = (aspectRatio: string = '16:9'): Camera => {
     easing: 'ease_out',
     width: cameraWidth,
     height: cameraHeight,
-    locked: false,
+    locked: true,
     isDefault: true,
     pauseDuration: 0,
     movementType: 'ease_out',
