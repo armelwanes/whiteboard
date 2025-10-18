@@ -319,6 +319,7 @@ const renderShapeLayer = (ctx, layer, cameraX, cameraY) => {
 
   switch (shapeType) {
     case 'rectangle':
+    case 'square':
       if (fillMode !== 'stroke') {
         ctx.fillRect(-width / 2, -height / 2, width, height);
       }

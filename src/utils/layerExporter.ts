@@ -396,6 +396,7 @@ const renderShapeLayerFromJSON = (ctx, layer) => {
 
   switch (shapeType) {
     case 'rectangle':
+    case 'square':
       if (fillMode !== 'stroke') {
         ctx.fillRect(-width / 2, -height / 2, width, height);
       }
