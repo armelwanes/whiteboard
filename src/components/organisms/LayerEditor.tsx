@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSceneStore, useScenesActions } from '../../app/scenes';
 import {
   useLayerEditor,
@@ -84,6 +84,39 @@ const LayerEditor: React.FC = () => {
       }
     });
   };
+
+  // Auto-save with debounce when editedScene changes
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const initialLoadRef = useRef(true);
+
+  useEffect(() => {
+    // Skip auto-save on initial load
+    if (initialLoadRef.current) {
+      initialLoadRef.current = false;
+      return;
+    }
+
+    // Clear previous timeout
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+
+    // Set new timeout for auto-save (2 seconds after last change)
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      if (scene?.id && editedScene) {
+        console.log('[LayerEditor] Auto-saving scene changes...');
+        handleSave();
+      }
+    }, 2000);
+
+    // Cleanup on unmount
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [editedScene.layers, editedScene.sceneCameras, editedScene.backgroundImage]);
+
 
   // LayerEditorModals expects onCropComplete to take croppedImageUrl and optionally imageDimensions
   const handleCropComplete = async (croppedImageUrl: string, imageDimensions?: { width: number; height: number }) => {
