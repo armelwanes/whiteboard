@@ -163,7 +163,6 @@ const ThumbnailMaker = ({ scene, onClose, onSave }: ThumbnailMakerProps) => {
         stroke: '#000000',
         strokeWidth: 3,
         opacity: 1,
-        rotation: 0,
         cornerRadius: 0,
         fillMode: 'stroke',
       },

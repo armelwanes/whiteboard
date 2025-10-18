@@ -25,3 +25,4 @@ dist-ssr
 
 # Screenshots for testing
 screenshots/
+public/demo.html
