@@ -129,13 +129,15 @@ const ScenePanel: React.FC = () => {
                   <img
                     src={scene.sceneImage}
                     alt={`Scene ${index + 1}`}
-                    className="w-full h-full object-contain bg-gray-50"
+                    className="w-full h-full object-contain"
+                    style={{ backgroundColor: '#f5f5f5' }}
                   />
                 ) : scene.backgroundImage ? (
                   <img
                     src={scene.backgroundImage}
                     alt={`Scene ${index + 1}`}
-                    className="w-full h-full object-contain bg-gray-50"
+                    className="w-full h-full object-contain"
+                    style={{ backgroundColor: '#f5f5f5' }}
                   />
                 ) : (
                   <span className="text-4xl">📄</span>

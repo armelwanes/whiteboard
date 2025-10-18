@@ -6,12 +6,21 @@
 import { exportSceneImage } from './sceneExporter';
 import { Scene, Camera } from '../app/scenes/types';
 
+// Thumbnail configuration constants
+const THUMBNAIL_CONFIG = {
+  WIDTH: 320,
+  HEIGHT: 180,
+  PIXEL_RATIO: 2,
+  QUALITY: 0.95,
+  BACKGROUND_COLOR: '#f5f5f5',
+} as const;
+
 /**
  * Generate a thumbnail image for a scene
  * @param {Scene} scene - The scene object to generate thumbnail for
  * @param {object} options - Thumbnail generation options
- * @param {number} options.thumbnailWidth - Thumbnail width (default: 160)
- * @param {number} options.thumbnailHeight - Thumbnail height (default: 120)
+ * @param {number} options.thumbnailWidth - Thumbnail width (default: 320)
+ * @param {number} options.thumbnailHeight - Thumbnail height (default: 180)
  * @returns {Promise<string>} Data URL of the thumbnail PNG
  */
 export const generateSceneThumbnail = async (scene: Scene, options: {
@@ -19,8 +28,8 @@ export const generateSceneThumbnail = async (scene: Scene, options: {
   thumbnailHeight?: number;
 } = {}): Promise<string> => {
   const {
-    thumbnailWidth = 320,
-    thumbnailHeight = 180,
+    thumbnailWidth = THUMBNAIL_CONFIG.WIDTH,
+    thumbnailHeight = THUMBNAIL_CONFIG.HEIGHT,
   } = options;
 
   try {
@@ -37,7 +46,7 @@ export const generateSceneThumbnail = async (scene: Scene, options: {
       sceneWidth: 1920,
       sceneHeight: 1080,
       background: scene.backgroundImage ? 'transparent' : '#FFFFFF',
-      pixelRatio: 2,
+      pixelRatio: THUMBNAIL_CONFIG.PIXEL_RATIO,
     });
 
     // The exported image is at camera resolution, now we need to resize it for thumbnail
@@ -92,13 +101,13 @@ const resizeImageToThumbnail = (dataUrl: string, width: number, height: number):
         }
 
         // Fill background
-        ctx.fillStyle = '#f5f5f5';
+        ctx.fillStyle = THUMBNAIL_CONFIG.BACKGROUND_COLOR;
         ctx.fillRect(0, 0, width, height);
 
         // Draw the image with proper aspect ratio
         ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
         
-        resolve(canvas.toDataURL('image/png', 0.95));
+        resolve(canvas.toDataURL('image/png', THUMBNAIL_CONFIG.QUALITY));
       } catch (error) {
         reject(error);
       }
