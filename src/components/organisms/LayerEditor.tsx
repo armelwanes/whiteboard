@@ -74,10 +74,9 @@ const LayerEditor: React.FC = () => {
     });
   };
 
-  // LayerEditorModals expects onCropComplete to take only croppedImageUrl
-  const handleCropComplete = (croppedImageUrl: string) => {
-    // If you need imageDimensions, you can retrieve from pendingImageData or elsewhere
-    handleCropCompleteBase(croppedImageUrl, undefined, pendingImageData, editedScene.layers.length);
+  // LayerEditorModals expects onCropComplete to take croppedImageUrl and optionally imageDimensions
+  const handleCropComplete = (croppedImageUrl: string, imageDimensions?: { width: number; height: number }) => {
+    handleCropCompleteBase(croppedImageUrl, imageDimensions, pendingImageData, editedScene.layers.length);
     setShowCropModal(false);
     setPendingImageData(null);
   };

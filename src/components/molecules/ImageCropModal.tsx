@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
-import ReactCrop from 'react-image-crop';
+import ReactCrop, { PercentCrop, PixelCrop } from 'react-image-crop';
+// @ts-ignore: allow importing CSS for the cropper styles (handled by bundler)
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from '../atoms';
-import { X, Check, Crop as CropIcon, Eraser, Crop } from 'lucide-react';
+import { X, Check, Crop as CropIcon } from 'lucide-react';
 
 interface ImageCropModalProps {
   imageUrl: string;
@@ -16,26 +17,23 @@ interface ImageCropModalProps {
  * Now with automatic background removal feature
  */
 const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplete, onCancel }) => {
-  const [crop, setCrop] = useState({
+  const [crop, setCrop] = useState<PercentCrop>({
     unit: '%',
     width: 50,
     height: 50,
     x: 25,
     y: 25,
   });
-  const [completedCrop, setCompletedCrop] = useState(null);
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
   const [isRemovingBackground, setIsRemovingBackground] = useState(false);
-  const imgRef = useRef(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
 
- const handleCropComplete = async () => {
+  const handleCropComplete = async () => {
     setIsRemovingBackground(true);
-    
     let finalImageUrl = imageUrl;
-    let imageDimensions = null;
-    
+    let imageDimensions: { width: number; height: number } | undefined = undefined;
     try {
       if (!completedCrop || !imgRef.current) {
-        // If no crop was made, use the entire image
         const image = imgRef.current;
         if (image) {
           imageDimensions = {
@@ -45,49 +43,41 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
         }
         finalImageUrl = imageUrl;
       } else {
-        // Create canvas to extract cropped image
         const image = imgRef.current;
         const canvas = document.createElement('canvas');
         const scaleX = image.naturalWidth / image.width;
         const scaleY = image.naturalHeight / image.height;
-        
         canvas.width = completedCrop.width * scaleX;
         canvas.height = completedCrop.height * scaleY;
-        
-        // Store dimensions for scaling calculation
         imageDimensions = {
           width: canvas.width,
           height: canvas.height
         };
-        
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(
-          image,
-          completedCrop.x * scaleX,
-          completedCrop.y * scaleY,
-          completedCrop.width * scaleX,
-          completedCrop.height * scaleY,
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        );
-
-        // Convert canvas to blob URL
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-        if (!blob) {
-          console.error('Canvas is empty');
-        } else {
-          finalImageUrl = URL.createObjectURL(blob);
+        if (ctx) {
+          ctx.drawImage(
+            image,
+            completedCrop.x * scaleX,
+            completedCrop.y * scaleY,
+            completedCrop.width * scaleX,
+            completedCrop.height * scaleY,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+          const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
+          if (!blob) {
+            console.error('Canvas is empty');
+          } else {
+            finalImageUrl = URL.createObjectURL(blob);
+          }
         }
       }
-
     } catch (error) {
       console.error('Error processing image:', error);
     } finally {
-      // Always reset state and call callback in finally block
       setIsRemovingBackground(false);
-      // Use setTimeout to ensure state update completes before callback
       setTimeout(() => {
         onCropComplete(finalImageUrl, imageDimensions);
       }, 0);
@@ -96,12 +86,9 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
 
   const handleSkipCrop = async () => {
     setIsRemovingBackground(true);
-    
     let finalImageUrl = imageUrl;
-    let imageDimensions = null;
-    
+    let imageDimensions: { width: number; height: number } | undefined = undefined;
     try {
-      // Get dimensions from the image element
       if (imgRef.current) {
         imageDimensions = {
           width: imgRef.current.naturalWidth,
@@ -111,9 +98,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
     } catch (error) {
       console.error('Error getting image dimensions:', error);
     } finally {
-      // Always reset state and call callback in finally block
       setIsRemovingBackground(false);
-      // Use setTimeout to ensure state update completes before callback
       setTimeout(() => {
         onCropComplete(finalImageUrl, imageDimensions);
       }, 0);
@@ -126,7 +111,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-border">
           <div className="flex items-center gap-2">
-            <Crop className="w-5 h-5 text-blue-600 dark:text-primary" />
+            <CropIcon className="w-5 h-5 text-blue-600 dark:text-primary" />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Crop Image</h2>
           </div>
           <button
@@ -150,7 +135,29 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
             <div className="flex justify-center">
               <ReactCrop
                 crop={crop}
-                onChange={(c) => setCrop(c)}
+                onChange={(c) => {
+                  // ReactCrop may return PixelCrop (unit='px') or PercentCrop (unit='%').
+                  // Convert pixel crop to percent using the displayed image dimensions.
+                  const unit = (c as any)?.unit;
+                  if (unit === '%') {
+                    setCrop(c as unknown as PercentCrop);
+                    return;
+                  }
+                  if (unit === 'px') {
+                    const p = c as unknown as PixelCrop;
+                    const img = imgRef.current;
+                    if (img && img.width && img.height) {
+                      const percentCrop: PercentCrop = {
+                        unit: '%',
+                        x: (p.x / img.width) * 100,
+                        y: (p.y / img.height) * 100,
+                        width: (p.width / img.width) * 100,
+                        height: (p.height / img.height) * 100
+                      };
+                      setCrop(percentCrop as unknown as PercentCrop);
+                    }
+                  }
+                }}
                 onComplete={(c) => setCompletedCrop(c)}
                 aspect={undefined}
                 className=' bg-white'

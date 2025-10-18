@@ -12,10 +12,16 @@ import {
 import { THUMBNAIL_CONFIG } from '@/utils/sceneThumbnail';
 
 const ScenePanel: React.FC = () => {
+  // Pour ouvrir asset library et shape toolbar
+  // const setShowAssetLibrary = useSceneStore((state) => state.setShowAssetLibrary); // No longer used for direct image upload
+  const setShowCropModal = useSceneStore((state) => state.setShowCropModal);
+  const setPendingImageData = useSceneStore((state) => state.setPendingImageData);
+  const setShowShapeToolbar = useSceneStore((state) => state.setShowShapeToolbar);
   const { scenes } = useScenes();
   const selectedSceneIndex = useSceneStore((state) => state.selectedSceneIndex);
   const setSelectedSceneIndex = useSceneStore((state) => state.setSelectedSceneIndex);
   const importInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   
   // Use actions from useScenesActions hook
   const { createScene, deleteScene, duplicateScene, reorderScenes } = useScenesActions();
@@ -61,19 +67,30 @@ const ScenePanel: React.FC = () => {
     }
   };
 
+  // Handle image file selection for direct upload/crop
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setPendingImageData({
+        imageUrl: event.target?.result,
+        fileName: file.name,
+        originalUrl: event.target?.result,
+        fileType: file.type
+      });
+      setShowCropModal(true);
+    };
+    reader.readAsDataURL(file);
+    // Reset input so same file can be selected again
+    e.target.value = '';
+  };
+
   return (
     <div className="bg-white flex h-full shadow-sm">
       {/* Header - Now on the left side */}
       <div className="w-64 p-3 border-r border-border bg-secondary/30 flex flex-col flex-shrink-0">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h2 className="text-foreground font-bold text-base">Scènes</h2>
-            <p className="text-muted-foreground text-xs mt-0.5">{scenes.length} scène{scenes.length > 1 ? 's' : ''}</p>
-          </div>
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-primary font-bold text-sm">{scenes.length}</span>
-          </div>
-        </div>
+       
         <Button
           onClick={handleAddScene}
           className="w-full gap-2 mb-2"
@@ -81,6 +98,31 @@ const ScenePanel: React.FC = () => {
         >
           <Plus className="w-4 h-4" />
           Ajouter
+        </Button>
+        <Button
+          onClick={() => imageInputRef.current?.click()}
+          className="w-full gap-2 mb-2"
+          size="sm"
+          variant="outline"
+        >
+          <Upload className="w-4 h-4" />
+          Ajouter une image
+        </Button>
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageFileChange}
+          className="hidden"
+        />
+        <Button
+          onClick={() => setShowShapeToolbar(true)}
+          className="w-full gap-2 mb-2"
+          size="sm"
+          variant="outline"
+        >
+          <Plus className="w-4 h-4" />
+          Ajouter une forme
         </Button>
         <div className="flex gap-2">
           <Button
@@ -130,14 +172,14 @@ const ScenePanel: React.FC = () => {
                   <img
                     src={scene.sceneImage}
                     alt={`Scene ${index + 1}`}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover"
                     style={{ backgroundColor: THUMBNAIL_CONFIG.BACKGROUND_COLOR }}
                   />
                 ) : scene.backgroundImage ? (
                   <img
                     src={scene.backgroundImage}
                     alt={`Scene ${index + 1}`}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover"
                     style={{ backgroundColor: THUMBNAIL_CONFIG.BACKGROUND_COLOR }}
                   />
                 ) : (
