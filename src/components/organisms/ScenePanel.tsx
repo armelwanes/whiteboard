@@ -121,7 +121,13 @@ const ScenePanel: React.FC = () => {
               <div className="flex gap-2 mb-2">
                 {/* Thumbnail */}
                 <div className="flex-shrink-0 w-16 h-12 bg-secondary rounded-lg flex items-center justify-center text-muted-foreground text-xs overflow-hidden shadow-sm border border-border">
-                  {scene.backgroundImage ? (
+                  {scene.sceneImage ? (
+                    <img
+                      src={scene.sceneImage}
+                      alt={scene.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : scene.backgroundImage ? (
                     <img
                       src={scene.backgroundImage}
                       alt={scene.title}
