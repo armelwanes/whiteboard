@@ -6,6 +6,10 @@ interface Layer {
   type: 'image' | 'text' | 'shape';
   text?: string;
   name?: string;
+  shape_config?: {
+    shape?: string;
+    [key: string]: any;
+  };
   [key: string]: any;
 }
 
@@ -41,6 +45,13 @@ export const ThumbnailLayersList: React.FC<ThumbnailLayersListProps> = ({
       case 'image':
         return layer.name || 'Image';
       case 'shape':
+        if (layer.shape_config?.shape) {
+          const shapeName = layer.shape_config.shape
+            .split('_')
+            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+          return shapeName;
+        }
         return layer.name || 'Forme';
       case 'text':
         return layer.text?.substring(0, 20) || 'Texte';
