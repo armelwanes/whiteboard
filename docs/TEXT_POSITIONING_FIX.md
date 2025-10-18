@@ -8,7 +8,8 @@ Text layers were not properly centered in:
 3. Imported scenes - text appeared off-center when loading saved scenes
 
 As reported in the issue:
-> "la position du texte sur le thumbnail du scene ne bas bien, meme sur la scene il ne pas totalment centre au mileu du camera quand on l'imorte"
+> "la position du texte sur le thumbnail du scene ne va pas bien, meme sur la scene il ne pas totalement centre au milieu du camera quand on l'importe"
+> (Translation: "the text position on the scene thumbnail is not good, even on the scene it is not totally centered in the middle of the camera when imported")
 
 ## Root Cause Analysis
 
@@ -126,7 +127,8 @@ Given:
 ```
 cameraCenterX = 0.5 * 1920 = 960
 cameraCenterY = 0.5 * 1080 = 540
-scaledHeight = 48 * 1.2 * 0.8 = 46.08
+estimatedHeight = 48 * 1.2 = 57.6
+scaledHeight = 57.6 * 0.8 = 46.08
 
 initialX = 960  ✓
 initialY = 540 - 23.04 = 516.96  ✗ (above center)
