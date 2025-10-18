@@ -7,6 +7,8 @@ const ASSETS_STORAGE_KEY = 'whiteboard-assets';
 const ASSET_CACHE_KEY = 'whiteboard-asset-cache';
 const MAX_CACHE_SIZE = 50;
 
+import assetDB from './assetDB';
+
 export interface Asset {
   id: string;
   name: string;
@@ -54,7 +56,10 @@ export interface AssetCache {
 export function getAllAssets(): Asset[] {
   try {
     const stored = localStorage.getItem(ASSETS_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    if (stored) return JSON.parse(stored);
+    // If localStorage empty, try IndexedDB (async) - but keep sync API: return [] for now
+    // Consumers that need IDB can call assetDB.getAllAssetsFromIDB() directly if needed
+    return [];
   } catch (error) {
     console.error('Error loading assets:', error);
     return [];
@@ -68,6 +73,7 @@ export function getAllAssets(): Asset[] {
 function saveAssets(assets: Asset[]): void {
   try {
     localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets));
+    console.debug('[assetManager] saved assets to localStorage', assets.length);
   } catch (error) {
     console.error('Error saving assets:', error);
     if ((error as any).name === 'QuotaExceededError') {
@@ -76,6 +82,12 @@ function saveAssets(assets: Asset[]): void {
         localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets));
       } catch (retryError) {
         console.error('Failed to save assets after cleanup:', retryError);
+        // Fallback to IndexedDB
+        assetDB.saveAllAssetsToIDB(assets).then(() => {
+          console.debug('[assetManager] saved assets to IndexedDB after quota exceeded');
+        }).catch((idbErr) => {
+          console.error('[assetManager] failed to save assets to IndexedDB:', idbErr);
+        });
       }
     }
   }
@@ -218,6 +230,70 @@ export function getCachedAssets(): Asset[] {
   return assets
     .filter(asset => cachedIds.includes(asset.id))
     .sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0));
+}
+
+// Async: get all assets, preferring localStorage but falling back to IndexedDB
+export async function getAllAssetsAsync(): Promise<Asset[]> {
+  try {
+    const stored = localStorage.getItem(ASSETS_STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+    // fallback to IndexedDB
+    const idbAssets = await assetDB.getAllAssetsFromIDB();
+    return idbAssets;
+  } catch (err) {
+    console.error('[assetManager] getAllAssetsAsync failed', err);
+    return [];
+  }
+}
+
+export async function getCachedAssetsAsync(): Promise<Asset[]> {
+  try {
+    const cache = getAssetCache();
+    const cachedIds = Object.keys(cache);
+    const assets = await getAllAssetsAsync();
+    return assets
+      .filter(asset => cachedIds.includes(asset.id))
+      .sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0));
+  } catch (err) {
+    console.error('[assetManager] getCachedAssetsAsync failed', err);
+    return [];
+  }
+}
+
+export async function searchAssetsAsync(criteria: SearchCriteria = {}): Promise<Asset[]> {
+  try {
+    const { query = '', tags = [], sortBy = 'uploadDate', sortOrder = 'desc' } = criteria;
+    const assets = await getAllAssetsAsync();
+    let results = assets;
+
+    if (query.trim()) {
+      const searchTerm = query.toLowerCase().trim();
+      results = results.filter(asset => asset.name.toLowerCase().includes(searchTerm));
+    }
+
+    if (tags.length > 0) {
+      const searchTags = tags.map(tag => tag.toLowerCase().trim());
+      results = results.filter(asset => searchTags.some(tag => asset.tags.includes(tag)));
+    }
+
+    results.sort((a, b) => {
+      let comparison = 0;
+      switch (sortBy) {
+        case 'name': comparison = a.name.localeCompare(b.name); break;
+        case 'uploadDate': comparison = a.uploadDate - b.uploadDate; break;
+        case 'lastUsed': comparison = (a.lastUsed || 0) - (b.lastUsed || 0); break;
+        case 'usageCount': comparison = (a.usageCount || 0) - (b.usageCount || 0); break;
+        case 'size': comparison = a.size - b.size; break;
+        default: comparison = a.uploadDate - b.uploadDate;
+      }
+      return sortOrder === 'desc' ? -comparison : comparison;
+    });
+
+    return results;
+  } catch (err) {
+    console.error('[assetManager] searchAssetsAsync failed', err);
+    return [];
+  }
 }
 
 /**

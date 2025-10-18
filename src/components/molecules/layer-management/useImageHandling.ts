@@ -14,6 +14,7 @@ export const useImageHandling = (options: LayerCreationOptions) => {
     if (!pendingImageData) return null;
 
     try {
+      console.debug('[useImageHandling] handleCropComplete called', { croppedImageUrl, imageDimensions, pendingImageData, layersLength });
       await addAsset({
         name: pendingImageData.fileName,
         dataUrl: pendingImageData.originalUrl,
@@ -24,12 +25,14 @@ export const useImageHandling = (options: LayerCreationOptions) => {
       console.error('Error saving asset to library:', error);
     }
 
-    return createImageLayer(
+    const layer = createImageLayer(
       croppedImageUrl,
       pendingImageData.fileName,
       imageDimensions,
       layersLength
     );
+    console.debug('[useImageHandling] createImageLayer returned', layer);
+    return layer;
   }, [createImageLayer]);
 
   const handleSelectAssetFromLibrary = useCallback((

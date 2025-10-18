@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import {
-    getCachedAssets,
-    searchAssets,
+    getCachedAssetsAsync,
+    searchAssetsAsync,
     getAllTags,
     getAssetStats,
     addAsset,
@@ -16,19 +16,23 @@ export function useAssetLibraryActions(setAssets: (assets: Asset[]) => void, set
         setAllTags, setShowCropModal, setPendingImageData, pendingImageData
     } = useAssetLibraryStore();
 
-    const loadAssets = useCallback(() => {
-        let loadedAssets: Asset[];
-        if (viewMode === 'cached') {
-            loadedAssets = getCachedAssets();
-        } else if (viewMode === 'recent') {
-            loadedAssets = searchAssets({ sortBy: 'uploadDate', sortOrder: 'desc' }).slice(0, 20);
-        } else {
-            loadedAssets = searchAssets({
-                query: searchQuery,
-                tags: selectedTags,
-                sortBy,
-                sortOrder
-            });
+    const loadAssets = useCallback(async () => {
+        let loadedAssets: Asset[] = [];
+        try {
+            if (viewMode === 'cached') {
+                loadedAssets = await getCachedAssetsAsync();
+            } else if (viewMode === 'recent') {
+                loadedAssets = (await searchAssetsAsync({ sortBy: 'uploadDate', sortOrder: 'desc' })).slice(0, 20);
+            } else {
+                loadedAssets = await searchAssetsAsync({
+                    query: searchQuery,
+                    tags: selectedTags,
+                    sortBy,
+                    sortOrder
+                });
+            }
+        } catch (err) {
+            console.error('[useAssetLibraryActions] loadAssets failed', err);
         }
         setAssets(loadedAssets);
     }, [searchQuery, selectedTags, sortBy, sortOrder, viewMode, setAssets]);

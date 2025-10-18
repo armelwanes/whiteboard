@@ -65,6 +65,7 @@ export const useLayerEditor = ({
   }, []);
 
   const handleAddLayer = useCallback((newLayer: any) => {
+    console.debug('[useLayerEditor] Adding new layer', newLayer);
     setEditedScene((prev: any) => ({
       ...prev,
       layers: [...prev.layers, newLayer]

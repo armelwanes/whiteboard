@@ -4,6 +4,7 @@ import {
   useLayerEditor,
   useLayerCreationHandlers
 } from '../molecules/layer-management';
+import { useLayerCreation } from '../molecules/layer-management/useLayerCreation';
 import LayerEditorModals from './LayerEditorModals';
 import LayerEditorCanvas from './LayerEditorCanvas';
 import { useCurrentScene } from '@/app/scenes';
@@ -61,6 +62,9 @@ const LayerEditor: React.FC = () => {
     onCloseShapeToolbar: () => setShowShapeToolbar(false)
   });
 
+  // Also expose createImageLayer so we can fallback to direct creation if handlers fail
+  const { createImageLayer } = useLayerCreation({ sceneWidth, sceneHeight, selectedCamera });
+
   const handleSave = async () => {
     if (!scene?.id) return;
     
@@ -83,7 +87,26 @@ const LayerEditor: React.FC = () => {
 
   // LayerEditorModals expects onCropComplete to take croppedImageUrl and optionally imageDimensions
   const handleCropComplete = async (croppedImageUrl: string, imageDimensions?: { width: number; height: number }) => {
-    await handleCropCompleteBase(croppedImageUrl, imageDimensions, pendingImageData, editedScene.layers.length);
+    const newLayer = await handleCropCompleteBase(croppedImageUrl, imageDimensions, pendingImageData, editedScene.layers.length);
+    if (!newLayer) {
+      // Fallback: try to create layer directly if handler failed
+      try {
+        if (croppedImageUrl && pendingImageData) {
+          const fallback = createImageLayer(
+            croppedImageUrl,
+            pendingImageData.fileName || 'image',
+            imageDimensions || (pendingImageData.originalWidth && pendingImageData.originalHeight ? { width: pendingImageData.originalWidth, height: pendingImageData.originalHeight } : null),
+            editedScene.layers.length
+          );
+          handleAddLayer(fallback);
+        } else {
+          console.warn('[LayerEditor] cannot create fallback image layer: missing data', { croppedImageUrl, pendingImageData });
+        }
+      } catch (err) {
+        console.error('[LayerEditor] fallback createImageLayer failed', err);
+      }
+    }
+
     setShowCropModal(false);
     setPendingImageData(null);
   };

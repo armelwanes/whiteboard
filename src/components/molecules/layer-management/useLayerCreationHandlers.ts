@@ -48,16 +48,37 @@ export const useLayerCreationHandlers = ({
     pendingImageData: any,
     layersLength: number
   ) => {
+    console.debug('[useLayerCreationHandlers] handleCropCompleteWrapper called', { croppedImageUrl, imageDimensions, layersLength });
     const newLayer = await baseCropComplete(
       croppedImageUrl,
       imageDimensions,
       pendingImageData,
       layersLength
     );
+    console.debug('[useLayerCreationHandlers] baseCropComplete returned', newLayer);
     if (newLayer) {
+      console.debug('[useLayerCreationHandlers] calling onAddLayer with newLayer');
       onAddLayer(newLayer);
+      return newLayer;
     }
-    return newLayer;
+
+    console.warn('[useLayerCreationHandlers] no newLayer returned from baseCropComplete, attempting fallback using createImageLayer');
+    try {
+      if (croppedImageUrl && pendingImageData) {
+        const fallback = createImageLayer(
+          croppedImageUrl,
+          pendingImageData.fileName || 'image',
+          imageDimensions,
+          layersLength
+        );
+        console.debug('[useLayerCreationHandlers] fallback layer created', fallback);
+        onAddLayer(fallback);
+        return fallback;
+      }
+    } catch (err) {
+      console.error('[useLayerCreationHandlers] fallback createImageLayer failed', err);
+    }
+    return null;
   }, [baseCropComplete, onAddLayer]);
 
   const handleSelectAssetFromLibraryWrapper = useCallback((
