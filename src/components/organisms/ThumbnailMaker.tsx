@@ -3,6 +3,7 @@ import { Stage, Layer as KonvaLayer, Rect } from 'react-konva';
 import {
   ThumbnailImageLayer,
   ThumbnailTextLayer,
+  ThumbnailShapeLayer,
   ThumbnailHeader,
   ThumbnailActions,
   ThumbnailAddElements,
@@ -37,6 +38,16 @@ export type ThumbnailLayer =
       strokeWidth: number;
       shadowEnabled: boolean;
       align: string;
+    }
+  | {
+      id: string;
+      type: 'shape';
+      x: number;
+      y: number;
+      scaleX: number;
+      scaleY: number;
+      rotation: number;
+      shape_config: any;
     };
 
 interface ThumbnailMakerProps {
@@ -278,6 +289,16 @@ const ThumbnailMaker = ({ scene, onClose, onSave }: ThumbnailMakerProps) => {
                         } else if (layer.type === 'text') {
                           return (
                             <ThumbnailTextLayer
+                              key={layer.id}
+                              layer={layer}
+                              isSelected={layer.id === selectedLayerId}
+                              onSelect={() => setSelectedLayerId(layer.id)}
+                              onChange={handleLayerChange}
+                            />
+                          );
+                        } else if (layer.type === 'shape') {
+                          return (
+                            <ThumbnailShapeLayer
                               key={layer.id}
                               layer={layer}
                               isSelected={layer.id === selectedLayerId}
