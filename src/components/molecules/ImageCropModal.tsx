@@ -33,17 +33,19 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
     let finalImageUrl = imageUrl;
     let imageDimensions: { width: number; height: number } | undefined = undefined;
     try {
-      if (!completedCrop || !imgRef.current) {
-        const image = imgRef.current;
-        if (image) {
-          imageDimensions = {
-            width: image.naturalWidth,
-            height: image.naturalHeight
-          };
-        }
+      const image = imgRef.current;
+      if (!image) {
+        console.error('Image reference not available');
+        return;
+      }
+
+      if (!completedCrop || completedCrop.width === 0 || completedCrop.height === 0) {
+        imageDimensions = {
+          width: image.naturalWidth,
+          height: image.naturalHeight
+        };
         finalImageUrl = imageUrl;
       } else {
-        const image = imgRef.current;
         const canvas = document.createElement('canvas');
         const scaleX = image.naturalWidth / image.width;
         const scaleY = image.naturalHeight / image.height;

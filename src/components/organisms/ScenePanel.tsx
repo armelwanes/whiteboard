@@ -253,6 +253,19 @@ const ScenePanel: React.FC = () => {
             </div>
           </Card>
         ))}
+        
+        {/* Add Scene Card */}
+        <Card
+          className="flex-shrink-0 w-64 cursor-pointer transition-all hover:shadow-md border-2 border-dashed border-border hover:border-primary/50 hover:bg-secondary/50"
+          onClick={handleAddScene}
+        >
+          <div className="p-0 relative">
+            <div className="w-full aspect-video bg-secondary/30 rounded-lg flex flex-col items-center justify-center text-muted-foreground gap-2 hover:text-primary transition-colors">
+              <Plus className="w-12 h-12" />
+              <span className="text-sm font-medium">Nouvelle scène</span>
+            </div>
+          </div>
+        </Card>
         </div>
       </div>
     </div>
