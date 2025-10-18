@@ -1,5 +1,8 @@
 import { useCallback } from 'react';
 
+// Minimum camera zoom to prevent division by zero and extreme viewport calculations
+const MIN_CAMERA_ZOOM = 0.1;
+
 export interface LayerCreationOptions {
   sceneWidth?: number;
   sceneHeight?: number;
@@ -25,7 +28,7 @@ export const useLayerCreation = ({
       cameraWidth = selectedCamera.width || 800;
       cameraHeight = selectedCamera.height || 450;
       // Ensure zoom is never zero or too small to prevent division issues
-      cameraZoom = Math.max(0.1, selectedCamera.zoom || 0.8);
+      cameraZoom = Math.max(MIN_CAMERA_ZOOM, selectedCamera.zoom || 0.8);
     }
     
     return { cameraCenterX, cameraCenterY, cameraWidth, cameraHeight, cameraZoom };
