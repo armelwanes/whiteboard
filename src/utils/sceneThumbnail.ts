@@ -4,7 +4,7 @@
  */
 
 import { exportSceneImage } from './sceneExporter';
-import { Scene } from '../app/scenes/types';
+import { Scene, Camera } from '../app/scenes/types';
 
 /**
  * Generate a thumbnail image for a scene
@@ -25,9 +25,9 @@ export const generateSceneThumbnail = async (scene: Scene, options: {
 
   try {
     // Check if scene has a default camera with required properties
-    const defaultCamera = scene.sceneCameras?.find((cam: any) => cam.isDefault);
+    const defaultCamera = scene.sceneCameras?.find((cam: Camera) => (cam as any).isDefault);
     
-    if (!defaultCamera || !defaultCamera.width || !defaultCamera.height) {
+    if (!defaultCamera || !(defaultCamera as any).width || !(defaultCamera as any).height) {
       console.warn('Scene has no default camera with dimensions, cannot generate thumbnail');
       return '';
     }

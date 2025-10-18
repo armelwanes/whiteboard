@@ -6,21 +6,30 @@ import { createSceneAudioConfig } from '../../../utils/audioManager';
 import { createCamera } from '../../../utils/cameraAnimator';
 import { Scene, ScenePayload, Layer, Camera } from '../types';
 
+const DEFAULT_CAMERA_NAME = 'Vue par défaut';
+
+/**
+ * Create a default camera for a scene
+ */
+function createDefaultCamera(): Camera {
+  return createCamera({
+    id: `camera-${Date.now()}`,
+    name: DEFAULT_CAMERA_NAME,
+    isDefault: true,
+    width: 800,
+    height: 600,
+    position: { x: 0.5, y: 0.5 },
+    zoom: 0.8,
+  });
+}
+
 class ScenesService extends BaseService<Scene> {
   constructor() {
     super(STORAGE_KEYS.SCENES, API_ENDPOINTS.scenes);
   }
 
   async create(payload: ScenePayload = {}): Promise<Scene> {
-    const defaultCamera = createCamera({
-      id: `camera-${Date.now()}`,
-      name: 'Vue par défaut',
-      isDefault: true,
-      width: 800,
-      height: 600,
-      position: { x: 0.5, y: 0.5 },
-      zoom: 0.8,
-    });
+    const defaultCamera = createDefaultCamera();
 
     const defaultScene: Partial<Scene> = {
       id: `scene-${Date.now()}`,
@@ -47,16 +56,7 @@ class ScenesService extends BaseService<Scene> {
     // Ensure sceneCameras has at least a default camera
     let sceneCameras = scene.sceneCameras || [];
     if (sceneCameras.length === 0) {
-      const defaultCamera = createCamera({
-        id: `camera-${Date.now()}`,
-        name: 'Vue par défaut',
-        isDefault: true,
-        width: 800,
-        height: 600,
-        position: { x: 0.5, y: 0.5 },
-        zoom: 0.8,
-      });
-      sceneCameras = [defaultCamera];
+      sceneCameras = [createDefaultCamera()];
     }
 
     const duplicatedScene: Partial<Scene> = {
