@@ -55,7 +55,7 @@ export const DEFAULT_CAMERA: Camera = {
   transition_duration: 0,
   easing: 'ease_out',
   width: 800,
-  height: 600,
+  height: 450,
   locked: false,
   isDefault: false,
   pauseDuration: 0,
@@ -84,7 +84,7 @@ export const createCamera = (overrides: Partial<Camera> = {}): Camera => {
  * @param {string} aspectRatio - Aspect ratio (e.g., '16:9', '4:3')
  * @returns {object} Default camera configuration
  */
-export const createDefaultCamera = (aspectRatio: string = '4:3'): Camera => {
+export const createDefaultCamera = (aspectRatio: string = '16:9'): Camera => {
   let cameraWidth = 800;
   let cameraHeight = 600;
   

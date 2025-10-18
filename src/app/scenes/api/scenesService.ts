@@ -17,7 +17,7 @@ function createDefaultCamera(): Camera {
     name: DEFAULT_CAMERA_NAME,
     isDefault: true,
     width: 800,
-    height: 600,
+    height: 450,
     position: { x: 0.5, y: 0.5 },
     zoom: 0.8,
   });
