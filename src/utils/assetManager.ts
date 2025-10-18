@@ -77,11 +77,13 @@ function saveAssets(assets: Asset[]): void {
   } catch (error) {
     console.error('Error saving assets:', error);
     if ((error as any).name === 'QuotaExceededError') {
-      cleanupOldAssets();
+      // Aggressive cleanup: keep only the most recent 10 or most frequently used assets
+      const cleanedAssets = aggressiveCleanup(assets);
       try {
-        localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets));
+        localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(cleanedAssets));
+        console.log(`[assetManager] Aggressive cleanup: reduced from ${assets.length} to ${cleanedAssets.length} assets`);
       } catch (retryError) {
-        console.error('Failed to save assets after cleanup:', retryError);
+        console.error('Failed to save assets after aggressive cleanup:', retryError);
         // Fallback to IndexedDB
         assetDB.saveAllAssetsToIDB(assets).then(() => {
           console.debug('[assetManager] saved assets to IndexedDB after quota exceeded');
@@ -458,6 +460,26 @@ function cleanupOldAssets(): void {
   saveAssets(filteredAssets);
   
   console.log(`Cleaned up ${assets.length - filteredAssets.length} old assets`);
+}
+
+/**
+ * Aggressive cleanup when quota is exceeded
+ * Keeps only the most recent 10 or most frequently used assets
+ * @param {Array} assets - Array of asset objects
+ * @returns {Array} Filtered assets array
+ */
+function aggressiveCleanup(assets: Asset[]): Asset[] {
+  // Sort by combined score: recent usage and usage count
+  const scoredAssets = assets.map(asset => ({
+    asset,
+    score: (asset.usageCount || 0) * 2 + (Date.now() - asset.lastUsed < 7 * 24 * 60 * 60 * 1000 ? 10 : 0)
+  }));
+  
+  // Sort by score descending and keep top 10
+  scoredAssets.sort((a, b) => b.score - a.score);
+  const kept = scoredAssets.slice(0, 10).map(s => s.asset);
+  
+  return kept;
 }
 
 /**

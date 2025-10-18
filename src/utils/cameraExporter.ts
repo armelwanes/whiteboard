@@ -194,6 +194,7 @@ const renderShapeLayer = (ctx, layer, cameraX, cameraY) => {
 
   switch (shapeType) {
     case 'rectangle':
+    case 'square':
       if (shapeConfig.fill_mode !== 'stroke') {
         ctx.fillRect(centerX - width / 2, centerY - height / 2, width, height);
       }
@@ -453,6 +454,7 @@ const renderShapeLayerCentered = (ctx, layer, centerX, centerY) => {
 
   switch (shapeType) {
     case 'rectangle':
+    case 'square':
       if (shapeConfig.fill_mode !== 'stroke') {
         ctx.fillRect(centerX - width / 2, centerY - height / 2, width, height);
       }
