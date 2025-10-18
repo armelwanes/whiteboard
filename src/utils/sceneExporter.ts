@@ -315,7 +315,7 @@ const renderShapeLayer = (ctx, layer, cameraX, cameraY) => {
   const shapeType = shapeConfig.shape_type || shapeConfig.shape || 'rectangle';
   const width = (shapeConfig.width || 100) * scale;
   const height = (shapeConfig.height || 100) * scale;
-  const fillMode = shapeConfig.fill_mode || 'both';
+  const fillMode = shapeConfig.fillMode || shapeConfig.fill_mode || 'both';
 
   switch (shapeType) {
     case 'rectangle':

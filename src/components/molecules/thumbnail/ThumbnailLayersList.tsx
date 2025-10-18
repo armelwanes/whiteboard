@@ -1,10 +1,11 @@
 import React from 'react';
-import { Layers, ImageIcon, Type, Trash2 } from 'lucide-react';
+import { Layers, ImageIcon, Type, Trash2, Square } from 'lucide-react';
 
 interface Layer {
   id: string;
-  type: 'image' | 'text';
+  type: 'image' | 'text' | 'shape';
   text?: string;
+  name?: string;
   [key: string]: any;
 }
 
@@ -23,6 +24,31 @@ export const ThumbnailLayersList: React.FC<ThumbnailLayersListProps> = ({
   onMoveLayer,
   onDeleteLayer
 }) => {
+  const getLayerIcon = (layer: Layer) => {
+    switch (layer.type) {
+      case 'image':
+        return <ImageIcon className="w-4 h-4" />;
+      case 'shape':
+        return <Square className="w-4 h-4" />;
+      case 'text':
+      default:
+        return <Type className="w-4 h-4" />;
+    }
+  };
+
+  const getLayerLabel = (layer: Layer) => {
+    switch (layer.type) {
+      case 'image':
+        return layer.name || 'Image';
+      case 'shape':
+        return layer.name || 'Forme';
+      case 'text':
+        return layer.text?.substring(0, 20) || 'Texte';
+      default:
+        return layer.name || 'Calque';
+    }
+  };
+
   return (
     <div className="bg-secondary/30 rounded-lg p-4 border border-border">
       <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
@@ -43,13 +69,9 @@ export const ThumbnailLayersList: React.FC<ThumbnailLayersListProps> = ({
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                {layer.type === 'image' ? (
-                  <ImageIcon className="w-4 h-4" />
-                ) : (
-                  <Type className="w-4 h-4" />
-                )}
+                {getLayerIcon(layer)}
                 <span className="text-sm font-medium">
-                  {layer.type === 'image' ? 'Image' : layer.text?.substring(0, 20) || 'Texte'}
+                  {getLayerLabel(layer)}
                 </span>
               </div>
               <div className="flex gap-1">
@@ -90,7 +112,7 @@ export const ThumbnailLayersList: React.FC<ThumbnailLayersListProps> = ({
       
       {layers.length === 0 && (
         <p className="text-muted-foreground text-sm text-center py-4">
-          Aucun calque. Ajoutez une image ou du texte.
+          Aucun calque. Ajoutez une image, du texte ou une forme.
         </p>
       )}
     </div>
