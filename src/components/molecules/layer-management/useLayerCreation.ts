@@ -1,5 +1,8 @@
 import { useCallback } from 'react';
 
+// Minimum camera zoom to prevent division by zero and extreme viewport calculations
+const MIN_CAMERA_ZOOM = 0.1;
+
 export interface LayerCreationOptions {
   sceneWidth?: number;
   sceneHeight?: number;
@@ -24,7 +27,8 @@ export const useLayerCreation = ({
       cameraCenterY = selectedCamera.position.y * sceneHeight;
       cameraWidth = selectedCamera.width || 800;
       cameraHeight = selectedCamera.height || 450;
-      cameraZoom = selectedCamera.zoom || 0.8;
+      // Ensure zoom is never zero or too small to prevent division issues
+      cameraZoom = Math.max(MIN_CAMERA_ZOOM, selectedCamera.zoom || 0.8);
     }
     
     return { cameraCenterX, cameraCenterY, cameraWidth, cameraHeight, cameraZoom };
@@ -79,13 +83,21 @@ export const useLayerCreation = ({
     
     let calculatedScale = 1.0;
     if (imageDimensions) {
-      const maxWidth = cameraWidth * 0.8;
-      const maxHeight = cameraHeight * 0.8;
+      // Camera zoom semantics: lower values mean zoomed out (larger viewport)
+      // e.g., zoom = 0.8 means camera sees 800/0.8 = 1000 units of scene width
+      // Account for camera zoom when calculating the viewport size in scene coordinates
+      const viewportWidth = cameraWidth / cameraZoom;
+      const viewportHeight = cameraHeight / cameraZoom;
+      
+      // Fit image within 80% of the camera's actual viewport
+      const maxWidth = viewportWidth * 0.8;
+      const maxHeight = viewportHeight * 0.8;
       
       const scaleX = maxWidth / imageDimensions.width;
       const scaleY = maxHeight / imageDimensions.height;
       
-      calculatedScale = Math.min(scaleX, scaleY, 1.0) * cameraZoom;
+      // Use the minimum scale to ensure the image fits within the viewport
+      calculatedScale = Math.min(scaleX, scaleY, 1.0);
     }
     
     const scaledImageWidth = imageDimensions ? imageDimensions.width * calculatedScale : 0;

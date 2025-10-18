@@ -7,6 +7,7 @@ import {
 import LayerEditorModals from './LayerEditorModals';
 import LayerEditorCanvas from './LayerEditorCanvas';
 import { useCurrentScene } from '@/app/scenes';
+import { createDefaultCamera } from '@/utils/cameraAnimator';
 
 const LayerEditor: React.FC = () => {
   const scene = useCurrentScene();
@@ -26,7 +27,15 @@ const LayerEditor: React.FC = () => {
   const sceneHeight = 1080;
 
   const [selectedLayerId, setSelectedLayerId] = React.useState<string | null>(null);
-  const [selectedCamera, setSelectedCamera] = React.useState<string | null>(null);
+  
+  // Initialize with default camera to ensure we always have a camera reference
+  const [selectedCamera, setSelectedCamera] = React.useState<any>(() => {
+    // Try to get the default camera from the scene, otherwise create one
+    const defaultCam = scene?.sceneCameras?.find((cam: any) => cam.isDefault) || 
+                       scene?.sceneCameras?.[0] || 
+                       createDefaultCamera('16:9');
+    return defaultCam;
+  });
 
   const {
     editedScene,
