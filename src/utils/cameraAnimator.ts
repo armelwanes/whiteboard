@@ -80,7 +80,7 @@ export const createCamera = (overrides: Partial<Camera> = {}): Camera => {
 
 /**
  * Create the initial default camera for a scene
- * This camera is centered and locked by default
+ * This camera is centered and unlocked by default
  * @param {string} aspectRatio - Aspect ratio (e.g., '16:9', '4:3')
  * @returns {object} Default camera configuration
  */
@@ -109,7 +109,7 @@ export const createDefaultCamera = (aspectRatio: string = '16:9'): Camera => {
     easing: 'ease_out',
     width: cameraWidth,
     height: cameraHeight,
-    locked: true,
+    locked: false,
     isDefault: true,
     pauseDuration: 0,
     movementType: 'ease_out',
