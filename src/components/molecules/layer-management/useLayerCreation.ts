@@ -164,7 +164,14 @@ export const useLayerCreation = ({
     return {
       ...shapeLayer,
       z_index: layersLength + 1,
-      shape_config: scaledShapeConfig
+      skip_rate: 12,
+      shape_config: scaledShapeConfig,
+      audio: {
+        narration: null,
+        soundEffects: [],
+        typewriter: null,
+        drawing: null,
+      }
     };
   }, [getCameraPosition]);
 
