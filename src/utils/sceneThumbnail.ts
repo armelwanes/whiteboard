@@ -19,8 +19,8 @@ export const generateSceneThumbnail = async (scene: Scene, options: {
   thumbnailHeight?: number;
 } = {}): Promise<string> => {
   const {
-    thumbnailWidth = 160,
-    thumbnailHeight = 120,
+    thumbnailWidth = 320,
+    thumbnailHeight = 180,
   } = options;
 
   try {
@@ -32,12 +32,12 @@ export const generateSceneThumbnail = async (scene: Scene, options: {
       return '';
     }
 
-    // Use the exportSceneImage function to generate the thumbnail
+    // Use the exportSceneImage function to generate the thumbnail with higher pixel ratio
     const sceneImage = await exportSceneImage(scene, {
       sceneWidth: 1920,
       sceneHeight: 1080,
       background: scene.backgroundImage ? 'transparent' : '#FFFFFF',
-      pixelRatio: 1,
+      pixelRatio: 2,
     });
 
     // The exported image is at camera resolution, now we need to resize it for thumbnail
@@ -49,7 +49,7 @@ export const generateSceneThumbnail = async (scene: Scene, options: {
 };
 
 /**
- * Resize an image data URL to thumbnail size
+ * Resize an image data URL to thumbnail size with proper aspect ratio
  * @param {string} dataUrl - Source image data URL
  * @param {number} width - Target width
  * @param {number} height - Target height
@@ -71,10 +71,34 @@ const resizeImageToThumbnail = (dataUrl: string, width: number, height: number):
           return;
         }
 
-        // Draw the image scaled to thumbnail size
-        ctx.drawImage(img, 0, 0, width, height);
+        // Calculate aspect ratios
+        const imgAspect = img.width / img.height;
+        const targetAspect = width / height;
         
-        resolve(canvas.toDataURL('image/png'));
+        let drawWidth = width;
+        let drawHeight = height;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        // Fit image to maintain aspect ratio (contain)
+        if (imgAspect > targetAspect) {
+          // Image is wider - fit to width
+          drawHeight = width / imgAspect;
+          offsetY = (height - drawHeight) / 2;
+        } else {
+          // Image is taller - fit to height
+          drawWidth = height * imgAspect;
+          offsetX = (width - drawWidth) / 2;
+        }
+
+        // Fill background
+        ctx.fillStyle = '#f5f5f5';
+        ctx.fillRect(0, 0, width, height);
+
+        // Draw the image with proper aspect ratio
+        ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+        
+        resolve(canvas.toDataURL('image/png', 0.95));
       } catch (error) {
         reject(error);
       }
