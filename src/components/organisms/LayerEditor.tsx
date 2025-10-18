@@ -19,14 +19,14 @@ const LayerEditor: React.FC = () => {
   const setShowCropModal = useSceneStore((state) => state.setShowCropModal);
   const pendingImageData = useSceneStore((state) => state.pendingImageData);
   const setPendingImageData = useSceneStore((state) => state.setPendingImageData);
+  const selectedLayerId = useSceneStore((state) => state.selectedLayerId);
+  const setSelectedLayerId = useSceneStore((state) => state.setSelectedLayerId);
 
   // Use actions from useScenesActions hook for persistence
   const { updateScene } = useScenesActions();
 
   const sceneWidth = 1920;
   const sceneHeight = 1080;
-
-  const [selectedLayerId, setSelectedLayerId] = React.useState<string | null>(null);
   
   // Initialize with default camera to ensure we always have a camera reference
   const [selectedCamera, setSelectedCamera] = React.useState<any>(() => {
