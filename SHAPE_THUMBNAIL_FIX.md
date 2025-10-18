@@ -3,6 +3,8 @@
 ## Issue
 When adding shapes to a scene, they were not being displayed in the thumbnail preview. The issue title stated: "l'ajout de forme ne créer pas de layer correspondant et aussi ca ne s'affiche pas sur le thumbnail" (Adding shapes doesn't create a corresponding layer and also doesn't display on the thumbnail).
 
+**Note:** Upon investigation, shapes WERE actually being added to layers correctly and displayed in both the main canvas and layer lists. The actual issue was specifically that shapes were not being rendered in the thumbnail preview canvas - this gave the appearance that the layer wasn't created when viewing the thumbnail maker.
+
 ## Root Cause Analysis
 
 ### What Was Working
