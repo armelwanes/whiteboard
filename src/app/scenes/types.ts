@@ -67,6 +67,7 @@ export interface Scene {
   duration: number;
   animation: string;
   backgroundImage: string | null;
+  sceneImage?: string | null;
   layers: Layer[];
   cameras: Camera[];
   sceneCameras: Camera[];
@@ -82,6 +83,7 @@ export interface ScenePayload {
   duration?: number;
   animation?: string;
   backgroundImage?: string | null;
+  sceneImage?: string | null;
   layers?: Layer[];
   cameras?: Camera[];
   sceneCameras?: Camera[];

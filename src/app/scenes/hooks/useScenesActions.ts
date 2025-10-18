@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import scenesService from '../api/scenesService';
 import { scenesKeys } from '../config';
 import { Scene, ScenePayload, Layer, Camera } from '../types';
+import { generateSceneThumbnail } from '../../../utils/sceneThumbnail';
 
 export const useScenesActions = () => {
   const queryClient = useQueryClient();
@@ -13,9 +14,21 @@ export const useScenesActions = () => {
     });
   };
 
+  const updateSceneThumbnail = async (scene: Scene) => {
+    try {
+      const thumbnail = await generateSceneThumbnail(scene);
+      if (thumbnail) {
+        await scenesService.update(scene.id, { sceneImage: thumbnail });
+      }
+    } catch (error) {
+      console.error('Failed to generate scene thumbnail:', error);
+    }
+  };
+
   const createScene = useMutation({
     mutationFn: (payload: ScenePayload = {}) => scenesService.create(payload),
-    onSuccess: () => {
+    onSuccess: async (scene) => {
+      await updateSceneThumbnail(scene);
       invalidateScenes();
     },
   });
@@ -23,7 +36,8 @@ export const useScenesActions = () => {
   const updateScene = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Scene> }) => 
       scenesService.update(id, data),
-    onSuccess: () => {
+    onSuccess: async (scene) => {
+      await updateSceneThumbnail(scene);
       invalidateScenes();
     },
   });
@@ -37,7 +51,8 @@ export const useScenesActions = () => {
 
   const duplicateScene = useMutation({
     mutationFn: (id: string) => scenesService.duplicate(id),
-    onSuccess: () => {
+    onSuccess: async (scene) => {
+      await updateSceneThumbnail(scene);
       invalidateScenes();
     },
   });
@@ -52,7 +67,8 @@ export const useScenesActions = () => {
   const addLayer = useMutation({
     mutationFn: ({ sceneId, layer }: { sceneId: string; layer: Layer }) => 
       scenesService.addLayer(sceneId, layer),
-    onSuccess: () => {
+    onSuccess: async (scene) => {
+      await updateSceneThumbnail(scene);
       invalidateScenes();
     },
   });
@@ -60,7 +76,8 @@ export const useScenesActions = () => {
   const updateLayer = useMutation({
     mutationFn: ({ sceneId, layerId, data }: { sceneId: string; layerId: string; data: Partial<Layer> }) => 
       scenesService.updateLayer(sceneId, layerId, data),
-    onSuccess: () => {
+    onSuccess: async (scene) => {
+      await updateSceneThumbnail(scene);
       invalidateScenes();
     },
   });
@@ -68,7 +85,8 @@ export const useScenesActions = () => {
   const deleteLayer = useMutation({
     mutationFn: ({ sceneId, layerId }: { sceneId: string; layerId: string }) => 
       scenesService.deleteLayer(sceneId, layerId),
-    onSuccess: (_, variables) => {
+    onSuccess: async (scene, variables) => {
+      await updateSceneThumbnail(scene);
       invalidateScenes();
     },
   });
@@ -104,7 +122,8 @@ export const useScenesActions = () => {
       
       return scenesService.update(sceneId, { ...scene, layers });
     },
-    onSuccess: () => {
+    onSuccess: async (scene) => {
+      await updateSceneThumbnail(scene);
       invalidateScenes();
     },
   });
@@ -129,7 +148,8 @@ export const useScenesActions = () => {
         layers: [...scene.layers, newLayer],
       });
     },
-    onSuccess: () => {
+    onSuccess: async (scene) => {
+      await updateSceneThumbnail(scene);
       invalidateScenes();
     },
   });
