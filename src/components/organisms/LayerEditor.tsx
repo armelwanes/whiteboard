@@ -84,8 +84,8 @@ const LayerEditor: React.FC = () => {
   };
 
   // LayerEditorModals expects onCropComplete to take croppedImageUrl and optionally imageDimensions
-  const handleCropComplete = (croppedImageUrl: string, imageDimensions?: { width: number; height: number }) => {
-    handleCropCompleteBase(croppedImageUrl, imageDimensions, pendingImageData, editedScene.layers.length);
+  const handleCropComplete = async (croppedImageUrl: string, imageDimensions?: { width: number; height: number }) => {
+    await handleCropCompleteBase(croppedImageUrl, imageDimensions, pendingImageData, editedScene.layers.length);
     setShowCropModal(false);
     setPendingImageData(null);
   };
