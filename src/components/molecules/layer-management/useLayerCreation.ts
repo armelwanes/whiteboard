@@ -39,11 +39,9 @@ export const useLayerCreation = ({
     
     const text = 'Votre texte ici';
     const fontSize = 48;
-    const estimatedHeight = fontSize * 1.2;
-    const scaledHeight = estimatedHeight * cameraZoom;
     
     const initialX = cameraCenterX;
-    const initialY = cameraCenterY - (scaledHeight / 2);
+    const initialY = cameraCenterY;
     
     return {
       id: `layer-${Date.now()}`,

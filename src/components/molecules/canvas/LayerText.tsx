@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Text, Transformer } from 'react-konva';
 import Konva from 'konva';
 
@@ -17,6 +17,23 @@ export const LayerText: React.FC<LayerTextProps> = ({
 }) => {
   const textRef = useRef<Konva.Text>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
+  const [textOffsets, setTextOffsets] = useState({ offsetX: 0, offsetY: 0 });
+
+  useEffect(() => {
+    if (textRef.current) {
+      const node = textRef.current;
+      const scale = layer.scale || 1.0;
+      const align = layer.text_config?.align || 'left';
+      
+      const width = node.width();
+      const height = node.height();
+      
+      setTextOffsets({
+        offsetX: align === 'center' ? width / 2 : 0,
+        offsetY: height / 2
+      });
+    }
+  }, [layer.text_config?.text, layer.text_config?.size, layer.text_config?.font, layer.text_config?.align, layer.scale]);
 
   React.useEffect(() => {
     if (isSelected && transformerRef.current && textRef.current) {
@@ -80,6 +97,8 @@ export const LayerText: React.FC<LayerTextProps> = ({
         scaleX={layer.scale || 1.0}
         scaleY={layer.scale || 1.0}
         opacity={layer.opacity || 1.0}
+        offsetX={textOffsets.offsetX}
+        offsetY={textOffsets.offsetY}
         draggable
         dragBoundFunc={dragBoundFunc}
         onClick={onSelect}
