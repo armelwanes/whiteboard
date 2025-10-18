@@ -73,21 +73,25 @@ const SceneCanvas: React.FC<SceneCanvasProps> = ({
   const sceneWidth = 1920;
   const sceneHeight = 1080;
 
-  // Calculate initial zoom to fit scene in viewport
+  // Calculate zoom to fit scene in viewport
+  const calculateFitZoom = useCallback(() => {
+    if (!scrollContainerRef.current) return 1.0;
+    const container = scrollContainerRef.current as HTMLDivElement;
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    const zoomX = (containerWidth * 0.95) / sceneWidth;
+    const zoomY = (containerHeight * 0.95) / sceneHeight;
+    return Math.min(zoomX, zoomY, 1.0);
+  }, [sceneWidth, sceneHeight]);
+
+  // Set initial zoom to fit scene in viewport
   React.useEffect(() => {
     if (!hasCalculatedInitialZoom && scrollContainerRef.current) {
-      const container = scrollContainerRef.current as HTMLDivElement;
-      const containerWidth = container.clientWidth;
-      const containerHeight = container.clientHeight;
-      const zoomX = (containerWidth * 0.9) / sceneWidth;
-      const zoomY = (containerHeight * 0.9) / sceneHeight;
-      const fitZoom = Math.max(0.5, Math.min(zoomX, zoomY, 1.0));
-      if (fitZoom < 1.0) {
-        setSceneZoom(fitZoom);
-      }
+      const fitZoom = calculateFitZoom();
+      setSceneZoom(fitZoom);
       setHasCalculatedInitialZoom(true);
     }
-  }, [hasCalculatedInitialZoom, sceneWidth, sceneHeight]);
+  }, [hasCalculatedInitialZoom, calculateFitZoom]);
 
   // Create a new camera
   const handleAddCamera = useCallback(() => {
@@ -212,6 +216,7 @@ const SceneCanvas: React.FC<SceneCanvasProps> = ({
         onToggleLock={handleToggleLock}
         sceneZoom={sceneZoom}
         onSceneZoom={setSceneZoom}
+        onFitToViewport={() => setSceneZoom(calculateFitZoom())}
       />
       {/* Main Content Area */}
       <div className="flex flex-1 min-h-0 bg-white" style={{ height: '100%' }}>

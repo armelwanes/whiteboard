@@ -16,6 +16,7 @@ interface CameraToolbarProps {
   onZoomCamera: (delta: number) => void;
   onDeleteCamera?: () => void;
   onToggleCameraLock?: () => void;
+  onFitToViewport?: () => void;
   [key: string]: any;
 }
 
@@ -32,6 +33,7 @@ const CameraToolbar: React.FC<CameraToolbarProps> = ({
   onToggleLock,
   sceneZoom = 1.0,
   onSceneZoom,
+  onFitToViewport,
 }) => {
   // Select first camera by default if none is selected
   const effectiveSelectedCameraId = selectedCameraId || (cameras.length > 0 ? cameras[0].id : null);
@@ -99,9 +101,9 @@ const CameraToolbar: React.FC<CameraToolbarProps> = ({
             <ZoomIn className="w-3.5 h-3.5" />
           </button>
           <button
-            onClick={() => onSceneZoom(1.0)}
+            onClick={() => onFitToViewport ? onFitToViewport() : onSceneZoom(1.0)}
             className="bg-secondary hover:bg-secondary/80 text-foreground p-1.5 rounded-lg transition-colors"
-            title="Réinitialiser zoom"
+            title="Ajuster à la vue (100%)"
           >
             <Maximize2 className="w-3.5 h-3.5" />
           </button>
