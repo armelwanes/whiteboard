@@ -7,6 +7,12 @@ const ASSETS_STORAGE_KEY = 'whiteboard-assets';
 const ASSET_CACHE_KEY = 'whiteboard-asset-cache';
 const MAX_CACHE_SIZE = 50;
 
+// Aggressive cleanup constants
+const AGGRESSIVE_CLEANUP_MAX_ASSETS = 10;
+const AGGRESSIVE_CLEANUP_RECENT_DAYS = 7;
+const AGGRESSIVE_CLEANUP_USAGE_WEIGHT = 2;
+const AGGRESSIVE_CLEANUP_RECENT_BONUS = 10;
+
 import assetDB from './assetDB';
 
 export interface Asset {
@@ -464,20 +470,23 @@ function cleanupOldAssets(): void {
 
 /**
  * Aggressive cleanup when quota is exceeded
- * Keeps only the most recent 10 or most frequently used assets
+ * Keeps only the most recent or most frequently used assets (default: top 10)
  * @param {Array} assets - Array of asset objects
  * @returns {Array} Filtered assets array
  */
 function aggressiveCleanup(assets: Asset[]): Asset[] {
   // Sort by combined score: recent usage and usage count
+  const recentThreshold = Date.now() - (AGGRESSIVE_CLEANUP_RECENT_DAYS * 24 * 60 * 60 * 1000);
+  
   const scoredAssets = assets.map(asset => ({
     asset,
-    score: (asset.usageCount || 0) * 2 + (Date.now() - asset.lastUsed < 7 * 24 * 60 * 60 * 1000 ? 10 : 0)
+    score: (asset.usageCount || 0) * AGGRESSIVE_CLEANUP_USAGE_WEIGHT + 
+           (asset.lastUsed > recentThreshold ? AGGRESSIVE_CLEANUP_RECENT_BONUS : 0)
   }));
   
-  // Sort by score descending and keep top 10
+  // Sort by score descending and keep top N assets
   scoredAssets.sort((a, b) => b.score - a.score);
-  const kept = scoredAssets.slice(0, 10).map(s => s.asset);
+  const kept = scoredAssets.slice(0, AGGRESSIVE_CLEANUP_MAX_ASSETS).map(s => s.asset);
   
   return kept;
 }
