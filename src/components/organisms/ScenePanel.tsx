@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { THUMBNAIL_CONFIG } from '@/utils/sceneThumbnail';
 
 const ScenePanel: React.FC = () => {
   const { scenes } = useScenes();
@@ -130,14 +131,14 @@ const ScenePanel: React.FC = () => {
                     src={scene.sceneImage}
                     alt={`Scene ${index + 1}`}
                     className="w-full h-full object-contain"
-                    style={{ backgroundColor: '#f5f5f5' }}
+                    style={{ backgroundColor: THUMBNAIL_CONFIG.BACKGROUND_COLOR }}
                   />
                 ) : scene.backgroundImage ? (
                   <img
                     src={scene.backgroundImage}
                     alt={`Scene ${index + 1}`}
                     className="w-full h-full object-contain"
-                    style={{ backgroundColor: '#f5f5f5' }}
+                    style={{ backgroundColor: THUMBNAIL_CONFIG.BACKGROUND_COLOR }}
                   />
                 ) : (
                   <span className="text-4xl">📄</span>

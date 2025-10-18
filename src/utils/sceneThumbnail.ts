@@ -7,7 +7,7 @@ import { exportSceneImage } from './sceneExporter';
 import { Scene, Camera } from '../app/scenes/types';
 
 // Thumbnail configuration constants
-const THUMBNAIL_CONFIG = {
+export const THUMBNAIL_CONFIG = {
   WIDTH: 320,
   HEIGHT: 180,
   PIXEL_RATIO: 2,
