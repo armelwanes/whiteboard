@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { useSceneStore, useScenesActions } from '../../app/scenes';
 import {
   useLayerEditor,
@@ -65,7 +65,7 @@ const LayerEditor: React.FC = () => {
   // Also expose createImageLayer so we can fallback to direct creation if handlers fail
   const { createImageLayer } = useLayerCreation({ sceneWidth, sceneHeight, selectedCamera });
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!scene?.id) return;
     
     // Persist the edited scene to the backend
@@ -83,7 +83,7 @@ const LayerEditor: React.FC = () => {
         audio: editedScene.audio,
       }
     });
-  };
+  }, [scene?.id, editedScene, updateScene]);
 
   // Auto-save with debounce when editedScene changes
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -96,6 +96,11 @@ const LayerEditor: React.FC = () => {
       return;
     }
 
+    // Skip if no scene ID
+    if (!scene?.id) {
+      return;
+    }
+
     // Clear previous timeout
     if (autoSaveTimeoutRef.current) {
       clearTimeout(autoSaveTimeoutRef.current);
@@ -103,10 +108,7 @@ const LayerEditor: React.FC = () => {
 
     // Set new timeout for auto-save (2 seconds after last change)
     autoSaveTimeoutRef.current = setTimeout(() => {
-      if (scene?.id && editedScene) {
-        console.log('[LayerEditor] Auto-saving scene changes...');
-        handleSave();
-      }
+      handleSave();
     }, 2000);
 
     // Cleanup on unmount
@@ -115,7 +117,7 @@ const LayerEditor: React.FC = () => {
         clearTimeout(autoSaveTimeoutRef.current);
       }
     };
-  }, [editedScene.layers, editedScene.sceneCameras, editedScene.backgroundImage]);
+  }, [editedScene.layers, editedScene.sceneCameras, editedScene.backgroundImage, scene?.id, handleSave]);
 
 
   // LayerEditorModals expects onCropComplete to take croppedImageUrl and optionally imageDimensions
