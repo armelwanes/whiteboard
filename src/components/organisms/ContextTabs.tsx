@@ -5,6 +5,7 @@ import { useCurrentScene, useSceneStore, useScenesActions } from '@/app/scenes';
 import { LayersListPanel } from '../molecules/properties';
 import { useLayerCreation } from '../molecules/layer-management';
 import { addAsset } from '@/utils/assetManager';
+import AssetCategoryGrid from '../molecules/AssetCategoryGrid';
 
 type TabType = 'characters' | 'props' | 'layers' | 'text';
 
@@ -110,9 +111,10 @@ const ContextTabs: React.FC = () => {
                 Browse
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Open the asset library to browse and add character assets
-            </p>
+            <AssetCategoryGrid
+              categoryTag="character"
+              onBrowseAssets={() => setShowAssetLibrary(true)}
+            />
           </div>
         )}
 
@@ -129,9 +131,10 @@ const ContextTabs: React.FC = () => {
                 Browse
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Open the asset library to browse and add prop assets
-            </p>
+            <AssetCategoryGrid
+              categoryTag="props"
+              onBrowseAssets={() => setShowAssetLibrary(true)}
+            />
           </div>
         )}
 

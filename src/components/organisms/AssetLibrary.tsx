@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AssetStats as ManagerAssetStats } from '../../utils/assetManager';
+import { AssetStats as ManagerAssetStats, addAsset } from '../../utils/assetManager';
 import { ImageCropModal } from '../molecules';
 import {
   AssetLibraryHeader,
@@ -51,11 +51,29 @@ const AssetLibrary: React.FC = () => {
     loadAssets,
     toggleTag,
     handleImageUpload,
-    handleCropComplete,
     handleCropCancel,
     handleSortByChange,
     refreshTagsAndStats
   } = useAssetLibraryActions(setAssets, setStats);
+
+  const handleCropComplete = async (croppedImageUrl: string, imageDimensions?: { width: number; height: number }, tags?: string[]) => {
+    if (!pendingImageData) return;
+    try {
+      await addAsset({
+        name: pendingImageData.fileName,
+        dataUrl: croppedImageUrl,
+        type: pendingImageData.fileType,
+        tags: tags || []
+      });
+      loadAssets();
+      refreshTagsAndStats();
+    } catch (error) {
+      console.error('Error adding asset:', error);
+      alert('Erreur lors de l\'ajout de l\'asset');
+    }
+    setShowCropModal(false);
+    setPendingImageData(null);
+  };
 
   useEffect(() => {
     loadAssets();
