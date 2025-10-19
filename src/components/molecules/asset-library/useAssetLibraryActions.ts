@@ -13,7 +13,7 @@ import type { Asset } from './types';
 export function useAssetLibraryActions(setAssets: (assets: Asset[]) => void, setStats: (stats: ManagerAssetStats | null) => void) {
     const {
         searchQuery, selectedTags, sortBy, sortOrder, viewMode,
-        setAllTags, setShowCropModal, setPendingImageData, pendingImageData
+        setAllTags, setShowCropModal, setPendingImageData
     } = useAssetLibraryStore();
 
     const loadAssets = useCallback(async () => {
@@ -68,26 +68,6 @@ export function useAssetLibraryActions(setAssets: (assets: Asset[]) => void, set
         e.target.value = '';
     };
 
-    const handleCropComplete = async () => {
-        if (!pendingImageData) return;
-        try {
-            await addAsset({
-                name: pendingImageData.fileName,
-                dataUrl: pendingImageData.imageUrl,
-                type: pendingImageData.fileType,
-                tags: []
-            });
-            loadAssets();
-            refreshTagsAndStats();
-        } catch (error) {
-            // eslint-disable-next-line no-console
-            console.error('Error adding asset:', error);
-            alert('Erreur lors de l\'ajout de l\'asset');
-        }
-        setShowCropModal(false);
-        setPendingImageData(null);
-    };
-
     const handleCropCancel = () => {
         setShowCropModal(false);
         setPendingImageData(null);
@@ -101,7 +81,6 @@ export function useAssetLibraryActions(setAssets: (assets: Asset[]) => void, set
         loadAssets,
         toggleTag,
         handleImageUpload,
-        handleCropComplete,
         handleCropCancel,
         handleSortByChange,
         refreshTagsAndStats

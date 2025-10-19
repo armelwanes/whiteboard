@@ -4,10 +4,12 @@ import ReactCrop, { PercentCrop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from '../atoms';
 import { X, Check, Crop as CropIcon } from 'lucide-react';
+import TagSelector from './TagSelector';
+import { getAllTags } from '@/utils/assetManager';
 
 interface ImageCropModalProps {
   imageUrl: string;
-  onCropComplete: (croppedImageUrl: string, imageDimensions?: { width: number; height: number }) => void;
+  onCropComplete: (croppedImageUrl: string, imageDimensions?: { width: number; height: number }, tags?: string[]) => void;
   onCancel: () => void;
 }
 
@@ -26,6 +28,8 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
   });
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
   const [isRemovingBackground, setIsRemovingBackground] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [availableTags] = useState<string[]>(getAllTags());
   const imgRef = useRef<HTMLImageElement | null>(null);
 
   const handleCropComplete = async () => {
@@ -81,7 +85,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
     } finally {
       setIsRemovingBackground(false);
       setTimeout(() => {
-        onCropComplete(finalImageUrl, imageDimensions);
+        onCropComplete(finalImageUrl, imageDimensions, selectedTags);
       }, 0);
     }
   };
@@ -102,7 +106,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
     } finally {
       setIsRemovingBackground(false);
       setTimeout(() => {
-        onCropComplete(finalImageUrl, imageDimensions);
+        onCropComplete(finalImageUrl, imageDimensions, selectedTags);
       }, 0);
     }
   };
@@ -183,8 +187,17 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
           </p>
         </div>
 
+        {/* Tag Selection Section */}
+        <div className="px-6 py-4 bg-white dark:bg-secondary/30 border-t border-gray-200 dark:border-border">
+          <TagSelector
+            selectedTags={selectedTags}
+            availableTags={availableTags}
+            onTagsChange={setSelectedTags}
+          />
+        </div>
+
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-border bg-white dark:bg-white">
+        <div className="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-border bg-white dark:bg-secondary/30">
           <Button
             variant="outline"
             onClick={onCancel}

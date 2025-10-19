@@ -86,6 +86,13 @@ const ScenePanel: React.FC = () => {
     e.target.value = '';
   };
 
+  const formatSceneDuration = (duration: number): string => {
+    const totalSeconds = Math.floor(duration);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="bg-white flex h-full shadow-sm">
       {/* Header - Now on the left side */}
@@ -190,6 +197,11 @@ const ScenePanel: React.FC = () => {
               {/* Scene number badge - top left */}
               <div className="absolute top-2 left-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded">
                 {index + 1}
+              </div>
+
+              {/* Scene duration badge - bottom left */}
+              <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs font-medium px-2 py-1 rounded flex items-center gap-1">
+                <span>{formatSceneDuration(scene.duration)}</span>
               </div>
 
               {/* Actions dropdown - top right, visible on hover or when selected */}
