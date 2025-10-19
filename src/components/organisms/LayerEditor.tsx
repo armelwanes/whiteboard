@@ -107,6 +107,9 @@ const LayerEditor: React.FC = () => {
     }
 
     // Set new timeout for auto-save (2 seconds after last change)
+    // Note: We monitor the entire editedScene object to ensure auto-save triggers
+    // for any scene property change (layers, cameras, background, etc.).
+    // The 2-second debounce prevents excessive saves during editing.
     autoSaveTimeoutRef.current = setTimeout(() => {
       handleSave();
     }, 2000);
@@ -117,7 +120,8 @@ const LayerEditor: React.FC = () => {
         clearTimeout(autoSaveTimeoutRef.current);
       }
     };
-  }, [editedScene, scene?.id, handleSave]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editedScene, scene?.id]);
 
 
   // LayerEditorModals expects onCropComplete to take croppedImageUrl and optionally imageDimensions
