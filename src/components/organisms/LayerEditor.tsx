@@ -117,7 +117,7 @@ const LayerEditor: React.FC = () => {
         clearTimeout(autoSaveTimeoutRef.current);
       }
     };
-  }, [editedScene.layers, editedScene.sceneCameras, editedScene.backgroundImage, scene?.id, handleSave]);
+  }, [editedScene, scene?.id, handleSave]);
 
 
   // LayerEditorModals expects onCropComplete to take croppedImageUrl and optionally imageDimensions
