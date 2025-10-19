@@ -28,9 +28,7 @@ const LayerEditor: React.FC = () => {
   const sceneWidth = 1920;
   const sceneHeight = 1080;
   
-  // Initialize with default camera to ensure we always have a camera reference
   const [selectedCamera, setSelectedCamera] = React.useState<any>(() => {
-    // Try to get the default camera from the scene, otherwise create one
     const defaultCam = scene?.sceneCameras?.find((cam: any) => cam.isDefault) || 
                        scene?.sceneCameras?.[0] || 
                        createDefaultCamera('16:9');
@@ -62,73 +60,121 @@ const LayerEditor: React.FC = () => {
     onCloseShapeToolbar: () => setShowShapeToolbar(false)
   });
 
-  // Also expose createImageLayer so we can fallback to direct creation if handlers fail
   const { createImageLayer } = useLayerCreation({ sceneWidth, sceneHeight, selectedCamera });
 
-  const handleSave = useCallback(async () => {
-    if (!scene?.id) return;
-    
-    // Persist the edited scene to the backend
-    await updateScene({ 
-      id: scene.id, 
-      data: {
-        layers: editedScene.layers,
-        sceneCameras: editedScene.sceneCameras,
-        backgroundImage: editedScene.backgroundImage,
-        duration: editedScene.duration,
-        title: editedScene.title,
-        content: editedScene.content,
-        animation: editedScene.animation,
-        multiTimeline: editedScene.multiTimeline,
-        audio: editedScene.audio,
-      }
-    });
-  }, [scene?.id, editedScene, updateScene]);
-
-  // Auto-save with debounce when editedScene changes
+  // Référence pour tracker l'état précédent et éviter les sauvegardes inutiles
+  const lastSavedStateRef = useRef<string>('');
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const initialLoadRef = useRef(true);
+  const isSavingRef = useRef(false);
 
+  // Fonction pour créer un hash simple de l'état (pour détecter les changements)
+  const createStateHash = useCallback((state: any) => {
+    return JSON.stringify({
+      layers: state.layers?.map((l: any) => ({ id: l.id, ...l })),
+      sceneCameras: state.sceneCameras,
+      backgroundImage: state.backgroundImage,
+      duration: state.duration,
+      title: state.title,
+      content: state.content,
+      animation: state.animation,
+      multiTimeline: state.multiTimeline,
+      audio: state.audio,
+    });
+  }, []);
+
+  const handleSave = useCallback(async () => {
+    if (!scene?.id || isSavingRef.current) return;
+    
+    try {
+      isSavingRef.current = true;
+      
+      // Créer un hash de l'état actuel
+      const currentStateHash = createStateHash(editedScene);
+      
+      // Vérifier si l'état a réellement changé
+      if (currentStateHash === lastSavedStateRef.current) {
+        console.log('[LayerEditor] No changes detected, skipping save');
+        return;
+      }
+
+      console.log('[LayerEditor] Auto-saving scene...');
+      
+      await updateScene({ 
+        id: scene.id, 
+        data: {
+          layers: editedScene.layers,
+          sceneCameras: editedScene.sceneCameras,
+          backgroundImage: editedScene.backgroundImage,
+          duration: editedScene.duration,
+          title: editedScene.title,
+          content: editedScene.content,
+          animation: editedScene.animation,
+          multiTimeline: editedScene.multiTimeline,
+          audio: editedScene.audio,
+        }
+      });
+
+      // Mettre à jour l'état sauvegardé après une sauvegarde réussie
+      lastSavedStateRef.current = currentStateHash;
+      console.log('[LayerEditor] Scene saved successfully');
+    } catch (err) {
+      console.error('[LayerEditor] Auto-save failed', err);
+    } finally {
+      isSavingRef.current = false;
+    }
+  }, [scene?.id, editedScene, updateScene, createStateHash]);
+
+  // Gérer l'auto-sauvegarde avec debounce
   useEffect(() => {
-    // Skip auto-save on initial load
+    // Sauter à la première charge
     if (initialLoadRef.current) {
       initialLoadRef.current = false;
+      // Initialiser le hash de l'état sauvegardé
+      lastSavedStateRef.current = createStateHash(editedScene);
       return;
     }
 
-    // Skip if no scene ID
     if (!scene?.id) {
       return;
     }
 
-    // Clear previous timeout
+    // Effacer le timeout précédent pour relancer le debounce
     if (autoSaveTimeoutRef.current) {
       clearTimeout(autoSaveTimeoutRef.current);
     }
 
-    // Set new timeout for auto-save (2 seconds after last change)
-    // Note: We monitor the entire editedScene object to ensure auto-save triggers
-    // for any scene property change (layers, cameras, background, etc.).
-    // The 2-second debounce prevents excessive saves during editing.
+    // Créer un nouveau timeout pour l'auto-save
+    // Délai de 3 secondes après la DERNIÈRE modification (debounce)
+    // La sauvegarde ne se fera que quand l'utilisateur arrête d'interagir
     autoSaveTimeoutRef.current = setTimeout(() => {
       handleSave();
-    }, 2000);
+    }, 3000);
 
-    // Cleanup on unmount
+    // Cleanup lors du démontage
     return () => {
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editedScene, scene?.id]);
+  }, [editedScene, scene?.id, handleSave, createStateHash]);
 
+  // Sauvegarder avant de quitter la page
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (autoSaveTimeoutRef.current) {
+        // Exécuter immédiatement la sauvegarde avant de quitter
+        handleSave();
+      }
+    };
 
-  // LayerEditorModals expects onCropComplete to take croppedImageUrl and optionally imageDimensions
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [handleSave]);
+
   const handleCropComplete = async (croppedImageUrl: string, imageDimensions?: { width: number; height: number }) => {
     const newLayer = await handleCropCompleteBase(croppedImageUrl, imageDimensions, pendingImageData, editedScene.layers.length);
     if (!newLayer) {
-      // Fallback: try to create layer directly if handler failed
       try {
         if (croppedImageUrl && pendingImageData) {
           const fallback = createImageLayer(
@@ -169,7 +215,7 @@ const LayerEditor: React.FC = () => {
         pendingImageData={pendingImageData}
         scene={editedScene}
         onCloseShapeToolbar={() => setShowShapeToolbar(false)}
-  onCloseThumbnailMaker={() => setShowThumbnailMaker(false)}
+        onCloseThumbnailMaker={() => setShowThumbnailMaker(false)}
         onAddShape={handleAddShapeWrapper}
         onCropComplete={handleCropComplete}
         onCropCancel={handleCropCancel}
