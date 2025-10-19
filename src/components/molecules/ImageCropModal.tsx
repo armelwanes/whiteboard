@@ -188,7 +188,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
         </div>
 
         {/* Tag Selection Section */}
-        <div className="px-6 py-4 bg-white dark:bg-white border-t border-gray-200 dark:border-border">
+        <div className="px-6 py-4 bg-white dark:bg-secondary/30 border-t border-gray-200 dark:border-border">
           <TagSelector
             selectedTags={selectedTags}
             availableTags={availableTags}
@@ -197,7 +197,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ imageUrl, onCropComplet
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-border bg-white dark:bg-white">
+        <div className="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-border bg-white dark:bg-secondary/30">
           <Button
             variant="outline"
             onClick={onCancel}
