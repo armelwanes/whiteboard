@@ -5,9 +5,9 @@ import { useCurrentScene, useSceneStore, useScenesActions } from '@/app/scenes';
 import { LayersListPanel } from '../molecules/properties';
 import { useLayerCreation } from '../molecules/layer-management';
 import { addAsset } from '@/utils/assetManager';
-import AssetCategoryGrid from '../molecules/AssetCategoryGrid';
+import EmbeddedAssetLibrary from '../molecules/EmbeddedAssetLibrary';
 
-type TabType = 'characters' | 'props' | 'layers' | 'text';
+type TabType = 'assets' | 'props' | 'layers' | 'text';
 
 const ContextTabs: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('layers');
@@ -25,7 +25,7 @@ const ContextTabs: React.FC = () => {
   });
 
   const tabs = [
-    { id: 'characters' as TabType, label: 'Characters', icon: Image },
+    { id: 'assets' as TabType, label: 'Assets', icon: Image },
     { id: 'props' as TabType, label: 'Props', icon: Shapes },
     { id: 'layers' as TabType, label: 'Layers', icon: LayersIcon },
     { id: 'text' as TabType, label: 'Text', icon: Type },
@@ -98,22 +98,30 @@ const ContextTabs: React.FC = () => {
 
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
-        {activeTab === 'characters' && (
+        {activeTab === 'assets' && (
           <div className="p-3">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold">Characters</h3>
+              <h3 className="text-sm font-bold">Bibliothèque d'Assets</h3>
               <Button
                 onClick={() => setShowAssetLibrary(true)}
                 size="sm"
                 className="gap-1"
               >
                 <Plus className="w-3 h-3" />
-                Browse
+                Gérer
               </Button>
             </div>
-            <AssetCategoryGrid
-              categoryTag="character"
+            <EmbeddedAssetLibrary
               onBrowseAssets={() => setShowAssetLibrary(true)}
+              onSelectAsset={async (asset) => {
+                if (!scene?.id) return;
+                try {
+                  const newLayer = createImageLayer(asset.dataUrl, asset.name, null, scene.layers?.length || 0);
+                  await addLayer({ sceneId: scene.id, layer: newLayer });
+                } catch (error) {
+                  console.error('Error adding image layer:', error);
+                }
+              }}
             />
           </div>
         )}
@@ -121,19 +129,27 @@ const ContextTabs: React.FC = () => {
         {activeTab === 'props' && (
           <div className="p-3">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold">Props</h3>
+              <h3 className="text-sm font-bold">Props & Objets</h3>
               <Button
                 onClick={() => setShowAssetLibrary(true)}
                 size="sm"
                 className="gap-1"
               >
                 <Plus className="w-3 h-3" />
-                Browse
+                Gérer
               </Button>
             </div>
-            <AssetCategoryGrid
-              categoryTag="props"
+            <EmbeddedAssetLibrary
               onBrowseAssets={() => setShowAssetLibrary(true)}
+              onSelectAsset={async (asset) => {
+                if (!scene?.id) return;
+                try {
+                  const newLayer = createImageLayer(asset.dataUrl, asset.name, null, scene.layers?.length || 0);
+                  await addLayer({ sceneId: scene.id, layer: newLayer });
+                } catch (error) {
+                  console.error('Error adding image layer:', error);
+                }
+              }}
             />
           </div>
         )}
